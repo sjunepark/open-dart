@@ -1,6 +1,6 @@
 mod client;
 mod config;
-mod endpoints;
+pub mod endpoints;
 mod env;
 mod error;
 

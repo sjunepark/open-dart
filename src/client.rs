@@ -1,7 +1,7 @@
 use anyhow::Result;
 use reqwest;
 
-use crate::endpoints::list::{ListRequestParams, ListRequestParamsBuilder};
+use crate::endpoints::{ListRequestParams, ListRequestParamsBuilder};
 
 pub struct OpenDartApi {
     client: reqwest::Client,
