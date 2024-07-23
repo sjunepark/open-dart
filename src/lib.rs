@@ -1,3 +1,9 @@
+mod client;
+mod config;
+mod endpoints;
+mod env;
+mod error;
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
