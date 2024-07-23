@@ -1,8 +1,14 @@
-mod client;
+pub mod client;
 mod config;
 pub mod endpoints;
 mod env;
 mod error;
+
+#[cfg(test)]
+mod test_utils;
+
+#[cfg(test)]
+pub use test_utils::TestContext;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

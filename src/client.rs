@@ -60,19 +60,13 @@ impl OpenDartApi {
 
 #[cfg(test)]
 mod tests {
+    use crate::TestContext;
+
     use super::*;
-    use crate::config::Settings;
 
     #[tokio::test]
     async fn test_get_list() {
-        let settings = Settings::new().unwrap();
-        std::env::set_var("OPEN_DART_API_KEY", &settings.open_dart_api_key);
-
-        let api = OpenDartApi::new(OpenDartConfig {
-            api_version: 1,
-            api_key: settings.open_dart_api_key,
-        });
-
+        let api = TestContext::new().api;
         let args = ListRequestParamsBuilder::default().build().unwrap();
 
         api.get_list(args).await.unwrap();
