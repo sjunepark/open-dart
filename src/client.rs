@@ -1,7 +1,8 @@
-use anyhow::Result;
+use bytes::Bytes;
 use reqwest;
 
-use crate::endpoints::{ListRequestParams, ListRequestParamsBuilder};
+use crate::endpoints::{ListRequestParams, ListRequestParamsBuilder, ListResponse};
+use crate::error::{map_deserialization_error, OpenDartError};
 
 pub struct OpenDartApi {
     client: reqwest::Client,
@@ -44,31 +45,38 @@ impl OpenDartApi {
         headers
     }
 
-    pub async fn get_list(&self, args: ListRequestParams) -> Result<()> {
-        let url = "https://opendart.fss.or.kr/api/list.json";
-
-        println!("{:?}", args);
-        let request = self.client.get(url).query(&args).build()?;
+    pub async fn execute_raw(&self, request: reqwest::Request) -> Result<Bytes, reqwest::Error> {
+        // log request info
         println!("{:?}", request);
         let response = self.client.execute(request).await?;
-        println!("{:?}", response);
-        let a = response.text().await?;
-        println!("{:?}", a);
-        Ok(())
+        let bytes = response.bytes().await?;
+        Ok(bytes)
+    }
+
+    pub async fn get_list(&self, args: ListRequestParams) -> Result<ListResponse, OpenDartError> {
+        let url = "https://opendart.fss.or.kr/api/list.json";
+        let request = self.client.get(url).query(&args).build()?;
+        let bytes = self.execute_raw(request).await?;
+        let list_response: ListResponse =
+            serde_json::from_slice(&bytes).map_err(|e| map_deserialization_error(e, &bytes))?;
+        // todo: find a elegant way to handle validation
+        list_response.validate()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::TestContext;
+    use test_log::test;
 
     use super::*;
 
-    #[tokio::test]
+    #[test(tokio::test)]
     async fn test_get_list() {
         let api = TestContext::new().api;
         let args = ListRequestParamsBuilder::default().build().unwrap();
 
-        api.get_list(args).await.unwrap();
+        let list_response = api.get_list(args).await.unwrap();
+        println!("{:?}", list_response);
     }
 }

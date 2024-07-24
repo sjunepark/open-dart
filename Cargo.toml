@@ -4,11 +4,20 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
+config = "0.14.0"
+phf = "0.11.2"
+
+derive_builder = "0.20.0"
+
+bytes = "1.6.1"
 reqwest = { version = "0.12.5", features = ["json"] }
 tokio = { version = "1.38.1", features = ["full"] }
-derive_builder = "0.20.0"
+
 anyhow = "1.0.86"
 thiserror = "1.0.63"
+tracing = "0.1.40"
+
 serde = { version = "1.0.204", features = ["derive"] }
 serde_json = "1.0.120"
-config = "0.14.0"
+
+test-log = { version = "0.2.16", features = ["trace"] }
