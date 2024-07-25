@@ -1,8 +1,8 @@
-use bytes::Bytes;
-use reqwest;
-
 use crate::endpoints::{ListRequestParams, ListRequestParamsBuilder, ListResponse};
 use crate::error::{map_deserialization_error, OpenDartError};
+use bytes::Bytes;
+use reqwest;
+use validator::Validate;
 
 pub struct OpenDartApi {
     client: reqwest::Client,
@@ -45,9 +45,7 @@ impl OpenDartApi {
         headers
     }
 
-    pub async fn execute_raw(&self, request: reqwest::Request) -> Result<Bytes, reqwest::Error> {
-        // log request info
-        println!("{:?}", request);
+    async fn execute_raw(&self, request: reqwest::Request) -> Result<Bytes, reqwest::Error> {
         let response = self.client.execute(request).await?;
         let bytes = response.bytes().await?;
         Ok(bytes)
@@ -59,8 +57,8 @@ impl OpenDartApi {
         let bytes = self.execute_raw(request).await?;
         let list_response: ListResponse =
             serde_json::from_slice(&bytes).map_err(|e| map_deserialization_error(e, &bytes))?;
-        // todo: find a elegant way to handle validation
-        list_response.validate()
+        list_response.validate()?;
+        Ok(list_response)
     }
 }
 
@@ -74,9 +72,23 @@ mod tests {
     #[test(tokio::test)]
     async fn test_get_list() {
         let api = TestContext::new().api;
-        let args = ListRequestParamsBuilder::default().build().unwrap();
+        let args = ListRequestParamsBuilder::default()
+            .corp_cls("Y")
+            .build()
+            .unwrap();
 
         let list_response = api.get_list(args).await.unwrap();
-        println!("{:?}", list_response);
+        assert!(list_response.validate().is_ok())
+    }
+
+    async fn test_get_list_invalid_params() {
+        let api = TestContext::new().api;
+        let args = ListRequestParamsBuilder::default()
+            .corp_cls("Z")
+            .build()
+            .unwrap();
+
+        let list_response = api.get_list(args).await;
+        assert!(list_response.is_err())
     }
 }

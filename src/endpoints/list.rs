@@ -6,6 +6,7 @@ use crate::env::OpenDartApiKey;
 use crate::error::OpenDartError;
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 #[derive(Builder, Debug, Default, Serialize)]
 #[builder(setter(into, strip_option), default)]
@@ -105,39 +106,32 @@ pub struct ListRequestParams {
 
 impl OpenDartApiKey for ListRequestParamsBuilder {}
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct ListResponse {
     #[serde(flatten)]
+    #[validate(nested)]
     message: Message,
 
     #[serde(flatten)]
     content: Option<Content>,
 }
 
-// todo: find a elegant way to handle this
-impl ListResponse {
-    pub fn validate(self) -> Result<Self, OpenDartError> {
-        self.message.validate()?;
-        Ok(self)
-    }
-}
-
 #[derive(Debug, Deserialize)]
 struct Content {
     /// ### 페이지 번호
-    pub page_no: i32,
+    page_no: i32,
 
     /// ### 페이지 별 건수
-    pub page_count: i32,
+    page_count: i32,
 
     /// ### 총 건수
     /// 총 페이지 수
-    pub total_count: i32,
+    total_count: i32,
 
     /// ### 총 페이지 수
-    pub total_page: i32,
+    total_page: i32,
 
-    pub list: Vec<ListItem>,
+    list: Vec<ListItem>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -147,19 +141,19 @@ struct ListItem {
     /// - K : 코스닥
     /// - N : 코넥스
     /// - E : 기타
-    pub corp_cls: String,
+    corp_cls: String,
 
     /// ### 종목명(법인명)
     /// 공시대상회사의 종목명(상장사) 또는 법인명(기타법인)
-    pub corp_name: String,
+    corp_name: String,
 
     /// ### 고유번호
     /// 공시대상회사의 고유번호(8자리)
-    pub corp_code: String,
+    corp_code: String,
 
     /// ### 종목코드
     /// 상장회사의 종목코드(6자리)
-    pub stock_code: String,
+    stock_code: String,
 
     /// ### 보고서명
     /// 공시구분+보고서명+기타정보
@@ -171,21 +165,21 @@ struct ListItem {
     /// - \[발행조건확정\] : 본 보고서명으로 이미 제출된 보고서의 유가증권 발행조건이 확정되어 제출된 것임
     /// - \[정정명령부과\] : 본 보고서에 대하여 금융감독원이 정정명령을 부과한 것임
     /// - \[정정제출요구\] : 본 보고서에 대하여 금융감독원이 정정제출요구을 부과한 것임
-    pub report_nm: String,
+    report_nm: String,
 
     /// ### 접수번호
     /// 접수번호(14자리)
     ///
     /// ※ 공시뷰어 연결에 이용예시
     /// - PC용 : https://dart.fss.or.kr/dsaf001/main.do?rcpNo=접수번호
-    pub rcept_no: String,
+    rcept_no: String,
 
     /// ### 공시 제출인명
-    pub flr_nm: String,
+    flr_nm: String,
 
     /// ### 접수일자
     /// 공시 접수일자(YYYYMMDD)
-    pub rcept_dt: String,
+    rcept_dt: String,
 
     /// ### 비고
     /// 조합된 문자로 각각은 아래와 같은 의미가 있음
@@ -197,5 +191,23 @@ struct ListItem {
     /// - 연 : 본 보고서는 연결부분을 포함한 것임
     /// - 정 : 본 보고서 제출 후 정정신고가 있으니 관련 보고서를 참조하시기 바람
     /// - 철 : 본 보고서는 철회(간주)되었으니 관련 철회신고서(철회간주안내)를 참고하시기 바람
-    pub rm: String,
+    rm: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn can_fail_validate_status_known_for_list_response() {
+        let response = ListResponse {
+            message: Message {
+                status: "010".into(),
+                message: "hello".into(),
+            },
+            content: None,
+        };
+
+        assert!(response.validate().is_err());
+    }
 }
