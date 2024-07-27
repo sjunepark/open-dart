@@ -1,8 +1,14 @@
-use crate::endpoints::{ListRequestParams, ListRequestParamsBuilder, ListResponse};
-use crate::error::{map_deserialization_error, OpenDartError};
-use bytes::Bytes;
+use std::fmt::Display;
+
 use reqwest;
+use reqwest::IntoUrl;
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 use validator::Validate;
+
+use crate::endpoints::{List, ListRequestParams, OpenDartResponse};
+use crate::error::{map_deserialization_error, DeserializationError, OpenDartError};
+use crate::types::ResponseType;
 
 pub struct OpenDartApi {
     client: reqwest::Client,
@@ -28,6 +34,50 @@ impl OpenDartApi {
         }
     }
 
+    // region: Public APIs
+
+    pub async fn get_list(
+        &self,
+        args: ListRequestParams,
+        response_type: ResponseType,
+    ) -> Result<OpenDartResponse<List>, OpenDartError> {
+        self.get("https://opendart.fss.or.kr/api/list", args, response_type)
+            .await
+    }
+
+    // endregion: Public APIs
+
+    // region: Generic APIs
+
+    async fn get<'de, U, P, R>(
+        &self,
+        url: U,
+        params: P,
+        response_type: ResponseType,
+    ) -> Result<OpenDartResponse<R>, OpenDartError>
+    where
+        U: Display + IntoUrl,
+        P: Serialize,
+        R: DeserializeOwned + Validate,
+    {
+        let url = format!("{}.{}", url, response_type);
+        let request = self.client.get(url).query(&params).build()?;
+        let response = self.client.execute(request).await?;
+        let bytes = response.bytes().await?;
+        let response: OpenDartResponse<R> = match response_type {
+            ResponseType::Json => serde_json::from_slice(&bytes)
+                .map_err(|e| map_deserialization_error(DeserializationError::from(e), &bytes))?,
+            ResponseType::Xml => quick_xml::de::from_reader(bytes.as_ref())
+                .map_err(|e| map_deserialization_error(DeserializationError::from(e), &bytes))?,
+        };
+        response.validate()?;
+        Ok(response)
+    }
+
+    // endregion: Generic APIs
+
+    // region: Helpers
+
     fn default_headers() -> reqwest::header::HeaderMap {
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
@@ -45,50 +95,31 @@ impl OpenDartApi {
         headers
     }
 
-    async fn execute_raw(&self, request: reqwest::Request) -> Result<Bytes, reqwest::Error> {
-        let response = self.client.execute(request).await?;
-        let bytes = response.bytes().await?;
-        Ok(bytes)
-    }
-
-    pub async fn get_list(&self, args: ListRequestParams) -> Result<ListResponse, OpenDartError> {
-        let url = "https://opendart.fss.or.kr/api/list.json";
-        let request = self.client.get(url).query(&args).build()?;
-        let bytes = self.execute_raw(request).await?;
-        let list_response: ListResponse =
-            serde_json::from_slice(&bytes).map_err(|e| map_deserialization_error(e, &bytes))?;
-        list_response.validate()?;
-        Ok(list_response)
-    }
+    // endregion: Helpers
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::TestContext;
     use test_log::test;
+    use validator::Validate;
 
-    use super::*;
+    use crate::endpoints::ListRequestParamsBuilder;
+    use crate::types::ResponseType;
+    use crate::TestContext;
 
     #[test(tokio::test)]
-    async fn test_get_list() {
+    async fn test_get_list_json() {
         let api = TestContext::new().api;
-        let args = ListRequestParamsBuilder::default()
-            .corp_cls("Y")
-            .build()
-            .unwrap();
-
-        let list_response = api.get_list(args).await.unwrap();
-        assert!(list_response.validate().is_ok())
+        let params = ListRequestParamsBuilder::default().build().unwrap();
+        let response = api.get_list(params, ResponseType::Json).await.unwrap();
+        assert!(response.validate().is_ok())
     }
 
-    async fn test_get_list_invalid_params() {
+    #[test(tokio::test)]
+    async fn test_get_list_xml() {
         let api = TestContext::new().api;
-        let args = ListRequestParamsBuilder::default()
-            .corp_cls("Z")
-            .build()
-            .unwrap();
-
-        let list_response = api.get_list(args).await;
-        assert!(list_response.is_err())
+        let params = ListRequestParamsBuilder::default().build().unwrap();
+        let response = api.get_list(params, ResponseType::Xml).await.unwrap();
+        assert!(response.validate().is_ok())
     }
 }

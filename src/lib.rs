@@ -1,11 +1,11 @@
 pub mod client;
 mod config;
 pub mod endpoints;
-mod env;
 mod error;
 
 #[cfg(test)]
 mod test_utils;
+mod types;
 
 #[cfg(test)]
 pub use test_utils::TestContext;

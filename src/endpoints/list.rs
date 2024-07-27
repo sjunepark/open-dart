@@ -1,14 +1,17 @@
 //! ## 공시검색
 //! [link](https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019001)
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
-use crate::endpoints::Message;
-use crate::env::OpenDartApiKey;
-use crate::error::OpenDartError;
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Builder, Debug, Default, Serialize)]
+use crate::endpoints::OpenDartApiKey;
+use crate::error::OpenDartError;
+use crate::types::{CorpCls, CorpCode, CrtfcKey, PblntfDetailTy};
+
+// region: Request Params
+
+#[derive(Builder, Debug, Default, Serialize, Validate)]
 #[builder(setter(into, strip_option), default)]
 #[builder(derive(Debug))]
 #[builder(build_fn(error = "OpenDartError"))]
@@ -17,13 +20,15 @@ pub struct ListRequestParams {
     /// 발급받은 인증키(40자리)
     #[builder(default = "Self::open_dart_api_key()")]
     #[builder(setter(skip))]
-    pub crtfc_key: String,
+    #[validate(nested)]
+    crtfc_key: CrtfcKey,
 
     /// ### 고유번호
     /// 공시대상회사의 고유번호(8자리)
     ///
     /// ※ 개발가이드 > 공시정보 > 고유번호 참고
-    pub corp_code: Option<String>,
+    #[validate(nested)]
+    pub corp_code: Option<CorpCode>,
 
     /// ### 시작일
     /// 검색시작 접수일자(YYYYMMDD)
@@ -43,35 +48,13 @@ pub struct ListRequestParams {
     /// 최종보고서만 검색여부(Y or N)
     ///
     /// - 기본값 : N(정정이 있는 경우 최종정정만 검색)
-    pub last_reprt_at: Option<String>,
+    pub last_reprt_at: Option<char>,
 
-    /// ### 공시유형
-    ///
-    /// - A : 정기공시
-    /// - B : 주요사항보고
-    /// - C : 발행공시
-    /// - D : 지분공시
-    /// - E : 기타공시
-    /// - F : 외부감사관련
-    /// - G : 펀드공시
-    /// - H : 자산유동화
-    /// - I : 거래소공시
-    /// - J : 공정위공시
-    pub pblntf_ty: Option<String>,
+    pub pblntf_ty: Option<char>,
 
-    /// ### 공시상세유형
-    /// (※ 상세 유형 참조 : pblntf_detail_ty)
-    pub pblntf_detail_ty: Option<String>,
+    pub pblntf_detail_ty: Option<PblntfDetailTy>,
 
-    /// ### 법인구분
-    ///
-    /// - Y : 유가
-    /// - K : 코스닥
-    /// - N : 코넥스
-    /// - E : 기타
-    ///
-    /// ※ 없으면 전체조회, 복수조건 불가
-    pub corp_cls: Option<String>,
+    pub corp_cls: Option<CorpCls>,
 
     /// ### 정렬
     ///
@@ -106,18 +89,12 @@ pub struct ListRequestParams {
 
 impl OpenDartApiKey for ListRequestParamsBuilder {}
 
+// endregion: Request Params
+
+// region: Response
+
 #[derive(Debug, Deserialize, Validate)]
-pub struct ListResponse {
-    #[serde(flatten)]
-    #[validate(nested)]
-    message: Message,
-
-    #[serde(flatten)]
-    content: Option<Content>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Content {
+pub struct List {
     /// ### 페이지 번호
     page_no: i32,
 
@@ -131,17 +108,12 @@ struct Content {
     /// ### 총 페이지 수
     total_page: i32,
 
-    list: Vec<ListItem>,
+    list: Vec<ListCorp>,
 }
 
 #[derive(Debug, Deserialize)]
-struct ListItem {
-    /// ### 법인구분
-    /// - Y : 유가
-    /// - K : 코스닥
-    /// - N : 코넥스
-    /// - E : 기타
-    corp_cls: String,
+struct ListCorp {
+    corp_cls: CorpCls,
 
     /// ### 종목명(법인명)
     /// 공시대상회사의 종목명(상장사) 또는 법인명(기타법인)
@@ -149,7 +121,7 @@ struct ListItem {
 
     /// ### 고유번호
     /// 공시대상회사의 고유번호(8자리)
-    corp_code: String,
+    corp_code: CorpCode,
 
     /// ### 종목코드
     /// 상장회사의 종목코드(6자리)
@@ -194,20 +166,28 @@ struct ListItem {
     rm: String,
 }
 
+// endregion: Response
+
 #[cfg(test)]
 mod tests {
+    use crate::TestContext;
+
     use super::*;
 
     #[test]
-    fn can_fail_validate_status_known_for_list_response() {
-        let response = ListResponse {
-            message: Message {
-                status: "010".into(),
-                message: "hello".into(),
-            },
-            content: None,
-        };
+    fn can_validate_list_request_params_corp_code() {
+        let _ = TestContext::new();
 
-        assert!(response.validate().is_err());
+        let invalid_corp_code = ListRequestParamsBuilder::default()
+            .corp_code(CorpCode("123456".to_string()))
+            .build()
+            .unwrap();
+        assert!(invalid_corp_code.validate().is_err());
+
+        let valid_corp_code = ListRequestParamsBuilder::default()
+            .corp_code(CorpCode("12345678".to_string()))
+            .build()
+            .unwrap();
+        assert!(valid_corp_code.validate().is_ok());
     }
 }
