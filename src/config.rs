@@ -1,6 +1,7 @@
 use config::{Config, ConfigError, File};
 use serde::Deserialize;
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub open_dart_api_key: String,

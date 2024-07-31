@@ -1,7 +1,4 @@
 use derive_builder::UninitializedFieldError;
-use derive_more::Display;
-
-use crate::endpoints::Message;
 
 #[derive(Debug, thiserror::Error)]
 pub enum OpenDartError {
@@ -10,7 +7,7 @@ pub enum OpenDartError {
     Reqwest(#[from] reqwest::Error),
     /// Error when a response cannot be deserialized into a Rust type
     #[error("failed to deserialize api response: {0}")]
-    Deserialize(DeserializationError),
+    Deserialize(serde_json::Error),
     /// Error from client side validation
     /// or when builder fails to build request before making API call
     #[error("invalid args: {0}")]
@@ -28,26 +25,7 @@ impl From<UninitializedFieldError> for OpenDartError {
         OpenDartError::InvalidArgument(value.to_string())
     }
 }
-
-#[derive(Debug, Display)]
-pub enum DeserializationError {
-    Json(serde_json::Error),
-    Xml(quick_xml::de::DeError),
-}
-
-impl From<serde_json::Error> for DeserializationError {
-    fn from(e: serde_json::Error) -> Self {
-        DeserializationError::Json(e)
-    }
-}
-
-impl From<quick_xml::de::DeError> for DeserializationError {
-    fn from(e: quick_xml::de::DeError) -> Self {
-        DeserializationError::Xml(e)
-    }
-}
-
-pub fn map_deserialization_error(e: DeserializationError, bytes: &[u8]) -> OpenDartError {
+pub fn map_deserialization_error(e: serde_json::Error, bytes: &[u8]) -> OpenDartError {
     tracing::error!(
         "failed deserialization of: {}",
         String::from_utf8_lossy(bytes)

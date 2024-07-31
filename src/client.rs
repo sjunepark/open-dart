@@ -3,13 +3,13 @@ use std::fmt::Display;
 use reqwest;
 use reqwest::IntoUrl;
 use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use validator::Validate;
 
 use crate::endpoints::{List, ListRequestParams, OpenDartResponse};
-use crate::error::{map_deserialization_error, DeserializationError, OpenDartError};
-use crate::types::ResponseType;
+use crate::error::{map_deserialization_error, OpenDartError};
 
+#[allow(dead_code)]
 pub struct OpenDartApi {
     client: reqwest::Client,
     config: OpenDartConfig,
@@ -39,9 +39,8 @@ impl OpenDartApi {
     pub async fn get_list(
         &self,
         args: ListRequestParams,
-        response_type: ResponseType,
     ) -> Result<OpenDartResponse<List>, OpenDartError> {
-        self.get("https://opendart.fss.or.kr/api/list", args, response_type)
+        self.get("https://opendart.fss.or.kr/api/list.json", args)
             .await
     }
 
@@ -53,23 +52,17 @@ impl OpenDartApi {
         &self,
         url: U,
         params: P,
-        response_type: ResponseType,
     ) -> Result<OpenDartResponse<R>, OpenDartError>
     where
         U: Display + IntoUrl,
         P: Serialize,
         R: DeserializeOwned + Validate,
     {
-        let url = format!("{}.{}", url, response_type);
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
         let bytes = response.bytes().await?;
-        let response: OpenDartResponse<R> = match response_type {
-            ResponseType::Json => serde_json::from_slice(&bytes)
-                .map_err(|e| map_deserialization_error(DeserializationError::from(e), &bytes))?,
-            ResponseType::Xml => quick_xml::de::from_reader(bytes.as_ref())
-                .map_err(|e| map_deserialization_error(DeserializationError::from(e), &bytes))?,
-        };
+        let response: OpenDartResponse<R> =
+            serde_json::from_slice(&bytes).map_err(|e| map_deserialization_error(e, &bytes))?;
         response.validate()?;
         Ok(response)
     }
@@ -100,26 +93,20 @@ impl OpenDartApi {
 
 #[cfg(test)]
 mod tests {
-    use test_log::test;
+    use tracing_log::log::{log, LevelFilter};
     use validator::Validate;
 
     use crate::endpoints::ListRequestParamsBuilder;
-    use crate::types::ResponseType;
     use crate::TestContext;
 
-    #[test(tokio::test)]
-    async fn test_get_list_json() {
+    #[tokio::test]
+    async fn test_get_list_default() {
         let api = TestContext::new().api;
         let params = ListRequestParamsBuilder::default().build().unwrap();
-        let response = api.get_list(params, ResponseType::Json).await.unwrap();
-        assert!(response.validate().is_ok())
-    }
+        let response = api.get_list(params).await.unwrap();
 
-    #[test(tokio::test)]
-    async fn test_get_list_xml() {
-        let api = TestContext::new().api;
-        let params = ListRequestParamsBuilder::default().build().unwrap();
-        let response = api.get_list(params, ResponseType::Xml).await.unwrap();
+        tracing::debug!(?response);
+
         assert!(response.validate().is_ok())
     }
 }

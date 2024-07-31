@@ -1,23 +1,6 @@
-use std::fmt::Display;
-
 use derive_more::From;
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationError, ValidationErrors};
-
-/// The response type to expect from the API
-pub enum ResponseType {
-    Json,
-    Xml,
-}
-
-impl Display for ResponseType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ResponseType::Json => write!(f, "json"),
-            ResponseType::Xml => write!(f, "xml"),
-        }
-    }
-}
 
 // region: CtrfcKey
 /// ### API 인증키
@@ -99,6 +82,7 @@ pub enum CorpCls {
 /// - H : 자산유동화
 /// - I : 거래소공시
 /// - J : 공정위공시
+#[allow(dead_code)]
 #[derive(Clone, Debug, Serialize)]
 pub enum PblntfTy {
     A,

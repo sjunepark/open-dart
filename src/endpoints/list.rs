@@ -93,6 +93,7 @@ impl OpenDartApiKey for ListRequestParamsBuilder {}
 
 // region: Response
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize, Validate)]
 pub struct List {
     /// ### 페이지 번호
@@ -111,6 +112,7 @@ pub struct List {
     list: Vec<ListCorp>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 struct ListCorp {
     corp_cls: CorpCls,

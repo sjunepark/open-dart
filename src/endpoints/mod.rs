@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use validator::{Validate, ValidationError, ValidationErrors};
 
 pub use list::*;
@@ -96,9 +96,6 @@ pub struct XmlResponse<T: Validate> {
 
 #[cfg(test)]
 mod tests {
-    use crate::error::{map_deserialization_error, DeserializationError};
-    use crate::TestContext;
-
     use super::*;
 
     #[test]
@@ -126,15 +123,5 @@ mod tests {
             message: "hello".into(),
         };
         assert!(message.validate().is_err());
-    }
-
-    #[test]
-    fn can_deserialize_xml_response() {
-        let _ = TestContext::new();
-
-        let xml = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><result><status>013</status><message>조회된 데이타가 없습니다.</message></result>"#;
-        let response: JsonResponse<List> = quick_xml::de::from_reader(xml.as_bytes())
-            .map_err(|e| map_deserialization_error(DeserializationError::from(e), xml.as_bytes()))
-            .unwrap();
     }
 }
