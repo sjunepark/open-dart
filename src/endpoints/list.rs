@@ -11,7 +11,7 @@ use crate::types::{CorpCls, CorpCode, CrtfcKey, PblntfDetailTy};
 
 // region: Request Params
 
-#[derive(Builder, Debug, Default, Serialize, Validate)]
+#[derive(Builder, Debug, Default, Serialize, Deserialize, PartialOrd, PartialEq, Validate)]
 #[builder(setter(into, strip_option), default)]
 #[builder(derive(Debug))]
 #[builder(build_fn(error = "OpenDartError"))]
@@ -94,7 +94,7 @@ impl OpenDartApiKey for ListRequestParamsBuilder {}
 // region: Response
 
 #[allow(dead_code)]
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Validate, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub struct List {
     /// ### 페이지 번호
     page_no: i32,
@@ -113,7 +113,7 @@ pub struct List {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 struct ListCorp {
     corp_cls: CorpCls,
 

@@ -5,7 +5,7 @@ use validator::{Validate, ValidationError, ValidationErrors};
 // region: CtrfcKey
 /// ### API 인증키
 /// 발급받은 인증키(40자리)
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub struct CrtfcKey(String);
 
 impl Validate for CrtfcKey {
@@ -34,7 +34,7 @@ impl From<String> for CrtfcKey {
 /// 공시대상회사의 고유번호(8자리)
 ///
 /// ※ 개발가이드 > 공시정보 > 고유번호 참고
-#[derive(Clone, Debug, From, Serialize, Deserialize)]
+#[derive(Clone, Debug, From, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub struct CorpCode(pub String);
 
 impl Validate for CorpCode {
@@ -60,7 +60,7 @@ impl Validate for CorpCode {
 /// - E : 기타
 ///
 /// ※ 없으면 전체조회, 복수조건 불가
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub enum CorpCls {
     Y,
     K,
@@ -180,7 +180,7 @@ pub enum PblntfTy {
 /// - J006 : 기타공정위공시
 /// - J008 : 대규모내부거래관련(공익법인용)
 /// - J009 : 하도급대금결제조건공시
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub enum PblntfDetailTy {
     A001,
     A002,
