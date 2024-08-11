@@ -7,7 +7,7 @@ edition = "2021"
 config = "0.14.0"
 
 derive_builder = "0.20.0"
-derive_more = "0.99.18"
+derive_more = { version = "1.0.0", features = ["from"] }
 
 bytes = "1.6.1"
 reqwest = { version = "0.12.5", features = ["json"] }

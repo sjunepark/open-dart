@@ -16,7 +16,7 @@ pub enum OpenDartError {
     #[error("{0}")]
     ApiError(String),
     /// Validation error for struct fields
-    #[error("validation error: {0}")]
+    #[error("{0}")]
     Validation(#[from] validator::ValidationErrors),
 }
 

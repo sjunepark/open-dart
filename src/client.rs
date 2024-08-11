@@ -23,8 +23,30 @@ pub struct OpenDartConfig {
     pub api_key: String,
 }
 
+impl Default for OpenDartApi {
+    /// Create a new `OpenDartApi` instance with default configuration.
+    ///
+    /// The default configuration is as below:
+    /// - `api_version`: 1
+    /// - `api_key`: Loaded from the `OPEN_DART_API_KEY` environment variable
+    fn default() -> Self {
+        let api_version = 1;
+        let api_key = std::env::var("OPEN_DART_API_KEY").expect("OPEN_DART_API_KEY must be set");
+        let config = OpenDartConfig {
+            api_version,
+            api_key,
+        };
+
+        Self::new(config)
+    }
+}
+
 impl OpenDartApi {
     pub fn new(config: OpenDartConfig) -> Self {
+        if config.api_version != 1 {
+            panic!("The only supported API version is 1");
+        }
+
         Self {
             client: reqwest::Client::builder()
                 .default_headers(Self::default_headers())
