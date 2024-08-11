@@ -93,7 +93,6 @@ impl OpenDartApi {
 
 #[cfg(test)]
 mod tests {
-    use tracing_log::log::{log, LevelFilter};
     use validator::Validate;
 
     use crate::endpoints::ListRequestParamsBuilder;

@@ -2,9 +2,9 @@
 
 use tracing::metadata::LevelFilter;
 use tracing_log::AsLog;
+use tracing_subscriber::EnvFilter;
 
 use crate::client::{OpenDartApi, OpenDartConfig};
-use crate::config::Settings;
 
 pub struct TestContext {
     pub api: OpenDartApi,
@@ -12,25 +12,27 @@ pub struct TestContext {
 
 impl TestContext {
     pub fn new() -> Self {
-        let settings = Settings::new().expect("Failed to load settings");
-        std::env::set_var("OPEN_DART_API_KEY", &settings.open_dart_api_key);
+        let open_dart_api_key =
+            std::env::var("OPEN_DART_API_KEY").expect("OPEN_DART_API_KEY must be set");
 
         let subscriber = tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+            .with_env_filter(EnvFilter::from_default_env())
             .pretty()
             .finish();
 
         let _ = tracing::subscriber::set_global_default(subscriber);
 
+        let current_level = LevelFilter::current();
+
         let _ = tracing_log::LogTracer::builder()
             // Note that we must call this *after* setting the global default
             // subscriber, so that we get its max level hint.
-            .with_max_level(LevelFilter::current().as_log())
+            .with_max_level(current_level.as_log())
             .init();
 
         let api = OpenDartApi::new(OpenDartConfig {
             api_version: 1,
-            api_key: settings.open_dart_api_key,
+            api_key: open_dart_api_key,
         });
 
         Self { api }
