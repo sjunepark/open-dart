@@ -1,12 +1,24 @@
+use crate::error::OpenDartError;
 use derive_more::From;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
+use std::str::FromStr;
 use validator::{Validate, ValidationError, ValidationErrors};
 
 // region: CtrfcKey
+
 /// ### API 인증키
 /// 발급받은 인증키(40자리)
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub struct CrtfcKey(String);
+
+impl CrtfcKey {
+    pub fn parse(s: &str) -> Result<Self, OpenDartError> {
+        let key = CrtfcKey(s.to_string());
+        key.validate()?;
+        Ok(key)
+    }
+}
 
 impl Validate for CrtfcKey {
     fn validate(&self) -> Result<(), ValidationErrors> {
@@ -22,11 +34,20 @@ impl Validate for CrtfcKey {
     }
 }
 
-impl From<String> for CrtfcKey {
-    fn from(s: String) -> Self {
-        CrtfcKey(s)
+impl FromStr for CrtfcKey {
+    type Err = OpenDartError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        CrtfcKey::parse(s)
     }
 }
+
+impl Display for CrtfcKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 // endregion: CtrfcKey
 
 // region: CorpCode
@@ -50,6 +71,7 @@ impl Validate for CorpCode {
         Ok(())
     }
 }
+
 // endregion: CorpCode
 
 /// ### 법인구분
