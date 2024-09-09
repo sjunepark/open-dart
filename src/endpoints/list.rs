@@ -17,16 +17,10 @@ use crate::types::PblntfDetailTy;
 #[builder(derive(Debug))]
 #[builder(build_fn(error = "OpenDartError"))]
 pub struct ListRequestParams {
-    /// ### API 인증키
-    /// 발급받은 인증키(40자리)
     #[builder(default = "Self::open_dart_api_key()")]
     #[builder(setter(skip))]
     crtfc_key: CrtfcKey,
 
-    /// ### 고유번호
-    /// 공시대상회사의 고유번호(8자리)
-    ///
-    /// ※ 개발가이드 > 공시정보 > 고유번호 참고
     pub corp_code: Option<CorpCode>,
 
     /// ### 시작일

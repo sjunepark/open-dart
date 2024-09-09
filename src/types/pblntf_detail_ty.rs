@@ -1,7 +1,6 @@
 use self::Inner::*;
-use crate::error::OpenDartError;
+use derive_more::{AsRef, From, FromStr};
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 
 /// ### 공시상세유형
 ///
@@ -84,10 +83,73 @@ use std::str::FromStr;
 /// - J006 : 기타공정위공시
 /// - J008 : 대규모내부거래관련(공익법인용)
 /// - J009 : 하도급대금결제조건공시
-#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq, From, AsRef)]
 pub struct PblntfDetailTy(Inner);
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
+impl PblntfDetailTy {
+    const A001: Self = Self(A001);
+    const A002: Self = Self(A002);
+    const A003: Self = Self(A003);
+    const A004: Self = Self(A004);
+    const A005: Self = Self(A005);
+    const B001: Self = Self(B001);
+    const B002: Self = Self(B002);
+    const B003: Self = Self(B003);
+    const C001: Self = Self(C001);
+    const C002: Self = Self(C002);
+    const C003: Self = Self(C003);
+    const C004: Self = Self(C004);
+    const C005: Self = Self(C005);
+    const C006: Self = Self(C006);
+    const C007: Self = Self(C007);
+    const C008: Self = Self(C008);
+    const C009: Self = Self(C009);
+    const C010: Self = Self(C010);
+    const C011: Self = Self(C011);
+    const D001: Self = Self(D001);
+    const D002: Self = Self(D002);
+    const D003: Self = Self(D003);
+    const D004: Self = Self(D004);
+    const D005: Self = Self(D005);
+    const E001: Self = Self(E001);
+    const E002: Self = Self(E002);
+    const E003: Self = Self(E003);
+    const E004: Self = Self(E004);
+    const E005: Self = Self(E005);
+    const E006: Self = Self(E006);
+    const E007: Self = Self(E007);
+    const E008: Self = Self(E008);
+    const E009: Self = Self(E009);
+    const F001: Self = Self(F001);
+    const F002: Self = Self(F002);
+    const F003: Self = Self(F003);
+    const F004: Self = Self(F004);
+    const F005: Self = Self(F005);
+    const G001: Self = Self(G001);
+    const G002: Self = Self(G002);
+    const G003: Self = Self(G003);
+    const H001: Self = Self(H001);
+    const H002: Self = Self(H002);
+    const H003: Self = Self(H003);
+    const H004: Self = Self(H004);
+    const H005: Self = Self(H005);
+    const H006: Self = Self(H006);
+    const I001: Self = Self(I001);
+    const I002: Self = Self(I002);
+    const I003: Self = Self(I003);
+    const I004: Self = Self(I004);
+    const I005: Self = Self(I005);
+    const I006: Self = Self(I006);
+    const J001: Self = Self(J001);
+    const J002: Self = Self(J002);
+    const J004: Self = Self(J004);
+    const J005: Self = Self(J005);
+    const J006: Self = Self(J006);
+    const J008: Self = Self(J008);
+    const J009: Self = Self(J009);
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq, From, FromStr)]
 enum Inner {
     A001,
     A002,
@@ -149,74 +211,4 @@ enum Inner {
     J006,
     J008,
     J009,
-}
-
-impl FromStr for PblntfDetailTy {
-    type Err = OpenDartError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "A001" => Ok(PblntfDetailTy(A001)),
-            "A002" => Ok(PblntfDetailTy(A002)),
-            "A003" => Ok(PblntfDetailTy(A003)),
-            "A004" => Ok(PblntfDetailTy(A004)),
-            "A005" => Ok(PblntfDetailTy(A005)),
-            "B001" => Ok(PblntfDetailTy(B001)),
-            "B002" => Ok(PblntfDetailTy(B002)),
-            "B003" => Ok(PblntfDetailTy(B003)),
-            "C001" => Ok(PblntfDetailTy(C001)),
-            "C002" => Ok(PblntfDetailTy(C002)),
-            "C003" => Ok(PblntfDetailTy(C003)),
-            "C004" => Ok(PblntfDetailTy(C004)),
-            "C005" => Ok(PblntfDetailTy(C005)),
-            "C006" => Ok(PblntfDetailTy(C006)),
-            "C007" => Ok(PblntfDetailTy(C007)),
-            "C008" => Ok(PblntfDetailTy(C008)),
-            "C009" => Ok(PblntfDetailTy(C009)),
-            "C010" => Ok(PblntfDetailTy(C010)),
-            "C011" => Ok(PblntfDetailTy(C011)),
-            "D001" => Ok(PblntfDetailTy(D001)),
-            "D002" => Ok(PblntfDetailTy(D002)),
-            "D003" => Ok(PblntfDetailTy(D003)),
-            "D004" => Ok(PblntfDetailTy(D004)),
-            "D005" => Ok(PblntfDetailTy(D005)),
-            "E001" => Ok(PblntfDetailTy(E001)),
-            "E002" => Ok(PblntfDetailTy(E002)),
-            "E003" => Ok(PblntfDetailTy(E003)),
-            "E004" => Ok(PblntfDetailTy(E004)),
-            "E005" => Ok(PblntfDetailTy(E005)),
-            "E006" => Ok(PblntfDetailTy(E006)),
-            "E007" => Ok(PblntfDetailTy(E007)),
-            "E008" => Ok(PblntfDetailTy(E008)),
-            "E009" => Ok(PblntfDetailTy(E009)),
-            "F001" => Ok(PblntfDetailTy(F001)),
-            "F002" => Ok(PblntfDetailTy(F002)),
-            "F003" => Ok(PblntfDetailTy(F003)),
-            "F004" => Ok(PblntfDetailTy(F004)),
-            "F005" => Ok(PblntfDetailTy(F005)),
-            "G001" => Ok(PblntfDetailTy(G001)),
-            "G002" => Ok(PblntfDetailTy(G002)),
-            "G003" => Ok(PblntfDetailTy(G003)),
-            "H001" => Ok(PblntfDetailTy(H001)),
-            "H002" => Ok(PblntfDetailTy(H002)),
-            "H003" => Ok(PblntfDetailTy(H003)),
-            "H004" => Ok(PblntfDetailTy(H004)),
-            "H005" => Ok(PblntfDetailTy(H005)),
-            "H006" => Ok(PblntfDetailTy(H006)),
-            "I001" => Ok(PblntfDetailTy(I001)),
-            "I002" => Ok(PblntfDetailTy(I002)),
-            "I003" => Ok(PblntfDetailTy(I003)),
-            "I004" => Ok(PblntfDetailTy(I004)),
-            "I005" => Ok(PblntfDetailTy(I005)),
-            "I006" => Ok(PblntfDetailTy(I006)),
-            "J001" => Ok(PblntfDetailTy(J001)),
-            "J002" => Ok(PblntfDetailTy(J002)),
-            "J004" => Ok(PblntfDetailTy(J004)),
-            "J005" => Ok(PblntfDetailTy(J005)),
-            "J006" => Ok(PblntfDetailTy(J006)),
-            "J008" => Ok(PblntfDetailTy(J008)),
-            "J009" => Ok(PblntfDetailTy(J009)),
-            _ => Err(OpenDartError::InvalidArgument(s.to_string())),
-        }
-    }
 }

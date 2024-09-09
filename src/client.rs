@@ -84,8 +84,6 @@ impl OpenDartApi {
         let bytes = response.bytes().await?;
         let response: OpenDartResponse<R> =
             serde_json::from_slice(&bytes).map_err(|e| map_deserialization_error(e, &bytes))?;
-        todo!();
-        // response.validate()?;
         Ok(response)
     }
 
@@ -121,11 +119,9 @@ mod tests {
     #[tokio::test]
     async fn test_get_list_default() {
         let api = TestContext::new().api;
-        let params = ListRequestParamsBuilder::default().build().unwrap();
-        let response = api.get_list(params).await.unwrap();
-
-        tracing::debug!(?response);
-
-        todo!()
+        let params = ListRequestParamsBuilder::default()
+            .build()
+            .expect("failed to build params");
+        let _response = api.get_list(params).await.expect("failed to get response");
     }
 }
