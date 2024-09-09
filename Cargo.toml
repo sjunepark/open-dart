@@ -21,8 +21,10 @@ serde_json = "1.0.120"
 
 tracing = "0.1.40"
 validator = { version = "0.18.1", features = ["derive"] }
-
+nutype = { version = "0.5.0", features = ["serde"] }
 
 [dev-dependencies]
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing-log = "0.2.0"
+
+pretty_assertions = { version = "1.4.0" }

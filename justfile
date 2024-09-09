@@ -1,6 +1,9 @@
 set dotenv-required
 set dotenv-filename := ".env.dev"
 
+watch:
+     cargo watch -q -c --no-vcs-ignores -s "just test" --env-file .env.dev
+
 test name="":
     cargo test --all-features {{name}} -- --nocapture
 

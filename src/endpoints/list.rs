@@ -3,15 +3,16 @@
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
-use validator::Validate;
 
 use crate::endpoints::OpenDartApiKey;
 use crate::error::OpenDartError;
-use crate::types::{CorpCls, CorpCode, CrtfcKey, PblntfDetailTy};
-
+use crate::types::CorpCls;
+use crate::types::CorpCode;
+use crate::types::CrtfcKey;
+use crate::types::PblntfDetailTy;
 // region: Request Params
 
-#[derive(Builder, Debug, Default, Serialize, Deserialize, PartialOrd, PartialEq, Validate)]
+#[derive(Builder, Debug, Default, Serialize, Deserialize, PartialOrd, PartialEq)]
 #[builder(setter(into, strip_option), default)]
 #[builder(derive(Debug))]
 #[builder(build_fn(error = "OpenDartError"))]
@@ -20,14 +21,12 @@ pub struct ListRequestParams {
     /// 발급받은 인증키(40자리)
     #[builder(default = "Self::open_dart_api_key()")]
     #[builder(setter(skip))]
-    #[validate(nested)]
     crtfc_key: CrtfcKey,
 
     /// ### 고유번호
     /// 공시대상회사의 고유번호(8자리)
     ///
     /// ※ 개발가이드 > 공시정보 > 고유번호 참고
-    #[validate(nested)]
     pub corp_code: Option<CorpCode>,
 
     /// ### 시작일
@@ -94,7 +93,7 @@ impl OpenDartApiKey for ListRequestParamsBuilder {}
 // region: Response
 
 #[allow(dead_code)]
-#[derive(Debug, Validate, Serialize, Deserialize, PartialOrd, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub struct List {
     /// ### 페이지 번호
     page_no: i32,
@@ -169,27 +168,3 @@ struct ListCorp {
 }
 
 // endregion: Response
-
-#[cfg(test)]
-mod tests {
-    use crate::TestContext;
-
-    use super::*;
-
-    #[test]
-    fn can_validate_list_request_params_corp_code() {
-        let _ = TestContext::new();
-
-        let invalid_corp_code = ListRequestParamsBuilder::default()
-            .corp_code(CorpCode("123456".to_string()))
-            .build()
-            .unwrap();
-        assert!(invalid_corp_code.validate().is_err());
-
-        let valid_corp_code = ListRequestParamsBuilder::default()
-            .corp_code(CorpCode("12345678".to_string()))
-            .build()
-            .unwrap();
-        assert!(valid_corp_code.validate().is_ok());
-    }
-}

@@ -4,7 +4,6 @@ use reqwest;
 use reqwest::IntoUrl;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use validator::Validate;
 
 use crate::endpoints::{List, ListRequestParams, OpenDartResponse};
 use crate::error::{map_deserialization_error, OpenDartError};
@@ -78,14 +77,15 @@ impl OpenDartApi {
     where
         U: Display + IntoUrl,
         P: Serialize,
-        R: DeserializeOwned + Validate,
+        R: DeserializeOwned,
     {
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
         let bytes = response.bytes().await?;
         let response: OpenDartResponse<R> =
             serde_json::from_slice(&bytes).map_err(|e| map_deserialization_error(e, &bytes))?;
-        response.validate()?;
+        todo!();
+        // response.validate()?;
         Ok(response)
     }
 
@@ -115,8 +115,6 @@ impl OpenDartApi {
 
 #[cfg(test)]
 mod tests {
-    use validator::Validate;
-
     use crate::endpoints::ListRequestParamsBuilder;
     use crate::TestContext;
 
@@ -128,6 +126,6 @@ mod tests {
 
         tracing::debug!(?response);
 
-        assert!(response.validate().is_ok())
+        todo!()
     }
 }
