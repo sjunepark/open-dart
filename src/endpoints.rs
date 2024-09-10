@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::types::CrtfcKey;
 
@@ -12,7 +12,7 @@ pub trait OpenDartApiKey {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Message {
     /// ### 에러 및 정보 코드
     /// (※메시지 설명 참조)
@@ -29,14 +29,14 @@ impl std::fmt::Display for Message {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum OpenDartResponse<T> {
+pub enum OpenDartResponse<T: Serialize> {
     Json(JsonResponse<T>),
     Xml(XmlResponse<T>),
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct JsonResponse<T> {
     #[serde(flatten)]
     pub message: Message,
@@ -45,7 +45,7 @@ pub struct JsonResponse<T> {
     pub content: Option<T>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct XmlResponse<T> {
     pub result: JsonResponse<T>,
 }
