@@ -1,6 +1,6 @@
 ## Todos
 
-- [ ] Use snapshot testing to reduce actual api calls
+- [ ] Use mocks to reduce actual api calls
 - [ ] Add `assert_impl_all_commons` to types
 - [ ] Finish implementing types
 

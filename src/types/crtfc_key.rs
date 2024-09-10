@@ -1,10 +1,23 @@
+use crate::assert_impl_all_commons;
 use nutype::nutype;
+
+assert_impl_all_commons!(CrtfcKey);
 
 /// ### API 인증키
 /// 발급받은 인증키(40자리)
 #[nutype(
     validate(len_char_min = 40, len_char_max = 40),
-    derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq)
+    derive(
+        Clone,
+        Debug,
+        Serialize,
+        Deserialize,
+        PartialOrd,
+        PartialEq,
+        AsRef,
+        Display,
+        TryFrom
+    )
 )]
 pub struct CrtfcKey(String);
 
