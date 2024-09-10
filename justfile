@@ -10,6 +10,9 @@ test name="":
 watch-test name="":
     cargo watch -q -c --no-vcs-ignores -s "just test {{name}}" --env-file .env.dev
 
+watch-test-derive-common:
+    cargo watch -q -c -x "test -p derive-common"
+
 example name="":
     cargo run --example {{name}}
 

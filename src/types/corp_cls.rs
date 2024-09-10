@@ -1,6 +1,9 @@
 use self::Inner::*;
-use derive_more::{AsRef, From};
+use crate::assert_impl_all_commons;
+use derive_more::{AsRef, Display, From};
 use serde::{Deserialize, Serialize};
+
+assert_impl_all_commons!(CorpCls);
 
 /// ### 법인구분
 ///
@@ -10,10 +13,11 @@ use serde::{Deserialize, Serialize};
 /// - E : 기타
 ///
 /// ※ 없으면 전체조회, 복수조건 불가
-#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq, From, AsRef)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq, AsRef, Display, From)]
 pub struct CorpCls(Inner);
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq, From)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq, Display, From)]
+#[display("{_variant}")]
 enum Inner {
     Y,
     K,
@@ -28,16 +32,15 @@ impl CorpCls {
     pub const E: Self = Self(E);
 }
 
-// impl FromStr for CorpCls {
-//     type Err = OpenDartError;
-//
-//     fn from_str(s: &str) -> Result<Self, Self::Err> {
-//         match s {
-//             "Y" => Ok(CorpCls::Y),
-//             "K" => Ok(CorpCls::K),
-//             "N" => Ok(CorpCls::N),
-//             "E" => Ok(CorpCls::E),
-//             _ => Err(OpenDartError::InvalidArgument(s.to_string())),
-//         }
-//     }
-// }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn corp_cls_display() {
+        assert_eq!(CorpCls::Y.to_string(), "Y");
+        assert_eq!(CorpCls::K.to_string(), "K");
+        assert_eq!(CorpCls::N.to_string(), "N");
+        assert_eq!(CorpCls::E.to_string(), "E");
+    }
+}
