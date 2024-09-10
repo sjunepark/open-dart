@@ -1,3 +1,6 @@
+[workspace]
+members = ["derive-const"]
+
 [package]
 name = "open-dart"
 version = "0.0.1"
