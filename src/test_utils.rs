@@ -38,3 +38,9 @@ impl TestContext {
         Self { api }
     }
 }
+
+impl Default for TestContext {
+    fn default() -> Self {
+        Self::new()
+    }
+}
