@@ -1,3 +1,7 @@
+/// Assert that a type implements all common traits.
+/// The common traits are Clone, Eq, PartialEq, Ord, PartialOrd,
+/// Debug, Display, Default, Send, Sync, Serialize, DeserializeOwned.
+/// (DeserializeOwned is used instead of Deserialize because of lifetime issues, and Deserialize<'static> auto-implements DeserializeOwned.)
 #[macro_export]
 macro_rules! assert_impl_all_commons {
     ($type:ty) => {
@@ -18,5 +22,3 @@ macro_rules! assert_impl_all_commons {
         );
     };
 }
-
-// Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display, Default, Send, Sync, Serialize, DeserializeOwned
