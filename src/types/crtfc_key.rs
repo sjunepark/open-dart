@@ -1,5 +1,6 @@
 use crate::assert_impl_all_commons;
 use nutype::nutype;
+use std::fmt::{Display, Formatter};
 
 assert_impl_all_commons!(CrtfcKey);
 
@@ -9,13 +10,14 @@ assert_impl_all_commons!(CrtfcKey);
     validate(len_char_min = 40, len_char_max = 40),
     derive(
         Clone,
+        Eq,
+        PartialEq,
+        Ord,
+        PartialOrd,
         Debug,
         Serialize,
         Deserialize,
-        PartialOrd,
-        PartialEq,
         AsRef,
-        Display,
         TryFrom
     )
 )]
@@ -26,6 +28,12 @@ impl Default for CrtfcKey {
         let key = std::env::var("OPEN_DART_API_KEY")
             .expect("OPEN_DART_API_KEY must be set as an environment variable");
         CrtfcKey::try_new(key).expect("OPEN_DART_API_KEY must be 40 characters")
+    }
+}
+
+impl Display for CrtfcKey {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_ref())
     }
 }
 

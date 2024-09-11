@@ -1,6 +1,6 @@
-use derive_const::Const;
+use derive_const::impl_const;
 
-#[derive(Const)]
+#[impl_const(variants = Inner)]
 struct MyStruct(Inner);
 
 enum Inner {
@@ -8,13 +8,6 @@ enum Inner {
     B,
     C,
     D,
-}
-
-impl MyStruct {
-    const A: Self = Self(Inner::A);
-    const B: Self = Self(Inner::B);
-    const C: Self = Self(Inner::C);
-    const D: Self = Self(Inner::D);
 }
 
 fn main() {}

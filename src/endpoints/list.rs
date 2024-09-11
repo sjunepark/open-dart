@@ -1,15 +1,15 @@
 //! ## 공시검색
 //! [link](https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019001)
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
-use derive_builder::Builder;
-use serde::{Deserialize, Serialize};
-
 use crate::endpoints::OpenDartApiKey;
 use crate::error::OpenDartError;
 use crate::types::CorpCls;
 use crate::types::CorpCode;
 use crate::types::CrtfcKey;
 use crate::types::PblntfDetailTy;
+use derive_builder::Builder;
+use serde::{Deserialize, Serialize};
+
 // region: Request Params
 
 #[derive(Builder, Debug, Default, Serialize, Deserialize, PartialOrd, PartialEq)]
@@ -17,7 +17,6 @@ use crate::types::PblntfDetailTy;
 #[builder(derive(Debug))]
 #[builder(build_fn(error = "OpenDartError"))]
 pub struct ListRequestParams {
-    #[builder(default = "Self::open_dart_api_key()")]
     #[builder(setter(skip))]
     crtfc_key: CrtfcKey,
 
