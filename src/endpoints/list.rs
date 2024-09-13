@@ -14,7 +14,7 @@ assert_impl_commons!(ListRequestParams);
 
 // region: Request Params
 
-/// Documentation exists for each field's types
+/// Documentation exists in each field's types
 #[derive(
     Builder, Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, Default,
 )]
