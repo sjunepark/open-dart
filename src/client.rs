@@ -148,11 +148,12 @@ mod tests {
     use crate::endpoints::{List, OpenDartResponseBody};
     use crate::test_utils::{get_test_name, save_response_body};
     use crate::TestContext;
+    use anyhow::Context;
     use wiremock::matchers::{method, path};
     use wiremock::{Mock, ResponseTemplate};
 
     #[tokio::test]
-    async fn test_get_list_default() {
+    async fn test_get_list_default() -> anyhow::Result<()> {
         let test_name = get_test_name();
         let TestContext {
             mut api,
@@ -172,9 +173,9 @@ mod tests {
         // region: Set up appropriate domain
         if local_response {
             let body = std::fs::read_to_string(&golden_file_path)
-                .expect("Failed to read response body from file");
+                .context("Failed to read response body from file")?;
             let body: OpenDartResponseBody<List> =
-                serde_json::from_str(&body).expect("Failed to deserialize response body");
+                serde_json::from_str(&body).context("Failed to deserialize response body")?;
 
             let response = ResponseTemplate::new(200).set_body_json(body);
 
@@ -192,7 +193,7 @@ mod tests {
 
         // region: Perform API call
         let response = api.get_list(Default::default()).await;
-        let response = response.expect("List response should be successful");
+        let response = response.context("List response should be successful")?;
         // endregion: Perform API call
 
         // region: Assert response
@@ -204,8 +205,10 @@ mod tests {
         if update_golden_files {
             save_response_body(response_body, &golden_file_path)
                 .await
-                .expect("Failed to save response body");
+                .context("Failed to save response body")?;
         }
         // endregion: Save response body
+
+        Ok(())
     }
 }
