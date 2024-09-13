@@ -8,7 +8,6 @@ use serde::Serialize;
 use crate::endpoints::{List, ListRequestParams, OpenDartResponse};
 use crate::error::{map_deserialization_error, OpenDartError};
 
-#[allow(dead_code)]
 pub struct OpenDartApi {
     client: reqwest::Client,
     config: OpenDartConfig,
@@ -17,24 +16,45 @@ pub struct OpenDartApi {
 #[derive(Clone)]
 pub struct OpenDartConfig {
     /// API version to use
-    pub api_version: u32,
+    api_version: u32,
+    /// The domain, which will default to 'https://opendart.fss.or.kr'
+    domain: String,
+}
+
+impl OpenDartConfig {
+    pub fn new(api_version: u32, domain: &str) -> Self {
+        Self {
+            api_version,
+            domain: domain.to_string(),
+        }
+    }
 }
 
 impl Default for OpenDartApi {
-    /// Create a new `OpenDartApi` instance with default configuration.
+    /// Create a new `OpenDartApi` instance with the default configuration.
     ///
     /// The default configuration is as below:
     /// - `api_version`: 1
-    /// - `api_key`: Loaded from the `OPEN_DART_API_KEY` environment variable
+    /// - `domain`: "https://opendart.fss.or.kr"
     fn default() -> Self {
         let api_version = 1;
-        let config = OpenDartConfig { api_version };
+        let config = OpenDartConfig {
+            api_version,
+            domain: "https://opendart.fss.or.kr".to_string(),
+        };
 
         Self::new(config)
     }
 }
 
 impl OpenDartApi {
+    fn url(&self, path: &str) -> String {
+        if !path.starts_with("/") {
+            panic!("Path must start with a slash");
+        }
+        format!("{}{}", self.config.domain, path)
+    }
+
     pub fn new(config: OpenDartConfig) -> Self {
         if config.api_version != 1 {
             panic!("The only supported API version is 1");
@@ -55,8 +75,7 @@ impl OpenDartApi {
         &self,
         args: ListRequestParams,
     ) -> Result<OpenDartResponse<List>, OpenDartError> {
-        self.get("https://opendart.fss.or.kr/api/list.json", args)
-            .await
+        self.get(self.url("/api/list.json"), args).await
     }
 
     // endregion: Public APIs

@@ -35,4 +35,4 @@ const_format = "0.2.33"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing-log = "0.2.0"
 
-pretty_assertions = { version = "1.4.0" }
+wiremock = "0.6.2"
