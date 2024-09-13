@@ -1,9 +1,14 @@
+[workspace]
+members = ["test-variants"]
+
 [package]
 name = "open-dart"
 version = "0.0.1"
 edition = "2021"
 
 [dependencies]
+test-variants = { path = "./test-variants" }
+
 config = "0.14.0"
 
 derive_builder = "0.20.0"
