@@ -1,6 +1,7 @@
 use crate::assert_impl_commons_without_default;
 use derive_more::{AsMut, AsRef, Display};
 use serde::{Deserialize, Serialize};
+use test_variants::{generate_consts, test_variants};
 
 assert_impl_commons_without_default!(PblntfTy);
 
@@ -23,15 +24,27 @@ pub struct PblntfTy(Inner);
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize)]
 #[display("{_variant}")]
+#[test_variants(PblntfTy)]
+#[generate_consts(PblntfTy)]
 enum Inner {
+    /// 정기공시
     A,
+    /// 주요사항보고
     B,
+    /// 발행공시
     C,
+    /// 지분공시
     D,
+    /// 기타공시
     E,
+    /// 외부감사관련
     F,
+    /// 펀드공시
     G,
+    /// 자산유동화
     H,
+    /// 거래소공시
     I,
+    /// 공정위공시
     J,
 }

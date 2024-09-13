@@ -1,8 +1,8 @@
-use self::Inner::*;
 use crate::assert_impl_commons_without_default;
 use derive_more::{AsMut, AsRef, Display, FromStr};
 use serde::{Deserialize, Serialize};
 use std::fmt::Formatter;
+use test_variants::{generate_consts, test_variants};
 
 assert_impl_commons_without_default!(CorpCls);
 
@@ -17,13 +17,6 @@ assert_impl_commons_without_default!(CorpCls);
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, AsRef, AsMut)]
 pub struct CorpCls(Inner);
 
-impl CorpCls {
-    pub const Y: Self = Self(Y);
-    pub const K: Self = Self(K);
-    pub const N: Self = Self(N);
-    pub const E: Self = Self(E);
-}
-
 impl Display for CorpCls {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.as_ref())
@@ -34,70 +27,15 @@ impl Display for CorpCls {
     Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display, Serialize, Deserialize, FromStr,
 )]
 #[display("{_variant}")]
+#[test_variants(CorpCls)]
+#[generate_consts(CorpCls)]
 enum Inner {
+    /// 유가
     Y,
+    /// 코스닥
     K,
+    /// 코넥스
     N,
+    /// 기타
     E,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn serialize() {
-        assert_eq!(
-            serde_json::to_string(&CorpCls::Y).expect("Failed to serialize"),
-            r#""Y""#
-        );
-        assert_eq!(
-            serde_json::to_string(&CorpCls::K).expect("Failed to serialize"),
-            r#""K""#
-        );
-        assert_eq!(
-            serde_json::to_string(&CorpCls::N).expect("Failed to serialize"),
-            r#""N""#
-        );
-        assert_eq!(
-            serde_json::to_string(&CorpCls::E).expect("Failed to serialize"),
-            r#""E""#
-        );
-    }
-
-    #[test]
-    fn deserialize() {
-        assert_eq!(
-            serde_json::from_str::<CorpCls>(r#""Y""#).expect("Failed to deserialize"),
-            CorpCls::Y
-        );
-        assert_eq!(
-            serde_json::from_str::<CorpCls>(r#""K""#).expect("Failed to deserialize"),
-            CorpCls::K
-        );
-        assert_eq!(
-            serde_json::from_str::<CorpCls>(r#""N""#).expect("Failed to deserialize"),
-            CorpCls::N
-        );
-        assert_eq!(
-            serde_json::from_str::<CorpCls>(r#""E""#).expect("Failed to deserialize"),
-            CorpCls::E
-        );
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(CorpCls::Y.to_string(), "Y");
-        assert_eq!(CorpCls::K.to_string(), "K");
-        assert_eq!(CorpCls::N.to_string(), "N");
-        assert_eq!(CorpCls::E.to_string(), "E");
-    }
-
-    #[test]
-    fn display_inner() {
-        assert_eq!(Y.to_string(), "Y");
-        assert_eq!(K.to_string(), "K");
-        assert_eq!(N.to_string(), "N");
-        assert_eq!(E.to_string(), "E");
-    }
 }
