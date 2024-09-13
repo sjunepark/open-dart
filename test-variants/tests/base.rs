@@ -19,8 +19,11 @@ impl std::fmt::Display for MyStruct {
 #[test_variants(MyStruct)]
 #[generate_consts(MyStruct)]
 enum Inner {
+    /// Docs about A
     A,
+    /// Docs about B
     B,
+    /// Docs about C
     C,
 }
 

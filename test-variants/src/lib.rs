@@ -86,15 +86,25 @@ pub fn generate_consts(attr: TokenStream, item: TokenStream) -> TokenStream {
         _ => panic!("This macro only works on enums"),
     };
 
-    let variant_idents: Vec<_> = variants.iter().map(|v| &v.ident).collect();
+    let constants = variants.iter().map(|v| {
+        let ident = &v.ident;
+        let docs = v
+            .attrs
+            .iter()
+            .filter(|attr| attr.path().is_ident("doc"))
+            .collect::<Vec<_>>();
+
+        quote! {
+            #(#docs)*
+            pub const #ident: Self = Self(#enum_name::#ident);
+        }
+    });
 
     let expanded = quote! {
         #input
 
-         impl #struct_name {
-            #(
-                pub const #variant_idents: Self = Self(#enum_name::#variant_idents);
-            )*
+        impl #struct_name {
+            #(#constants)*
         }
     };
 
