@@ -1,5 +1,8 @@
+use crate::assert_impl_commons_without_default;
 use nutype::nutype;
 use std::fmt::Display;
+
+assert_impl_commons_without_default!(CorpCode);
 
 /// ### 고유번호
 /// 공시대상회사의 고유번호(8자리)

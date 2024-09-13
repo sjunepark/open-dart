@@ -1,4 +1,8 @@
-use serde::Serialize;
+use crate::assert_impl_commons_without_default;
+use derive_more::{AsMut, AsRef, Display};
+use serde::{Deserialize, Serialize};
+
+assert_impl_commons_without_default!(PblntfTy);
 
 /// ### 공시유형
 ///
@@ -12,10 +16,13 @@ use serde::Serialize;
 /// - H : 자산유동화
 /// - I : 거래소공시
 /// - J : 공정위공시
-#[derive(Clone, Debug, Serialize)]
+#[derive(
+    Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize, AsMut, AsRef,
+)]
 pub struct PblntfTy(Inner);
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize)]
+#[display("{_variant}")]
 enum Inner {
     A,
     B,

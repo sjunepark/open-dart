@@ -1,6 +1,3 @@
-[workspace]
-members = ["derive-const"]
-
 [package]
 name = "open-dart"
 version = "0.0.1"
@@ -26,6 +23,8 @@ tracing = "0.1.40"
 validator = { version = "0.18.1", features = ["derive"] }
 static_assertions = "1.1.0"
 nutype = { version = "0.5.0", features = ["serde"] }
+impls = "1.0.3"
+const_format = "0.2.33"
 
 [dev-dependencies]
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

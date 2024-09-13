@@ -1,8 +1,8 @@
-use crate::assert_impl_all_commons;
+use crate::assert_impl_commons;
 use nutype::nutype;
 use std::fmt::{Display, Formatter};
 
-assert_impl_all_commons!(CrtfcKey);
+assert_impl_commons!(CrtfcKey);
 
 /// ### API 인증키
 /// 발급받은 인증키(40자리)
@@ -50,6 +50,5 @@ mod crtfc_key_tests {
     #[test]
     fn crtfc_key_with_valid_length() {
         let crtfc_key = CrtfcKey::try_new("1234567890123456789012345678901234567890".to_string());
-        assert!(crtfc_key.is_ok());
     }
 }

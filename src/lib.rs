@@ -1,9 +1,9 @@
 pub mod client;
 pub mod endpoints;
 mod error;
-mod types;
+pub mod types;
 
-mod r#static;
+mod statics;
 
 #[cfg(test)]
 pub use test_utils::TestContext;

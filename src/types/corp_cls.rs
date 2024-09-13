@@ -1,8 +1,10 @@
 use self::Inner::*;
-use crate::error::OpenDartError;
+use crate::assert_impl_commons_without_default;
 use derive_more::{AsMut, AsRef, Display, FromStr};
 use serde::{Deserialize, Serialize};
 use std::fmt::Formatter;
+
+assert_impl_commons_without_default!(CorpCls);
 
 /// ### 법인구분
 ///
@@ -25,20 +27,6 @@ impl CorpCls {
 impl Display for CorpCls {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.as_ref())
-    }
-}
-
-impl FromStr for CorpCls {
-    type Err = OpenDartError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "Y" => Ok(Self::Y),
-            "K" => Ok(Self::K),
-            "N" => Ok(Self::N),
-            "E" => Ok(Self::E),
-            _ => Err(OpenDartError::InvalidArgument(s.to_string())),
-        }
     }
 }
 
@@ -103,14 +91,6 @@ mod tests {
         assert_eq!(CorpCls::K.to_string(), "K");
         assert_eq!(CorpCls::N.to_string(), "N");
         assert_eq!(CorpCls::E.to_string(), "E");
-    }
-
-    #[test]
-    fn from_str() {
-        assert!(matches!("Y".parse::<CorpCls>(), Ok(CorpCls::Y)));
-        assert!(matches!("K".parse::<CorpCls>(), Ok(CorpCls::K)));
-        assert!(matches!("N".parse::<CorpCls>(), Ok(CorpCls::N)));
-        assert!(matches!("E".parse::<CorpCls>(), Ok(CorpCls::E)));
     }
 
     #[test]

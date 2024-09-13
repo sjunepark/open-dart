@@ -10,8 +10,12 @@ use crate::types::PblntfDetailTy;
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
+// assert_impl_all_commons!(ListRequestParams);
+// assert_impl_all_commons!(ListRequestParamsBuilder)
+
 // region: Request Params
 
+/// Documentation exists for each field's types
 #[derive(Builder, Debug, Default, Serialize, Deserialize, PartialOrd, PartialEq)]
 #[builder(setter(into, strip_option), default)]
 #[builder(derive(Debug))]
@@ -161,3 +165,50 @@ struct ListCorp {
 }
 
 // endregion: Response
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn list_request_params_builder_works_with_all_fields_specified() {
+        let corp_code = CorpCode::try_new("00120182".to_string()).unwrap();
+        let bgn_de = "20220101".to_string();
+        let end_de = "20240630".to_string();
+        let last_reprt_at = 'Y';
+        let pblntf_ty = 'p';
+        let pblntf_detail_ty = PblntfDetailTy::A001;
+        let corp_cls = CorpCls::Y;
+        let sort = "sort".to_string();
+        let sort_mth = "sort_mth".to_string();
+        let page_no = "page_no".to_string();
+        let page_count = "page_count".to_string();
+
+        let params = ListRequestParamsBuilder::default()
+            .corp_code(corp_code.clone())
+            .bgn_de(&bgn_de)
+            .end_de(&end_de)
+            .last_reprt_at(last_reprt_at)
+            .pblntf_ty(pblntf_ty)
+            .pblntf_detail_ty(pblntf_detail_ty.clone())
+            .corp_cls(corp_cls.clone())
+            .sort(&sort)
+            .sort_mth(&sort_mth)
+            .page_no(&page_no)
+            .page_count(&page_count)
+            .build()
+            .expect("ListRequestParams should build");
+
+        assert_eq!(params.corp_code, Some(corp_code));
+        assert_eq!(params.bgn_de, Some(bgn_de));
+        assert_eq!(params.end_de, Some(end_de));
+        assert_eq!(params.last_reprt_at, Some(last_reprt_at));
+        assert_eq!(params.pblntf_ty, Some(pblntf_ty));
+        assert_eq!(params.pblntf_detail_ty, Some(pblntf_detail_ty));
+        assert_eq!(params.corp_cls, Some(corp_cls));
+        assert_eq!(params.sort, Some(sort));
+        assert_eq!(params.sort_mth, Some(sort_mth));
+        assert_eq!(params.page_no, Some(page_no));
+        assert_eq!(params.page_count, Some(page_count));
+    }
+}
