@@ -18,8 +18,6 @@ pub struct OpenDartApi {
 pub struct OpenDartConfig {
     /// API version to use
     pub api_version: u32,
-    /// OpenDart API key from [OpenDart](https://opendart.fss.or.kr/)
-    pub api_key: String,
 }
 
 impl Default for OpenDartApi {
@@ -30,11 +28,7 @@ impl Default for OpenDartApi {
     /// - `api_key`: Loaded from the `OPEN_DART_API_KEY` environment variable
     fn default() -> Self {
         let api_version = 1;
-        let api_key = std::env::var("OPEN_DART_API_KEY").expect("OPEN_DART_API_KEY must be set");
-        let config = OpenDartConfig {
-            api_version,
-            api_key,
-        };
+        let config = OpenDartConfig { api_version };
 
         Self::new(config)
     }

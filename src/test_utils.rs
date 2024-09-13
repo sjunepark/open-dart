@@ -12,9 +12,6 @@ pub struct TestContext {
 
 impl TestContext {
     pub fn new() -> Self {
-        let open_dart_api_key =
-            std::env::var("OPEN_DART_API_KEY").expect("OPEN_DART_API_KEY must be set");
-
         let subscriber = tracing_subscriber::fmt()
             .with_env_filter(EnvFilter::from_default_env())
             .pretty()
@@ -30,10 +27,7 @@ impl TestContext {
             .with_max_level(current_level.as_log())
             .init();
 
-        let api = OpenDartApi::new(OpenDartConfig {
-            api_version: 1,
-            api_key: open_dart_api_key,
-        });
+        let api = OpenDartApi::new(OpenDartConfig { api_version: 1 });
 
         Self { api }
     }
