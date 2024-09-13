@@ -1,5 +1,6 @@
 ## Todos
 
+- [ ] Review api test logic and mock logic
 - [ ] Use mocks to reduce actual api calls
 - [ ] Add `assert_impl_all_commons` to types
 - [ ] Finish implementing types

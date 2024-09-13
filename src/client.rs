@@ -1,50 +1,15 @@
-use std::fmt::Display;
-
+use crate::endpoints::{List, ListRequestParams, OpenDartResponse, OpenDartResponseBody};
+use crate::error::{map_deserialization_error, OpenDartError};
+use derive_builder::Builder;
 use reqwest;
 use reqwest::IntoUrl;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-
-use crate::endpoints::{List, ListRequestParams, OpenDartResponse, OpenDartResponseBody};
-use crate::error::{map_deserialization_error, OpenDartError};
+use std::fmt::Display;
 
 pub struct OpenDartApi {
     client: reqwest::Client,
     config: OpenDartConfig,
-}
-
-#[derive(Clone)]
-pub struct OpenDartConfig {
-    /// API version to use
-    api_version: u32,
-    /// The domain, which will default to 'https://opendart.fss.or.kr'
-    domain: String,
-}
-
-impl OpenDartConfig {
-    pub fn new(api_version: u32, domain: &str) -> Self {
-        Self {
-            api_version,
-            domain: domain.to_string(),
-        }
-    }
-}
-
-impl Default for OpenDartApi {
-    /// Create a new `OpenDartApi` instance with the default configuration.
-    ///
-    /// The default configuration is as below:
-    /// - `api_version`: 1
-    /// - `domain`: "https://opendart.fss.or.kr"
-    fn default() -> Self {
-        let api_version = 1;
-        let config = OpenDartConfig {
-            api_version,
-            domain: "https://opendart.fss.or.kr".to_string(),
-        };
-
-        Self::new(config)
-    }
 }
 
 impl OpenDartApi {
@@ -54,6 +19,8 @@ impl OpenDartApi {
         }
         format!("{}{}", self.config.domain, path)
     }
+
+    // region: Public APIs
 
     pub fn new(config: OpenDartConfig) -> Self {
         if config.api_version != 1 {
@@ -69,7 +36,9 @@ impl OpenDartApi {
         }
     }
 
-    // region: Public APIs
+    pub fn domain(&mut self, domain: &str) {
+        self.config.domain = domain.to_string();
+    }
 
     pub async fn get_list(
         &self,
@@ -130,8 +99,53 @@ impl OpenDartApi {
     // endregion: Helpers
 }
 
+impl Default for OpenDartApi {
+    /// Create a new `OpenDartApi` instance with the default configuration.
+    ///
+    /// The default configuration is as below:
+    /// - `api_version`: 1
+    /// - `domain`: "https://opendart.fss.or.kr"
+    fn default() -> Self {
+        Self::new(OpenDartConfig::default())
+    }
+}
+
+#[derive(Builder, Clone)]
+#[builder(default)]
+pub struct OpenDartConfig {
+    #[builder(setter(skip))]
+    /// Whether to allow external API calls
+    allow_external_api_call: bool,
+    #[builder(setter(skip))]
+    /// API version to use
+    api_version: u32,
+    /// The domain, which will default to 'https://opendart.fss.or.kr'
+    domain: String,
+}
+
+impl OpenDartConfig {
+    pub fn domain(&mut self, domain: &str) {
+        self.domain = domain.to_string();
+    }
+}
+
+impl Default for OpenDartConfig {
+    fn default() -> Self {
+        let allow_external_api_call = true;
+        let api_version = 1;
+        let domain = "https://opendart.fss.or.kr".to_string();
+
+        Self {
+            allow_external_api_call,
+            api_version,
+            domain,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::endpoints::{List, OpenDartResponseBody};
     use crate::test_utils::{get_test_name, save_response_body};
     use crate::TestContext;
     use wiremock::matchers::{method, path};
@@ -140,32 +154,58 @@ mod tests {
     #[tokio::test]
     async fn test_get_list_default() {
         let test_name = get_test_name();
-        let TestContext { api, mock_server } = TestContext::new().await;
+        let TestContext {
+            mut api,
+            mock_server,
+            update_golden_files,
+        } = TestContext::new().await;
 
-        if let Some(ref mock_server) = mock_server {
-            // todo: set environment variable on whether to update or not
+        let golden_file_path = format!("tests/resources/{}.json", test_name);
+        let golden_file_exists = std::path::Path::new(&golden_file_path).exists();
 
-            let body_path = format!("tests/resources/{}.json", test_name);
-            let body = std::fs::read_to_string(&body_path)
+        // region: Flags
+        let local_response = !api.config.allow_external_api_call
+            || (api.config.allow_external_api_call && golden_file_exists);
+        let update_golden_files = api.config.allow_external_api_call && update_golden_files;
+        // endregion: Flags
+
+        // region: Set up appropriate domain
+        if local_response {
+            let body = std::fs::read_to_string(&golden_file_path)
                 .expect("Failed to read response body from file");
+            let body: OpenDartResponseBody<List> =
+                serde_json::from_str(&body).expect("Failed to deserialize response body");
 
             let response = ResponseTemplate::new(200).set_body_json(body);
 
             Mock::given(method("GET"))
                 .and(path("/api/list.json"))
                 .respond_with(response)
-                .mount(mock_server)
+                .mount(&mock_server)
                 .await;
-        }
 
+            api.domain(&mock_server.uri());
+        } else {
+            api.domain("https://opendart.fss.or.kr");
+        }
+        // endregion: Set up appropriate domain
+
+        // region: Perform API call
         let response = api.get_list(Default::default()).await;
         let response = response.expect("List response should be successful");
-        assert!(response.status().is_success());
+        // endregion: Perform API call
 
+        // region: Assert response
+        assert!(response.status().is_success());
         let response_body = response.body;
-        let path = format!("tests/resources/{}.json", test_name);
-        save_response_body(response_body, &path)
-            .await
-            .expect("Failed to save response body");
+        // endregion: Assert response
+
+        // region: Save response body
+        if update_golden_files {
+            save_response_body(response_body, &golden_file_path)
+                .await
+                .expect("Failed to save response body");
+        }
+        // endregion: Save response body
     }
 }

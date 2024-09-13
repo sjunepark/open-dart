@@ -7,12 +7,13 @@ use tracing::metadata::LevelFilter;
 use tracing_log::AsLog;
 use tracing_subscriber::EnvFilter;
 
-use crate::client::{OpenDartApi, OpenDartConfig};
+use crate::client::{OpenDartApi, OpenDartConfigBuilder};
 use crate::endpoints::OpenDartResponseBody;
 
 pub struct TestContext {
     pub api: OpenDartApi,
-    pub mock_server: Option<wiremock::MockServer>,
+    pub mock_server: wiremock::MockServer,
+    pub update_golden_files: bool,
 }
 
 impl TestContext {
@@ -39,30 +40,37 @@ impl TestContext {
         // endregion: Mock server setup
 
         // region: Set domain for external open dart api calls
-        let make_external_call: bool = std::env::var("EXTERNAL_API_CALL")
-            .expect("EXTERNAL_API_CALL must be set")
+        let allow_external_call: bool = std::env::var("ALLOW_EXTERNAL_API_CALL")
+            .expect("ALLOW_EXTERNAL_API_CALL must be set")
             .parse()
-            .expect("EXTERNAL_API_CALL must be a boolean");
+            .expect(r#"ALLOW_EXTERNAL_API_CALL must be a boolean, e.g., "true" or "false""#);
 
-        let domain = if make_external_call {
-            "https://opendart.fss.or.kr"
+        let domain = if allow_external_call {
+            "https://opendart.fss.or.kr".to_string()
         } else {
-            &mock_server.uri()
+            mock_server.uri()
         };
         // endregion: Set domain for external open dart api calls
 
         // region: Initialize OpenDartApi
-        let config = OpenDartConfig::new(1, domain);
+        let config = OpenDartConfigBuilder::default()
+            .domain(domain)
+            .build()
+            .expect("Failed to build OpenDartConfig");
         let api = OpenDartApi::new(config);
         // endregion: Initialize OpenDartApi
 
+        // region: Update flag setup
+        let update_golden_files: bool = std::env::var("UPDATE_GOLDEN_FILES")
+            .expect("UPDATE_GOLDEN_FILES must be set")
+            .parse()
+            .expect(r#"UPDATE_GOLDEN_FILES must be a boolean, e.g., "true" or "false""#);
+        // endregion: Update flag setup
+
         Self {
             api,
-            mock_server: if make_external_call {
-                None
-            } else {
-                Some(mock_server)
-            },
+            mock_server,
+            update_golden_files,
         }
     }
 }
