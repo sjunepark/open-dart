@@ -13,8 +13,8 @@ watch-test name="":
 watch-example name="":
     cargo watch -q -c -x "run --example {{name}}" --env-file .env.dev
 
-watch-derive-const:
-    cargo watch -w derive-const -q -c -x "test -p derive-const -- --nocapture" --env-file .env.dev
+watch-test-variants:
+    cargo watch -w test-variants -q -c -x "test -p test-variants -- --nocapture" --env-file .env.dev
 
 
 # Individual commands
