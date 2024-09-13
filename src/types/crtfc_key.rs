@@ -50,5 +50,6 @@ mod crtfc_key_tests {
     #[test]
     fn crtfc_key_with_valid_length() {
         let crtfc_key = CrtfcKey::try_new("1234567890123456789012345678901234567890".to_string());
+        assert!(crtfc_key.is_ok());
     }
 }

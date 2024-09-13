@@ -1,7 +1,7 @@
 //! ## 공시검색
 //! [link](https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019001)
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
-use crate::endpoints::OpenDartApiKey;
+use crate::assert_impl_commons;
 use crate::error::OpenDartError;
 use crate::types::CorpCls;
 use crate::types::CorpCode;
@@ -10,13 +10,14 @@ use crate::types::PblntfDetailTy;
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
-// assert_impl_all_commons!(ListRequestParams);
-// assert_impl_all_commons!(ListRequestParamsBuilder)
+assert_impl_commons!(ListRequestParams);
 
 // region: Request Params
 
 /// Documentation exists for each field's types
-#[derive(Builder, Debug, Default, Serialize, Deserialize, PartialOrd, PartialEq)]
+#[derive(
+    Builder, Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, Default,
+)]
 #[builder(setter(into, strip_option), default)]
 #[builder(derive(Debug))]
 #[builder(build_fn(error = "OpenDartError"))]
@@ -83,7 +84,11 @@ pub struct ListRequestParams {
     pub page_count: Option<String>,
 }
 
-impl OpenDartApiKey for ListRequestParamsBuilder {}
+impl std::fmt::Display for ListRequestParams {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
 // endregion: Request Params
 
