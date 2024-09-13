@@ -5,7 +5,7 @@ use reqwest::IntoUrl;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
-use crate::endpoints::{List, ListRequestParams, OpenDartResponse};
+use crate::endpoints::{List, ListRequestParams, OpenDartResponse, OpenDartResponseBody};
 use crate::error::{map_deserialization_error, OpenDartError};
 
 pub struct OpenDartApi {
@@ -94,9 +94,15 @@ impl OpenDartApi {
     {
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
+
+        let headers = response.headers().clone();
+        let status = response.status();
+
         let bytes = response.bytes().await?;
-        let response: OpenDartResponse<R> =
+        let response_body: OpenDartResponseBody<R> =
             serde_json::from_slice(&bytes).map_err(|e| map_deserialization_error(e, &bytes))?;
+
+        let response = OpenDartResponse::new(status, headers, response_body);
         Ok(response)
     }
 
@@ -126,9 +132,40 @@ impl OpenDartApi {
 
 #[cfg(test)]
 mod tests {
+    use crate::test_utils::{get_test_name, save_response_body};
+    use crate::TestContext;
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, ResponseTemplate};
 
     #[tokio::test]
     async fn test_get_list_default() {
-        // todo: Mock the request
+        let test_name = get_test_name();
+        let TestContext { api, mock_server } = TestContext::new().await;
+
+        if let Some(ref mock_server) = mock_server {
+            // todo: set environment variable on whether to update or not
+
+            let body_path = format!("tests/resources/{}.json", test_name);
+            let body = std::fs::read_to_string(&body_path)
+                .expect("Failed to read response body from file");
+
+            let response = ResponseTemplate::new(200).set_body_json(body);
+
+            Mock::given(method("GET"))
+                .and(path("/api/list.json"))
+                .respond_with(response)
+                .mount(mock_server)
+                .await;
+        }
+
+        let response = api.get_list(Default::default()).await;
+        let response = response.expect("List response should be successful");
+        assert!(response.status().is_success());
+
+        let response_body = response.body;
+        let path = format!("tests/resources/{}.json", test_name);
+        save_response_body(response_body, &path)
+            .await
+            .expect("Failed to save response body");
     }
 }

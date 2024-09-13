@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
-
 use crate::types::CrtfcKey;
+use reqwest::{header::HeaderMap, StatusCode};
+use serde::{Deserialize, Serialize};
 
 mod list;
 
@@ -29,23 +29,39 @@ impl std::fmt::Display for Message {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum OpenDartResponse<T: Serialize> {
-    Json(JsonResponse<T>),
-    Xml(XmlResponse<T>),
+#[derive(Debug)]
+pub struct OpenDartResponse<R>
+where
+    R: Serialize,
+{
+    status: StatusCode,
+    header_map: HeaderMap,
+    pub body: OpenDartResponseBody<R>,
+}
+
+impl<R: Serialize> OpenDartResponse<R> {
+    pub fn new(status: StatusCode, header_map: HeaderMap, body: OpenDartResponseBody<R>) -> Self {
+        Self {
+            status,
+            header_map,
+            body,
+        }
+    }
+
+    pub fn headers(&self) -> &HeaderMap {
+        &self.header_map
+    }
+
+    pub fn status(&self) -> StatusCode {
+        self.status
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct JsonResponse<T> {
+pub struct OpenDartResponseBody<R> {
     #[serde(flatten)]
     pub message: Message,
 
     #[serde(flatten)]
-    pub content: Option<T>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct XmlResponse<T> {
-    pub result: JsonResponse<T>,
+    pub content: Option<R>,
 }

@@ -1,10 +1,14 @@
 #![cfg(test)]
 
+use serde::Serialize;
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
 use tracing::metadata::LevelFilter;
 use tracing_log::AsLog;
 use tracing_subscriber::EnvFilter;
 
 use crate::client::{OpenDartApi, OpenDartConfig};
+use crate::endpoints::OpenDartResponseBody;
 
 pub struct TestContext {
     pub api: OpenDartApi,
@@ -61,4 +65,24 @@ impl TestContext {
             },
         }
     }
+}
+
+pub async fn save_response_body<R: Serialize>(
+    body: OpenDartResponseBody<R>,
+    path: &str,
+) -> anyhow::Result<()> {
+    let bytes = serde_json::to_string_pretty(&body).expect("Failed to serialize response body");
+    let bytes = bytes.as_bytes();
+    let mut file = File::create(path).await.expect("Failed to create file");
+    file.write_all(bytes).await.map_err(anyhow::Error::from)
+}
+
+pub fn get_test_name() -> String {
+    std::thread::current()
+        .name()
+        .expect("Test name must be set")
+        .split("::")
+        .last()
+        .expect("Failed to get last element within test name parts")
+        .to_string()
 }
