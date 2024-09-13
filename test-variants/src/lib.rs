@@ -54,7 +54,6 @@ pub fn test_variants(attr: TokenStream, item: TokenStream) -> TokenStream {
             fn deserialize() {
                 #(
                     assert_eq!(
-                    µ
                         serde_json::from_str::<#struct_name>(concat!(r#"""#, stringify!(#variant_idents), r#"""#))
                             .expect("Failed to deserialize"),
                         #struct_name::#variant_idents
