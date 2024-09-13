@@ -36,7 +36,7 @@ where
 {
     status: StatusCode,
     header_map: HeaderMap,
-    pub body: OpenDartResponseBody<R>,
+    body: OpenDartResponseBody<R>,
 }
 
 impl<R: Serialize> OpenDartResponse<R> {
@@ -54,6 +54,10 @@ impl<R: Serialize> OpenDartResponse<R> {
 
     pub fn status(&self) -> StatusCode {
         self.status
+    }
+
+    pub fn body(&self) -> &OpenDartResponseBody<R> {
+        &self.body
     }
 }
 

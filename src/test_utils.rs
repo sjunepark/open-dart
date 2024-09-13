@@ -76,10 +76,10 @@ impl TestContext {
 }
 
 pub async fn save_response_body<R: Serialize>(
-    body: OpenDartResponseBody<R>,
+    body: &OpenDartResponseBody<R>,
     path: &str,
 ) -> anyhow::Result<()> {
-    let bytes = serde_json::to_string_pretty(&body).expect("Failed to serialize response body");
+    let bytes = serde_json::to_string_pretty(body).expect("Failed to serialize response body");
     let bytes = bytes.as_bytes();
     let mut file = File::create(path).await.expect("Failed to create file");
     file.write_all(bytes).await.map_err(anyhow::Error::from)

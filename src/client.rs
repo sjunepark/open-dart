@@ -36,7 +36,7 @@ impl OpenDartApi {
         }
     }
 
-    pub fn domain(&mut self, domain: &str) {
+    pub fn set_domain(&mut self, domain: &str) {
         self.config.domain = domain.to_string();
     }
 
@@ -116,15 +116,15 @@ pub struct OpenDartConfig {
     #[builder(setter(skip))]
     /// Whether to allow external API calls
     allow_external_api_call: bool,
-    #[builder(setter(skip))]
     /// API version to use
     api_version: u32,
     /// The domain, which will default to 'https://opendart.fss.or.kr'
+    /// This field exists to be adjusted in testing environments
     domain: String,
 }
 
 impl OpenDartConfig {
-    pub fn domain(&mut self, domain: &str) {
+    pub fn set_domain(&mut self, domain: &str) {
         self.domain = domain.to_string();
     }
 }
@@ -157,20 +157,20 @@ mod tests {
         let test_name = get_test_name();
         let TestContext {
             mut api,
-            mock_server,
             update_golden_files,
+            mock_server,
         } = TestContext::new().await;
 
         let golden_file_path = format!("tests/resources/{}.json", test_name);
         let golden_file_exists = std::path::Path::new(&golden_file_path).exists();
 
         // region: Flags
-        let local_response = !api.config.allow_external_api_call
-            || (api.config.allow_external_api_call && golden_file_exists);
-        let update_golden_files = api.config.allow_external_api_call && update_golden_files;
+        let allow_external_api_call = api.config.allow_external_api_call;
+        let local_response = !allow_external_api_call || golden_file_exists;
+        let update_golden_files = allow_external_api_call && update_golden_files;
         // endregion: Flags
 
-        // region: Set up appropriate domain
+        // region: Set up the appropriate domain and mock if needed
         if local_response {
             let body = std::fs::read_to_string(&golden_file_path)
                 .context("Failed to read response body from file")?;
@@ -185,20 +185,20 @@ mod tests {
                 .mount(&mock_server)
                 .await;
 
-            api.domain(&mock_server.uri());
+            api.set_domain(&mock_server.uri());
         } else {
-            api.domain("https://opendart.fss.or.kr");
+            api.set_domain("https://opendart.fss.or.kr");
         }
-        // endregion: Set up appropriate domain
+        // endregion: Set up the appropriate domain and mock if needed
 
         // region: Perform API call
         let response = api.get_list(Default::default()).await;
-        let response = response.context("List response should be successful")?;
+        let response = response.context("Response should be successful")?;
         // endregion: Perform API call
 
         // region: Assert response
         assert!(response.status().is_success());
-        let response_body = response.body;
+        let response_body = response.body();
         // endregion: Assert response
 
         // region: Save response body
