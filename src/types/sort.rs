@@ -27,7 +27,7 @@ use crate::test_utils::MockDefault;
 #[cfg(test)]
 impl MockDefault for Sort {
     fn mock_default() -> Self {
-        Self(Inner::DATE)
+        Self(Inner::date)
     }
 }
 
@@ -38,7 +38,7 @@ impl MockDefault for Sort {
 #[test_variants(Sort)]
 #[generate_consts(Sort)]
 enum Inner {
-    DATE,
-    CRP,
-    RPT,
+    date,
+    crp,
+    rpt,
 }

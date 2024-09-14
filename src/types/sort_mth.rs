@@ -26,10 +26,11 @@ use crate::test_utils::MockDefault;
 #[cfg(test)]
 impl MockDefault for SortMth {
     fn mock_default() -> Self {
-        Self(Inner::DESC)
+        Self(Inner::dsc)
     }
 }
 
+#[allow(non_upper_case_globals)]
 #[derive(
     Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display, Serialize, Deserialize, FromStr,
 )]
@@ -37,6 +38,6 @@ impl MockDefault for SortMth {
 #[test_variants(SortMth)]
 #[generate_consts(SortMth)]
 enum Inner {
-    ASC,
-    DESC,
+    asc,
+    dsc,
 }
