@@ -1,15 +1,17 @@
 use crate::assert_impl_commons_without_default;
 use nutype::nutype;
+use static_assertions::assert_impl_all;
 use std::fmt::Display;
 
 assert_impl_commons_without_default!(PageNo);
+assert_impl_all! {PageNo: Copy}
 
-/// ### 고유번호
-/// 공시대상회사의 고유번호(8자리)
-///     
-/// ※ 개발가이드 > 공시정보 > 고유번호 참고
+/// ### 페이지 번호
+/// 페이지 번호(1~n)
+///
+/// - 기본값 : 1
 #[nutype(
-    validate(greater_or_equal = 1, less_or_equal = 100),
+    validate(greater_or_equal = 1),
     derive(
         Clone,
         Eq,
@@ -19,10 +21,11 @@ assert_impl_commons_without_default!(PageNo);
         Debug,
         Serialize,
         Deserialize,
-        AsRef
+        AsRef,
+        Copy
     )
 )]
-pub struct PageNo(u16);
+pub struct PageNo(usize);
 
 impl Display for PageNo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -48,31 +51,29 @@ mod tests {
 
     #[test]
     fn serialize() -> anyhow::Result<()> {
-        let page_no = PageNo::try_new(10).context("failed to create page_no")?;
+        let page_no = PageNo::try_new(101).context("failed to create page_no")?;
         let serialized = serde_json::to_string(&page_no).context("failed to serialize")?;
-        assert_eq!(serialized, "10");
+        assert_eq!(serialized, "101");
         Ok(())
     }
 
     #[test]
     fn deserialize() -> anyhow::Result<()> {
-        let page_no = serde_json::from_str::<PageNo>("10").context("failed to deserialize")?;
-        assert_eq!(page_no.into_inner(), 10);
+        let page_no = serde_json::from_str::<PageNo>("101").context("failed to deserialize")?;
+        assert_eq!(page_no.into_inner(), 101);
         Ok(())
     }
 
     #[test]
     fn try_new_with_valid_range_should_succeed() -> anyhow::Result<()> {
-        let page_no = PageNo::try_new(10).context("failed to create page_no")?;
-        assert_eq!(page_no.into_inner(), 10);
+        let page_no = PageNo::try_new(101).context("failed to create page_no")?;
+        assert_eq!(page_no.into_inner(), 101);
         Ok(())
     }
 
     #[test]
     fn try_new_with_invalid_range_should_fail() -> anyhow::Result<()> {
         let page_no = PageNo::try_new(0);
-        assert!(page_no.is_err());
-        let page_no = PageNo::try_new(101);
         assert!(page_no.is_err());
         Ok(())
     }

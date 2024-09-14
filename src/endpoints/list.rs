@@ -4,7 +4,8 @@
 use crate::assert_impl_commons;
 use crate::error::OpenDartError;
 use crate::types::{
-    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, PblntfTy, Sort, SortMth, StockCode, YesNo,
+    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, PageCount, PageNo, PblntfTy, Sort, SortMth,
+    StockCode, TotalCount, TotalPage, YesNo,
 };
 use crate::types::{EndDe, PblntfDetailTy};
 use derive_builder::Builder;
@@ -33,19 +34,8 @@ pub struct ListRequestParams {
     pub corp_cls: Option<CorpCls>,
     pub sort: Option<Sort>,
     pub sort_mth: Option<SortMth>,
-
-    /// ### 페이지 번호
-    /// 페이지 번호(1~n)
-    ///
-    /// - 기본값 : 1
-    pub page_no: Option<String>,
-
-    /// ### 페이지 별 건수
-    /// 페이지당 건수(1~100)
-    ///
-    /// - 기본값 : 10
-    /// - 최대값 : 100
-    pub page_count: Option<String>,
+    pub page_no: Option<PageNo>,
+    pub page_count: Option<PageCount>,
 }
 
 impl std::fmt::Display for ListRequestParams {
@@ -53,25 +43,16 @@ impl std::fmt::Display for ListRequestParams {
         write!(f, "{:?}", self)
     }
 }
-
 // endregion
 
 // region: Response
 #[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub struct List {
-    /// ### 페이지 번호
-    page_no: i32,
-
-    /// ### 페이지 별 건수
-    page_count: i32,
-
-    /// ### 총 건수
-    /// 총 페이지 수
-    total_count: i32,
-
-    /// ### 총 페이지 수
-    total_page: i32,
+    page_no: PageNo,
+    page_count: PageCount,
+    total_count: TotalCount,
+    total_page: TotalPage,
 
     list: Vec<ListCorp>,
 }
@@ -129,7 +110,6 @@ struct ListCorp {
 mod tests {
     use super::*;
     use crate::test_utils::MockDefault;
-    use crate::types::PblntfTy;
     use anyhow::Context;
 
     #[test]
@@ -143,8 +123,8 @@ mod tests {
         let corp_cls = CorpCls::mock_default();
         let sort = Sort::mock_default();
         let sort_mth = SortMth::mock_default();
-        let page_no = "page_no".to_string();
-        let page_count = "page_count".to_string();
+        let page_no = PageNo::mock_default();
+        let page_count = PageCount::mock_default();
 
         let params = ListRequestParamsBuilder::default()
             .corp_code(corp_code.clone())
@@ -156,8 +136,8 @@ mod tests {
             .corp_cls(corp_cls.clone())
             .sort(sort.clone())
             .sort_mth(sort_mth.clone())
-            .page_no(&page_no)
-            .page_count(&page_count)
+            .page_no(page_no)
+            .page_count(page_count)
             .build()
             .context("ListRequestParams should build")?;
 
