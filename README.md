@@ -1,8 +1,10 @@
 ## Todos
 
-- [ ] Review api test logic and mock logic
-- [ ] Use mocks to reduce actual api calls
-- [ ] Add `assert_impl_all_commons` to types
+- [ ] Check clippy. The below doesn't work
+    ```rust
+    #[allow(non_camel_case_types)]
+    #[allow(non_upper_case_globals)]
+    ```
 - [ ] Finish implementing types
 
 ## Limitations
