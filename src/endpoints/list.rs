@@ -4,7 +4,7 @@
 use crate::assert_impl_commons;
 use crate::error::OpenDartError;
 use crate::types::{
-    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, PblntfTy, Sort, StockCode, YesNo,
+    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, PblntfTy, Sort, SortMth, StockCode, YesNo,
 };
 use crate::types::{EndDe, PblntfDetailTy};
 use derive_builder::Builder;
@@ -32,14 +32,7 @@ pub struct ListRequestParams {
     pub pblntf_detail_ty: Option<PblntfDetailTy>,
     pub corp_cls: Option<CorpCls>,
     pub sort: Option<Sort>,
-
-    /// ### 정렬방법
-    ///
-    /// - asc : 오름차순
-    /// - desc : 내림차순
-    ///
-    /// ※ 기본값 : desc
-    pub sort_mth: Option<String>,
+    pub sort_mth: Option<SortMth>,
 
     /// ### 페이지 번호
     /// 페이지 번호(1~n)
@@ -149,7 +142,7 @@ mod tests {
         let pblntf_detail_ty = PblntfDetailTy::mock_default();
         let corp_cls = CorpCls::mock_default();
         let sort = Sort::mock_default();
-        let sort_mth = "sort_mth".to_string();
+        let sort_mth = SortMth::mock_default();
         let page_no = "page_no".to_string();
         let page_count = "page_count".to_string();
 
@@ -162,7 +155,7 @@ mod tests {
             .pblntf_detail_ty(pblntf_detail_ty.clone())
             .corp_cls(corp_cls.clone())
             .sort(sort.clone())
-            .sort_mth(&sort_mth)
+            .sort_mth(sort_mth.clone())
             .page_no(&page_no)
             .page_count(&page_count)
             .build()

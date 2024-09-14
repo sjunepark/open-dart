@@ -102,7 +102,7 @@ mod tests {
     }
 
     #[test]
-    fn try_new_with_string_should_succeed() -> anyhow::Result<()> {
+    fn from_str_with_valid_date_should_succeed() -> anyhow::Result<()> {
         let bgn_de = BgnDe::from_str("2021-01-01")?;
         let expected_date =
             NaiveDate::from_ymd_opt(2021, 1, 1).context("failed to create NaiveDate")?;
@@ -111,15 +111,29 @@ mod tests {
     }
 
     #[test]
-    fn deserialize_invalid_date_should_fail() -> anyhow::Result<()> {
-        let result = serde_json::from_str::<BgnDe>("\"1899-12-32\"");
+    fn from_str_with_future_date_should_fail() -> anyhow::Result<()> {
+        let bgn_de = BgnDe::from_str("9999-12-31");
+        assert!(bgn_de.is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn from_str_with_invalid_date_should_fail() -> anyhow::Result<()> {
+        let bgn_de = BgnDe::from_str("2023-12-32");
+        assert!(bgn_de.is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize_future_date_should_fail() -> anyhow::Result<()> {
+        let result = serde_json::from_str::<BgnDe>("\"9999-12-31\"");
         assert!(result.is_err());
         Ok(())
     }
 
     #[test]
-    fn deserialize_invalid_format_should_fail() -> anyhow::Result<()> {
-        let result = serde_json::from_str::<BgnDe>("\"2021-13-01\""); // Invalid month
+    fn deserialize_invalid_date_should_fail() -> anyhow::Result<()> {
+        let result = serde_json::from_str::<BgnDe>("\"1899-12-32\"");
         assert!(result.is_err());
         Ok(())
     }

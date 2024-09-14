@@ -35,7 +35,7 @@ impl MockDefault for CorpName {
     fn mock_default() -> Self {
         let name = "NH투자증권".to_string();
         CorpName::try_new(&name)
-            .unwrap_or_else(|_| panic!("failed to create CorpName with name: {}", name))
+            .unwrap_or_else(|_| panic!("failed to create CorpName with: {}", name))
     }
 }
 

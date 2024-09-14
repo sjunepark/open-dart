@@ -1,3 +1,4 @@
+mod PageNo;
 mod bgn_de;
 mod corp_cls;
 mod corp_code;
@@ -7,6 +8,7 @@ mod end_de;
 mod pblntf_detail_ty;
 mod pblntf_ty;
 mod sort;
+mod sort_mth;
 mod stock_code;
 mod yes_no;
 
@@ -19,5 +21,6 @@ pub use end_de::EndDe;
 pub use pblntf_detail_ty::PblntfDetailTy;
 pub use pblntf_ty::PblntfTy;
 pub use sort::Sort;
+pub use sort_mth::SortMth;
 pub use stock_code::StockCode;
 pub use yes_no::YesNo;

@@ -27,7 +27,7 @@ impl MockDefault for CorpCode {
     fn mock_default() -> Self {
         let corp_code: String = String::from("00120182");
         CorpCode::try_new(&corp_code)
-            .unwrap_or_else(|_| panic!("failed to create CorpCode with code: {}", corp_code))
+            .unwrap_or_else(|_| panic!("failed to create CorpCode with: {}", corp_code))
     }
 }
 
@@ -74,6 +74,7 @@ mod tests {
 
     #[test]
     fn try_new_with_invalid_length_should_fail() -> anyhow::Result<()> {
+        // Invalid length of 7
         let corp_code = CorpCode::try_new("0012018".to_string());
         assert!(corp_code.is_err());
         Ok(())
