@@ -29,6 +29,12 @@ impl std::fmt::Display for Message {
     }
 }
 
+impl Message {
+    pub fn is_success(&self) -> bool {
+        self.status == "000"
+    }
+}
+
 #[derive(Debug)]
 pub struct OpenDartResponse<R>
 where
@@ -59,6 +65,10 @@ impl<R: Serialize> OpenDartResponse<R> {
     pub fn body(&self) -> &OpenDartResponseBody<R> {
         &self.body
     }
+
+    pub fn into_body(self) -> OpenDartResponseBody<R> {
+        self.body
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -68,4 +78,10 @@ pub struct OpenDartResponseBody<R> {
 
     #[serde(flatten)]
     pub content: Option<R>,
+}
+
+impl<R> OpenDartResponseBody<R> {
+    pub fn is_success(&self) -> bool {
+        self.message.is_success()
+    }
 }

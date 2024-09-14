@@ -13,7 +13,6 @@ use serde::{Deserialize, Serialize};
 assert_impl_commons!(ListRequestParams);
 
 // region: Request Params
-
 /// Documentation exists in each field's types
 #[derive(
     Builder, Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, Default,
@@ -90,10 +89,9 @@ impl std::fmt::Display for ListRequestParams {
     }
 }
 
-// endregion: Request Params
+// endregion
 
 // region: Response
-
 #[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub struct List {
@@ -169,7 +167,7 @@ struct ListCorp {
     rm: String,
 }
 
-// endregion: Response
+// endregion
 
 #[cfg(test)]
 mod tests {

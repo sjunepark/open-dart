@@ -21,7 +21,6 @@ impl OpenDartApi {
     }
 
     // region: Public APIs
-
     pub fn new(config: OpenDartConfig) -> Self {
         if config.api_version != 1 {
             panic!("The only supported API version is 1");
@@ -47,10 +46,9 @@ impl OpenDartApi {
         self.get(self.url("/api/list.json"), args).await
     }
 
-    // endregion: Public APIs
+    // endregion
 
     // region: Generic APIs
-
     async fn get<'de, U, P, R>(
         &self,
         url: U,
@@ -75,10 +73,9 @@ impl OpenDartApi {
         Ok(response)
     }
 
-    // endregion: Generic APIs
+    // endregion
 
     // region: Helpers
-
     fn default_headers() -> reqwest::header::HeaderMap {
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
@@ -95,8 +92,7 @@ impl OpenDartApi {
         );
         headers
     }
-
-    // endregion: Helpers
+    // endregion
 }
 
 impl Default for OpenDartApi {
@@ -113,9 +109,6 @@ impl Default for OpenDartApi {
 #[derive(Builder, Clone)]
 #[builder(default)]
 pub struct OpenDartConfig {
-    #[builder(setter(skip))]
-    /// Whether to allow external API calls
-    allow_external_api_call: bool,
     /// API version to use
     api_version: u32,
     /// The domain, which will default to 'https://opendart.fss.or.kr'
@@ -131,12 +124,10 @@ impl OpenDartConfig {
 
 impl Default for OpenDartConfig {
     fn default() -> Self {
-        let allow_external_api_call = true;
         let api_version = 1;
         let domain = "https://opendart.fss.or.kr".to_string();
 
         Self {
-            allow_external_api_call,
             api_version,
             domain,
         }
@@ -149,65 +140,115 @@ mod tests {
     use crate::test_utils::{get_test_name, save_response_body};
     use crate::TestContext;
     use anyhow::Context;
+    use std::time::SystemTime;
     use wiremock::matchers::{method, path};
     use wiremock::{Mock, ResponseTemplate};
 
     #[tokio::test]
     async fn test_get_list_default() -> anyhow::Result<()> {
+        // region: Arrange
         let test_name = get_test_name();
         let TestContext {
             mut api,
-            update_golden_files,
             mock_server,
+            allow_external_api_call,
+            update_golden_files,
         } = TestContext::new().await;
 
         let golden_file_path = format!("tests/resources/{}.json", test_name);
         let golden_file_exists = std::path::Path::new(&golden_file_path).exists();
+        let mut golden_file_body: Option<OpenDartResponseBody<List>> = None;
 
-        // region: Flags
-        let allow_external_api_call = api.config.allow_external_api_call;
-        let local_response = !allow_external_api_call || golden_file_exists;
-        let update_golden_files = allow_external_api_call && update_golden_files;
-        // endregion: Flags
-
-        // region: Set up the appropriate domain and mock if needed
-        if local_response {
-            let body = std::fs::read_to_string(&golden_file_path)
-                .context("Failed to read response body from file")?;
-            let body: OpenDartResponseBody<List> =
-                serde_json::from_str(&body).context("Failed to deserialize response body")?;
-
-            let response = ResponseTemplate::new(200).set_body_json(body);
-
-            Mock::given(method("GET"))
-                .and(path("/api/list.json"))
-                .respond_with(response)
-                .mount(&mock_server)
-                .await;
-
-            api.set_domain(&mock_server.uri());
-        } else {
-            api.set_domain("https://opendart.fss.or.kr");
+        #[derive(Debug)]
+        enum ResponseSource {
+            Local,
+            External,
         }
-        // endregion: Set up the appropriate domain and mock if needed
 
-        // region: Perform API call
-        let response = api.get_list(Default::default()).await;
-        let response = response.context("Response should be successful")?;
-        // endregion: Perform API call
+        let response_source: ResponseSource = match (
+            allow_external_api_call,
+            update_golden_files,
+            golden_file_exists,
+        ) {
+            (false, true, _) => {
+                panic!("Cannot update golden files without allowing external API calls")
+            }
+            (false, false, false) => {
+                panic!("Cannot test without allowing external API calls when golden files do not exist")
+            }
+            // Get from local without making external API calls
+            (false, false, true) => ResponseSource::Local,
+            // Get from external API without updating golden files
+            (true, false, false) => ResponseSource::External,
+            // Even if external API calls are allowed, respond from local if golden files exist
+            (true, false, true) => ResponseSource::Local,
+            // Allow external API calls and update golden files
+            (true, true, _) => ResponseSource::External,
+        };
 
-        // region: Assert response
-        assert!(response.status().is_success());
-        let response_body = response.body();
-        // endregion: Assert response
+        match response_source {
+            ResponseSource::Local => {
+                tracing::debug!(response_source = ?response_source, file_path = ?golden_file_path, "Getting response body from file");
+                let golden_file_str = std::fs::read_to_string(&golden_file_path)
+                    .context("Failed to read response body from file")?;
+                golden_file_body = serde_json::from_str(&golden_file_str)
+                    .context("Failed to deserialize response body")?;
+
+                let response = ResponseTemplate::new(200).set_body_json(&golden_file_body);
+
+                Mock::given(method("GET"))
+                    .and(path("/api/list.json"))
+                    .respond_with(response)
+                    .mount(&mock_server)
+                    .await;
+
+                api.set_domain(&mock_server.uri());
+            }
+            ResponseSource::External => {
+                tracing::debug!(response_source = ?response_source, file_path = ?golden_file_path, "Getting response body from external API");
+                api.set_domain("https://opendart.fss.or.kr");
+            }
+        }
+        // endregion
+
+        // region: Action
+        let response = api
+            .get_list(Default::default())
+            .await
+            .context("get_list should succeed")?;
+        // endregion
+
+        // region: Assert
+        assert!(
+            response.status().is_success(),
+            "Response didn't return a status code of 2xx"
+        );
+        // endregion
 
         // region: Save response body
         if update_golden_files {
-            save_response_body(response_body, &golden_file_path)
-                .await
-                .context("Failed to save response body")?;
+            match golden_file_body {
+                // When the local file's status is success but the external response body's status is not success,
+                // Don't save the external response body to the local file
+                Some(body) if body.is_success() && !response.body().is_success() => {
+                    tracing::debug!(response_body = ?response.body(), file_path = ?golden_file_path, "External response body is not success, not saving to file");
+                }
+                _ => {
+                    tracing::debug!(response_body = ?response.body(), file_path = ?golden_file_path, "Saving response body to file");
+                    save_response_body(response.body(), &golden_file_path)
+                        .await
+                        .context("Failed to save response body")?;
+
+                    assert!(
+                        SystemTime::now()
+                            .duration_since(std::fs::metadata(&golden_file_path)?.modified()?)?
+                            < std::time::Duration::from_secs(60),
+                        "The golden file was not updated within the last minute"
+                    );
+                }
+            }
         }
-        // endregion: Save response body
+        // endregion
 
         Ok(())
     }

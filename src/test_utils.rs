@@ -1,5 +1,7 @@
 #![cfg(test)]
 
+use crate::client::{OpenDartApi, OpenDartConfigBuilder};
+use crate::endpoints::OpenDartResponseBody;
 use serde::Serialize;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -7,12 +9,10 @@ use tracing::metadata::LevelFilter;
 use tracing_log::AsLog;
 use tracing_subscriber::EnvFilter;
 
-use crate::client::{OpenDartApi, OpenDartConfigBuilder};
-use crate::endpoints::OpenDartResponseBody;
-
 pub struct TestContext {
     pub api: OpenDartApi,
     pub mock_server: wiremock::MockServer,
+    pub allow_external_api_call: bool,
     pub update_golden_files: bool,
 }
 
@@ -33,11 +33,11 @@ impl TestContext {
             // so that we get its max level hint.
             .with_max_level(current_level.as_log())
             .init();
-        // endregion: Tracing setup
+        // endregion
 
         // region: Mock server setup
         let mock_server = wiremock::MockServer::start().await;
-        // endregion: Mock server setup
+        // endregion
 
         // region: Set domain for external open dart api calls
         let allow_external_call: bool = std::env::var("ALLOW_EXTERNAL_API_CALL")
@@ -50,7 +50,7 @@ impl TestContext {
         } else {
             mock_server.uri()
         };
-        // endregion: Set domain for external open dart api calls
+        // endregion
 
         // region: Initialize OpenDartApi
         let config = OpenDartConfigBuilder::default()
@@ -58,18 +58,24 @@ impl TestContext {
             .build()
             .expect("Failed to build OpenDartConfig");
         let api = OpenDartApi::new(config);
-        // endregion: Initialize OpenDartApi
+        // endregion
 
         // region: Update flag setup
         let update_golden_files: bool = std::env::var("UPDATE_GOLDEN_FILES")
             .expect("UPDATE_GOLDEN_FILES must be set")
             .parse()
-            .expect(r#"UPDATE_GOLDEN_FILES must be a boolean, e.g., "true" or "false""#);
-        // endregion: Update flag setup
+            .expect("UPDATE_GOLDEN_FILES must be a boolean");
+
+        let allow_external_api_call: bool = std::env::var("ALLOW_EXTERNAL_API_CALL")
+            .expect("ALLOW_EXTERNAL_API_CALL must be set")
+            .parse()
+            .expect("ALLOW_EXTERNAL_API_CALL must be a boolean");
+        // endregion
 
         Self {
             api,
             mock_server,
+            allow_external_api_call,
             update_golden_files,
         }
     }
