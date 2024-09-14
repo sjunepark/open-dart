@@ -136,120 +136,17 @@ impl Default for OpenDartConfig {
 
 #[cfg(test)]
 mod tests {
-    use crate::endpoints::{List, OpenDartResponseBody};
-    use crate::test_utils::{get_test_name, save_response_body};
+    use crate::test_utils::get_test_name;
     use crate::TestContext;
-    use anyhow::Context;
-    use std::time::SystemTime;
-    use wiremock::matchers::{method, path};
-    use wiremock::{Mock, ResponseTemplate};
 
     #[tokio::test]
     async fn test_get_list_default() -> anyhow::Result<()> {
         // region: Arrange
         let test_name = get_test_name();
-        let TestContext {
-            mut api,
-            mock_server,
-            allow_external_api_call,
-            update_golden_files,
-        } = TestContext::new().await;
+        let mut test_context = TestContext::new().await;
 
-        let golden_file_path = format!("tests/resources/{}.json", test_name);
-        let golden_file_exists = std::path::Path::new(&golden_file_path).exists();
-        let mut golden_file_body: Option<OpenDartResponseBody<List>> = None;
-
-        #[derive(Debug)]
-        enum ResponseSource {
-            Local,
-            External,
-        }
-
-        let response_source: ResponseSource = match (
-            allow_external_api_call,
-            update_golden_files,
-            golden_file_exists,
-        ) {
-            (false, true, _) => {
-                panic!("Cannot update golden files without allowing external API calls")
-            }
-            (false, false, false) => {
-                panic!("Cannot test without allowing external API calls when golden files do not exist")
-            }
-            // Get from local without making external API calls
-            (false, false, true) => ResponseSource::Local,
-            // Get from external API without updating golden files
-            (true, false, false) => ResponseSource::External,
-            // Even if external API calls are allowed, respond from local if golden files exist
-            (true, false, true) => ResponseSource::Local,
-            // Allow external API calls and update golden files
-            (true, true, _) => ResponseSource::External,
-        };
-
-        match response_source {
-            ResponseSource::Local => {
-                tracing::debug!(response_source = ?response_source, file_path = ?golden_file_path, "Getting response body from file");
-                let golden_file_str = std::fs::read_to_string(&golden_file_path)
-                    .context("Failed to read response body from file")?;
-                golden_file_body = serde_json::from_str(&golden_file_str)
-                    .context("Failed to deserialize response body")?;
-
-                let response = ResponseTemplate::new(200).set_body_json(&golden_file_body);
-
-                Mock::given(method("GET"))
-                    .and(path("/api/list.json"))
-                    .respond_with(response)
-                    .mount(&mock_server)
-                    .await;
-
-                api.set_domain(&mock_server.uri());
-            }
-            ResponseSource::External => {
-                tracing::debug!(response_source = ?response_source, file_path = ?golden_file_path, "Getting response body from external API");
-                api.set_domain("https://opendart.fss.or.kr");
-            }
-        }
-        // endregion
-
-        // region: Action
-        let response = api
-            .get_list(Default::default())
+        test_context
+            .test_endpoint_default(&test_name, "/api/list.json")
             .await
-            .context("get_list should succeed")?;
-        // endregion
-
-        // region: Assert
-        assert!(
-            response.status().is_success(),
-            "Response didn't return a status code of 2xx"
-        );
-        // endregion
-
-        // region: Save response body
-        if update_golden_files {
-            match golden_file_body {
-                // When the local file's status is success but the external response body's status is not success,
-                // Don't save the external response body to the local file
-                Some(body) if body.is_success() && !response.body().is_success() => {
-                    tracing::debug!(response_body = ?response.body(), file_path = ?golden_file_path, "External response body is not success, not saving to file");
-                }
-                _ => {
-                    tracing::debug!(response_body = ?response.body(), file_path = ?golden_file_path, "Saving response body to file");
-                    save_response_body(response.body(), &golden_file_path)
-                        .await
-                        .context("Failed to save response body")?;
-
-                    assert!(
-                        SystemTime::now()
-                            .duration_since(std::fs::metadata(&golden_file_path)?.modified()?)?
-                            < std::time::Duration::from_secs(60),
-                        "The golden file was not updated within the last minute"
-                    );
-                }
-            }
-        }
-        // endregion
-
-        Ok(())
     }
 }
