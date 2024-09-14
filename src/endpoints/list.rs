@@ -3,7 +3,9 @@
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
 use crate::assert_impl_commons;
 use crate::error::OpenDartError;
-use crate::types::{BgnDe, CorpCls, CorpCode, CrtfcKey, PblntfTy};
+use crate::types::{
+    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, PblntfTy, Sort, StockCode, YesNo,
+};
 use crate::types::{EndDe, PblntfDetailTy};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
@@ -25,26 +27,11 @@ pub struct ListRequestParams {
     pub corp_code: Option<CorpCode>,
     pub bgn_de: Option<BgnDe>,
     pub end_de: Option<EndDe>,
-
-    /// ### 최종보고서 검색여부
-    /// 최종보고서만 검색여부(Y or N)
-    ///
-    /// - 기본값 : N(정정이 있는 경우 최종정정만 검색)
-    pub last_reprt_at: Option<char>,
-
+    pub last_reprt_at: Option<YesNo>,
     pub pblntf_ty: Option<PblntfTy>,
     pub pblntf_detail_ty: Option<PblntfDetailTy>,
-
     pub corp_cls: Option<CorpCls>,
-
-    /// ### 정렬
-    ///
-    /// - date : 접수일자
-    /// - crp : 회사명
-    /// - rpt : 보고서명
-    ///
-    /// ※ 기본값 : date
-    pub sort: Option<String>,
+    pub sort: Option<Sort>,
 
     /// ### 정렬방법
     ///
@@ -100,18 +87,9 @@ pub struct List {
 #[derive(Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 struct ListCorp {
     corp_cls: CorpCls,
-
-    /// ### 종목명(법인명)
-    /// 공시대상회사의 종목명(상장사) 또는 법인명(기타법인)
-    corp_name: String,
-
-    /// ### 고유번호
-    /// 공시대상회사의 고유번호(8자리)
+    corp_name: CorpName,
     corp_code: CorpCode,
-
-    /// ### 종목코드
-    /// 상장회사의 종목코드(6자리)
-    stock_code: String,
+    stock_code: StockCode,
 
     /// ### 보고서명
     /// 공시구분+보고서명+기타정보
@@ -166,11 +144,11 @@ mod tests {
         let corp_code = CorpCode::mock_default();
         let bgn_de = BgnDe::mock_default();
         let end_de = EndDe::mock_default();
-        let last_reprt_at = 'Y';
+        let last_reprt_at = YesNo::mock_default();
         let pblntf_ty = PblntfTy::mock_default();
         let pblntf_detail_ty = PblntfDetailTy::mock_default();
         let corp_cls = CorpCls::mock_default();
-        let sort = "sort".to_string();
+        let sort = Sort::mock_default();
         let sort_mth = "sort_mth".to_string();
         let page_no = "page_no".to_string();
         let page_count = "page_count".to_string();
@@ -179,11 +157,11 @@ mod tests {
             .corp_code(corp_code.clone())
             .bgn_de(bgn_de.clone())
             .end_de(end_de.clone())
-            .last_reprt_at(last_reprt_at)
+            .last_reprt_at(last_reprt_at.clone())
             .pblntf_ty(pblntf_ty.clone())
             .pblntf_detail_ty(pblntf_detail_ty.clone())
             .corp_cls(corp_cls.clone())
-            .sort(&sort)
+            .sort(sort.clone())
             .sort_mth(&sort_mth)
             .page_no(&page_no)
             .page_count(&page_count)

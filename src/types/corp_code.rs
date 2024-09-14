@@ -25,8 +25,9 @@ use crate::test_utils::MockDefault;
 #[cfg(test)]
 impl MockDefault for CorpCode {
     fn mock_default() -> Self {
-        CorpCode::try_new("00120182".to_string())
-            .unwrap_or_else(|_| panic!("failed to create CorpCode with code: {}", "00120182"))
+        let corp_code: String = String::from("00120182");
+        CorpCode::try_new(&corp_code)
+            .unwrap_or_else(|_| panic!("failed to create CorpCode with code: {}", corp_code))
     }
 }
 
@@ -42,45 +43,45 @@ mod tests {
     #[test]
     fn serialize() -> anyhow::Result<()> {
         let corp_code =
-            CorpCode::try_new("12345678".to_string()).context("failed to create corp_code")?;
+            CorpCode::try_new("00120182".to_string()).context("failed to create corp_code")?;
         let serialized = serde_json::to_string(&corp_code).context("failed to serialize")?;
-        assert_eq!(serialized, "\"12345678\"");
+        assert_eq!(serialized, "\"00120182\"");
         Ok(())
     }
 
     #[test]
     fn deserialize() -> anyhow::Result<()> {
         let corp_code =
-            serde_json::from_str::<CorpCode>("\"12345678\"").context("failed to deserialize")?;
-        assert_eq!(corp_code.into_inner(), "12345678");
+            serde_json::from_str::<CorpCode>("\"00120182\"").context("failed to deserialize")?;
+        assert_eq!(corp_code.into_inner(), "00120182");
         Ok(())
     }
 
     #[test]
     fn try_new_with_valid_length_and_digits_should_succeed() -> anyhow::Result<()> {
         let corp_code =
-            CorpCode::try_new("12345678".to_string()).context("failed to create corp_code")?;
-        assert_eq!(corp_code.into_inner(), "12345678");
+            CorpCode::try_new("00120182".to_string()).context("failed to create corp_code")?;
+        assert_eq!(corp_code.into_inner(), "00120182");
         Ok(())
     }
 
     #[test]
     fn try_new_with_whitespace_should_fail() -> anyhow::Result<()> {
-        let corp_code = CorpCode::try_new("12345678 ".to_string());
+        let corp_code = CorpCode::try_new("00120182 ".to_string());
         assert!(corp_code.is_err());
         Ok(())
     }
 
     #[test]
     fn try_new_with_invalid_length_should_fail() -> anyhow::Result<()> {
-        let corp_code = CorpCode::try_new("1234567".to_string());
+        let corp_code = CorpCode::try_new("0012018".to_string());
         assert!(corp_code.is_err());
         Ok(())
     }
 
     #[test]
     fn try_new_with_invalid_char_should_fail() -> anyhow::Result<()> {
-        let corp_code = CorpCode::try_new("1234567a".to_string());
+        let corp_code = CorpCode::try_new("0012018a".to_string());
         assert!(corp_code.is_err());
         Ok(())
     }
