@@ -22,6 +22,15 @@ assert_impl_commons_without_default!(PblntfTy);
 )]
 pub struct PblntfTy(Inner);
 
+#[cfg(test)]
+use crate::test_utils::MockDefault;
+#[cfg(test)]
+impl MockDefault for PblntfTy {
+    fn mock_default() -> Self {
+        Self(Inner::F)
+    }
+}
+
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize)]
 #[display("{_variant}")]
 #[test_variants(PblntfTy)]

@@ -23,6 +23,15 @@ assert_impl_commons_without_default!(PblntfDetailTy);
 )]
 pub struct PblntfDetailTy(Inner);
 
+#[cfg(test)]
+use crate::test_utils::MockDefault;
+#[cfg(test)]
+impl MockDefault for PblntfDetailTy {
+    fn mock_default() -> Self {
+        Self(Inner::F001)
+    }
+}
+
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize)]
 #[display("{_variant}")]
 #[test_variants(PblntfDetailTy)]
@@ -38,7 +47,7 @@ enum Inner {
     /// 등록법인결산서류자본시장법이전
     A004,
     /// 소액공모법인결산서류
-    // endregion A 정기공시
+    // endregion
     A005,
 
     // region B 주요사항보고
@@ -48,7 +57,7 @@ enum Inner {
     B002,
     /// 최대주주등과의거래신고자본시장법 이전
     B003,
-    // endregion B 주요사항보고
+    // endregion
 
     // region C 발행공시
     /// 증권신고지분증권
@@ -73,7 +82,7 @@ enum Inner {
     C010,
     /// 호가중개시스템을통한소액매출
     C011,
-    /// endregion C 발행공시
+    // endregion
 
     // region D 지분공시
     /// 주식등의대량보유상황보고서
@@ -86,7 +95,7 @@ enum Inner {
     D004,
     /// 임원ㆍ주요주주 특정증권등 거래계획보고서
     D005,
-    // endregion D 지분공시
+    // endregion
 
     // region E 기타공시
     /// 자기주식취득처분
@@ -107,7 +116,7 @@ enum Inner {
     E008,
     /// 금융위등록취소자본시장법 이전
     E009,
-    // endregion E 기타공시
+    // endregion
 
     // region F 외부감사관련
     /// 감사보고서
@@ -121,7 +130,7 @@ enum Inner {
     /// 감사전재무제표미제출신고서
     F005,
     /// 증권신고집합투자증권신탁형
-    // endregion F 외부감사관련
+    // endregion
 
     // region G 펀드공시
     G001,
@@ -130,7 +139,7 @@ enum Inner {
     /// 증권신고집합투자증권합병
     G003,
     /// 자산유동화계획양도등록
-    // endregion G 펀드공시
+    // endregion
 
     // region H 자산유동화
     H001,
@@ -145,7 +154,7 @@ enum Inner {
     /// 주요사항보고서
     H006,
     /// 수시공시
-    // endregion H 자산유동화
+    // endregion
 
     // region I 거래소공시
     I001,
@@ -160,7 +169,7 @@ enum Inner {
     /// 채권공시
     I006,
     /// 대규모내부거래관련
-    // endregion I 거래소공시
+    // endregion
 
     // region J 공정위공시
     J001,
@@ -176,5 +185,5 @@ enum Inner {
     J008,
     /// 하도급대금결제조건공시
     J009,
-    // endregion J 공정위공시
+    // endregion
 }

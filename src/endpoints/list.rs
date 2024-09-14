@@ -3,7 +3,7 @@
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
 use crate::assert_impl_commons;
 use crate::error::OpenDartError;
-use crate::types::{BgnDe, CorpCls, CorpCode, CrtfcKey};
+use crate::types::{BgnDe, CorpCls, CorpCode, CrtfcKey, PblntfTy};
 use crate::types::{EndDe, PblntfDetailTy};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
@@ -32,8 +32,7 @@ pub struct ListRequestParams {
     /// - 기본값 : N(정정이 있는 경우 최종정정만 검색)
     pub last_reprt_at: Option<char>,
 
-    pub pblntf_ty: Option<char>,
-
+    pub pblntf_ty: Option<PblntfTy>,
     pub pblntf_detail_ty: Option<PblntfDetailTy>,
 
     pub corp_cls: Option<CorpCls>,
@@ -159,6 +158,7 @@ struct ListCorp {
 mod tests {
     use super::*;
     use crate::test_utils::MockDefault;
+    use crate::types::PblntfTy;
     use anyhow::Context;
 
     #[test]
@@ -167,8 +167,8 @@ mod tests {
         let bgn_de = BgnDe::mock_default();
         let end_de = EndDe::mock_default();
         let last_reprt_at = 'Y';
-        let pblntf_ty = 'p';
-        let pblntf_detail_ty = PblntfDetailTy::A001;
+        let pblntf_ty = PblntfTy::mock_default();
+        let pblntf_detail_ty = PblntfDetailTy::mock_default();
         let corp_cls = CorpCls::mock_default();
         let sort = "sort".to_string();
         let sort_mth = "sort_mth".to_string();
@@ -180,7 +180,7 @@ mod tests {
             .bgn_de(bgn_de.clone())
             .end_de(end_de.clone())
             .last_reprt_at(last_reprt_at)
-            .pblntf_ty(pblntf_ty)
+            .pblntf_ty(pblntf_ty.clone())
             .pblntf_detail_ty(pblntf_detail_ty.clone())
             .corp_cls(corp_cls.clone())
             .sort(&sort)
