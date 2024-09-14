@@ -3,8 +3,8 @@
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
 use crate::assert_impl_commons;
 use crate::error::OpenDartError;
-use crate::types::PblntfDetailTy;
 use crate::types::{BgnDe, CorpCls, CorpCode, CrtfcKey};
+use crate::types::{EndDe, PblntfDetailTy};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
@@ -24,13 +24,7 @@ pub struct ListRequestParams {
 
     pub corp_code: Option<CorpCode>,
     pub bgn_de: Option<BgnDe>,
-
-    /// ### 종료일
-    /// 검색종료 접수일자(YYYYMMDD)
-    ///
-    /// - 기본값 : 당일
-    /// - 고유번호(corp_code)가 없는 경우 검색기간은 3개월로 제한
-    pub end_de: Option<String>,
+    pub end_de: Option<EndDe>,
 
     /// ### 최종보고서 검색여부
     /// 최종보고서만 검색여부(Y or N)
@@ -164,20 +158,18 @@ struct ListCorp {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_utils::MockDefault;
     use anyhow::Context;
-    use chrono::NaiveDate;
 
     #[test]
     fn list_request_params_builder_works_with_all_fields_specified() -> anyhow::Result<()> {
-        let corp_code = CorpCode::try_new("00120182".to_string()).unwrap();
-        let bgn_de = BgnDe::try_new(
-            NaiveDate::from_ymd_opt(2024, 1, 1).context("failed to create NaiveDate")?,
-        )?;
-        let end_de = "20240630".to_string();
+        let corp_code = CorpCode::mock_default();
+        let bgn_de = BgnDe::mock_default();
+        let end_de = EndDe::mock_default();
         let last_reprt_at = 'Y';
         let pblntf_ty = 'p';
         let pblntf_detail_ty = PblntfDetailTy::A001;
-        let corp_cls = CorpCls::Y;
+        let corp_cls = CorpCls::mock_default();
         let sort = "sort".to_string();
         let sort_mth = "sort_mth".to_string();
         let page_no = "page_no".to_string();
@@ -186,7 +178,7 @@ mod tests {
         let params = ListRequestParamsBuilder::default()
             .corp_code(corp_code.clone())
             .bgn_de(bgn_de.clone())
-            .end_de(&end_de)
+            .end_de(end_de.clone())
             .last_reprt_at(last_reprt_at)
             .pblntf_ty(pblntf_ty)
             .pblntf_detail_ty(pblntf_detail_ty.clone())

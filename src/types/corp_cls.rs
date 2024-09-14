@@ -23,6 +23,15 @@ impl Display for CorpCls {
     }
 }
 
+#[cfg(test)]
+use crate::test_utils::MockDefault;
+#[cfg(test)]
+impl MockDefault for CorpCls {
+    fn mock_default() -> Self {
+        Self(Inner::Y)
+    }
+}
+
 #[derive(
     Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display, Serialize, Deserialize, FromStr,
 )]

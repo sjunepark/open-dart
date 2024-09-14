@@ -50,6 +50,18 @@ impl Display for BgnDe {
 }
 
 #[cfg(test)]
+use crate::test_utils::MockDefault;
+#[cfg(test)]
+impl MockDefault for BgnDe {
+    fn mock_default() -> Self {
+        let today = chrono::Local::now().naive_local().date();
+        let week_before = today - chrono::Duration::days(7);
+        BgnDe::try_new(week_before)
+            .unwrap_or_else(|_| panic!("failed to create BgnDe with date: {}", week_before))
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use anyhow::Context;

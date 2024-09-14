@@ -209,3 +209,7 @@ pub fn get_test_name() -> String {
         .expect("Failed to get last element within test name parts")
         .to_string()
 }
+
+pub trait MockDefault: Sized {
+    fn mock_default() -> Self;
+}

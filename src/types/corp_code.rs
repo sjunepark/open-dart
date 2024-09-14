@@ -20,6 +20,16 @@ impl Display for CorpCode {
     }
 }
 
+#[cfg(test)]
+use crate::test_utils::MockDefault;
+#[cfg(test)]
+impl MockDefault for CorpCode {
+    fn mock_default() -> Self {
+        CorpCode::try_new("00120182".to_string())
+            .unwrap_or_else(|_| panic!("failed to create CorpCode with code: {}", "00120182"))
+    }
+}
+
 fn is_digits(s: &str) -> bool {
     s.chars().all(|c| c.is_ascii_digit())
 }
