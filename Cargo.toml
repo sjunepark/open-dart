@@ -31,6 +31,8 @@ nutype = { version = "0.5.0", features = ["serde"] }
 impls = "1.0.3"
 const_format = "0.2.33"
 
+chrono = { version = "0.4.38", features = ["serde"] }
+
 [dev-dependencies]
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing-log = "0.2.0"

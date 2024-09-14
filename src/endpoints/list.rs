@@ -3,10 +3,8 @@
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
 use crate::assert_impl_commons;
 use crate::error::OpenDartError;
-use crate::types::CorpCls;
-use crate::types::CorpCode;
-use crate::types::CrtfcKey;
 use crate::types::PblntfDetailTy;
+use crate::types::{BgnDe, CorpCls, CorpCode, CrtfcKey};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
@@ -25,13 +23,7 @@ pub struct ListRequestParams {
     crtfc_key: CrtfcKey,
 
     pub corp_code: Option<CorpCode>,
-
-    /// ### 시작일
-    /// 검색시작 접수일자(YYYYMMDD)
-    ///
-    /// - 기본값 : 종료일(end_de)
-    /// - 고유번호(corp_code)가 없는 경우 검색기간은 3개월로 제한
-    pub bgn_de: Option<String>,
+    pub bgn_de: Option<BgnDe>,
 
     /// ### 종료일
     /// 검색종료 접수일자(YYYYMMDD)
@@ -172,11 +164,15 @@ struct ListCorp {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use anyhow::Context;
+    use chrono::NaiveDate;
 
     #[test]
-    fn list_request_params_builder_works_with_all_fields_specified() {
+    fn list_request_params_builder_works_with_all_fields_specified() -> anyhow::Result<()> {
         let corp_code = CorpCode::try_new("00120182".to_string()).unwrap();
-        let bgn_de = "20220101".to_string();
+        let bgn_de = BgnDe::try_new(
+            NaiveDate::from_ymd_opt(2024, 1, 1).context("failed to create NaiveDate")?,
+        )?;
         let end_de = "20240630".to_string();
         let last_reprt_at = 'Y';
         let pblntf_ty = 'p';
@@ -189,7 +185,7 @@ mod tests {
 
         let params = ListRequestParamsBuilder::default()
             .corp_code(corp_code.clone())
-            .bgn_de(&bgn_de)
+            .bgn_de(bgn_de.clone())
             .end_de(&end_de)
             .last_reprt_at(last_reprt_at)
             .pblntf_ty(pblntf_ty)
@@ -200,7 +196,7 @@ mod tests {
             .page_no(&page_no)
             .page_count(&page_count)
             .build()
-            .expect("ListRequestParams should build");
+            .context("ListRequestParams should build")?;
 
         assert_eq!(params.corp_code, Some(corp_code));
         assert_eq!(params.bgn_de, Some(bgn_de));
@@ -213,5 +209,7 @@ mod tests {
         assert_eq!(params.sort_mth, Some(sort_mth));
         assert_eq!(params.page_no, Some(page_no));
         assert_eq!(params.page_count, Some(page_count));
+
+        Ok(())
     }
 }

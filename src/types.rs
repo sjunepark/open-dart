@@ -1,9 +1,11 @@
+mod bgn_de;
 mod corp_cls;
 mod corp_code;
 mod crtfc_key;
 mod pblntf_detail_ty;
 mod pblntf_ty;
 
+pub use bgn_de::BgnDe;
 pub use corp_cls::CorpCls;
 pub use corp_code::CorpCode;
 pub use crtfc_key::CrtfcKey;
