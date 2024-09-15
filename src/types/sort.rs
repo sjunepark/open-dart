@@ -2,7 +2,7 @@ use crate::assert_impl_commons_without_default;
 use derive_more::{AsMut, AsRef, Display, FromStr};
 use serde::{Deserialize, Serialize};
 use std::fmt::Formatter;
-use test_variants::{generate_consts, test_variants};
+use test_variants::generate_consts;
 
 assert_impl_commons_without_default!(Sort);
 
@@ -24,21 +24,49 @@ impl Display for Sort {
 
 #[cfg(test)]
 use crate::test_utils::MockDefault;
+
 #[cfg(test)]
 impl MockDefault for Sort {
     fn mock_default() -> Self {
-        Self(Inner::date)
+        Self(Inner::Date)
     }
 }
 
 #[derive(
     Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display, Serialize, Deserialize, FromStr,
 )]
+#[serde(rename_all = "lowercase")]
 #[display("{_variant}")]
-#[test_variants(Sort)]
 #[generate_consts(Sort)]
 enum Inner {
-    date,
-    crp,
-    rpt,
+    Date,
+    Crp,
+    Rpt,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Context;
+
+    #[test]
+    fn serialize() -> anyhow::Result<()> {
+        let sort = Sort::DATE;
+        let serialized = serde_json::to_string(&sort).context("Failed to serialize")?;
+        assert_eq!(serialized, r#""date""#);
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize() -> anyhow::Result<()> {
+        let deserialized: Sort =
+            serde_json::from_str(r#""date""#).context("Failed to deserialize")?;
+        dbg!(&deserialized);
+        Ok(())
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(Sort::DATE.to_string(), "Date");
+    }
 }

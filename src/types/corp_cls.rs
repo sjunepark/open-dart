@@ -2,7 +2,7 @@ use crate::assert_impl_commons_without_default;
 use derive_more::{AsMut, AsRef, Display, FromStr};
 use serde::{Deserialize, Serialize};
 use std::fmt::Formatter;
-use test_variants::{generate_consts, test_variants};
+use test_variants::generate_consts;
 
 assert_impl_commons_without_default!(CorpCls);
 
@@ -36,7 +36,6 @@ impl MockDefault for CorpCls {
     Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display, Serialize, Deserialize, FromStr,
 )]
 #[display("{_variant}")]
-#[test_variants(CorpCls)]
 #[generate_consts(CorpCls)]
 enum Inner {
     /// 유가
@@ -47,4 +46,32 @@ enum Inner {
     N,
     /// 기타
     E,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Context;
+
+    #[test]
+    fn serialize() -> anyhow::Result<()> {
+        let corp_cls = CorpCls::Y;
+        let serialized = serde_json::to_string(&corp_cls).context("Failed to serialize")?;
+        assert_eq!(serialized, r#""Y""#);
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize() -> anyhow::Result<()> {
+        let corp_cls = CorpCls::Y;
+        let deserialized: CorpCls =
+            serde_json::from_str(r#""Y""#).context("Failed to deserialize")?;
+        assert_eq!(deserialized, corp_cls);
+        Ok(())
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(CorpCls::Y.to_string(), "Y");
+    }
 }

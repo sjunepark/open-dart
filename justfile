@@ -16,6 +16,9 @@ watch-example name="":
 watch-test-variants:
     cargo watch -i "tests/resources/**/*" -w test-variants -q -c -x "test -p test-variants -- --nocapture" --env-file .env.dev
 
+watch-test-integration:
+    cargo watch -i "tests/resources/**/*" -w tests -q -c -x 'test --test "*" -- --nocapture' --env-file .env.dev
+
 
 # Individual commands
 

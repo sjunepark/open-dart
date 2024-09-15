@@ -2,7 +2,7 @@ use crate::assert_impl_commons_without_default;
 use derive_more::{AsMut, AsRef, Display, FromStr};
 use serde::{Deserialize, Serialize};
 use std::fmt::Formatter;
-use test_variants::{generate_consts, test_variants};
+use test_variants::generate_consts;
 
 assert_impl_commons_without_default!(YesNo);
 
@@ -32,9 +32,35 @@ impl MockDefault for YesNo {
     Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display, Serialize, Deserialize, FromStr,
 )]
 #[display("{_variant}")]
-#[test_variants(YesNo)]
 #[generate_consts(YesNo)]
 enum Inner {
     Y,
     N,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Context;
+
+    #[test]
+    fn serialize() -> anyhow::Result<()> {
+        let yes_no = YesNo::Y;
+        let serialized = serde_json::to_string(&yes_no).context("Failed to serialize")?;
+        assert_eq!(serialized, r#""Y""#);
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize() -> anyhow::Result<()> {
+        let deserialized: YesNo =
+            serde_json::from_str(r#""Y""#).context("Failed to deserialize")?;
+        assert_eq!(deserialized, YesNo::Y);
+        Ok(())
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(YesNo::Y.to_string(), "Y");
+    }
 }

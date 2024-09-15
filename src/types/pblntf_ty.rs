@@ -1,7 +1,7 @@
 use crate::assert_impl_commons_without_default;
 use derive_more::{AsMut, AsRef, Display};
 use serde::{Deserialize, Serialize};
-use test_variants::{generate_consts, test_variants};
+use test_variants::generate_consts;
 
 assert_impl_commons_without_default!(PblntfTy);
 
@@ -24,6 +24,7 @@ pub struct PblntfTy(Inner);
 
 #[cfg(test)]
 use crate::test_utils::MockDefault;
+
 #[cfg(test)]
 impl MockDefault for PblntfTy {
     fn mock_default() -> Self {
@@ -33,7 +34,6 @@ impl MockDefault for PblntfTy {
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize)]
 #[display("{_variant}")]
-#[test_variants(PblntfTy)]
 #[generate_consts(PblntfTy)]
 enum Inner {
     /// 정기공시
@@ -56,4 +56,32 @@ enum Inner {
     I,
     /// 공정위공시
     J,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Context;
+
+    #[test]
+    fn serialize() -> anyhow::Result<()> {
+        let pblntf_ty = PblntfTy::F;
+        let serialized = serde_json::to_string(&pblntf_ty).context("Failed to serialize")?;
+        assert_eq!(serialized, r#""F""#);
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize() -> anyhow::Result<()> {
+        let pblntf_ty = PblntfTy::F;
+        let deserialized: PblntfTy =
+            serde_json::from_str(r#""F""#).context("Failed to deserialize")?;
+        assert_eq!(deserialized, pblntf_ty);
+        Ok(())
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(PblntfTy::F.to_string(), "F");
+    }
 }
