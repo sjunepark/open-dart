@@ -1,5 +1,5 @@
+use generate_consts::generate_consts;
 use serde::{Deserialize, Serialize};
-use test_variants::{generate_consts, test_variants};
 
 #[derive(
     Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, derive_more::AsRef,
@@ -16,7 +16,6 @@ impl std::fmt::Display for MyStruct {
     Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, derive_more::Display,
 )]
 #[display("{_variant}")]
-#[test_variants(MyStruct)]
 #[generate_consts(MyStruct)]
 enum Inner {
     /// Docs about A

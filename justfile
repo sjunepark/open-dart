@@ -13,8 +13,8 @@ watch-test name="":
 watch-example name="":
     cargo watch -i "tests/resources/**/*" -q -c -x "run --example {{name}}" --env-file .env.dev
 
-watch-test-variants:
-    cargo watch -i "tests/resources/**/*" -w test-variants -q -c -x "test -p test-variants -- --nocapture" --env-file .env.dev
+watch-generate_consts:
+    cargo watch -i "tests/resources/**/*" -w generate-consts -q -c -x "test -p generate_consts -- --nocapture" --env-file .env.dev
 
 watch-test-integration:
     cargo watch -i "tests/resources/**/*" -w tests -q -c -x 'test --test "*" -- --nocapture' --env-file .env.dev

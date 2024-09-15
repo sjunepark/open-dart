@@ -1,8 +1,8 @@
 use crate::assert_impl_commons_without_default;
 use derive_more::{AsMut, AsRef, Display, FromStr};
+use generate_consts::generate_consts;
 use serde::{Deserialize, Serialize};
 use std::fmt::Formatter;
-use test_variants::generate_consts;
 
 assert_impl_commons_without_default!(Sort);
 

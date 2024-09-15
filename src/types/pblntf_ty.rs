@@ -1,7 +1,7 @@
 use crate::assert_impl_commons_without_default;
 use derive_more::{AsMut, AsRef, Display};
+use generate_consts::generate_consts;
 use serde::{Deserialize, Serialize};
-use test_variants::generate_consts;
 
 assert_impl_commons_without_default!(PblntfTy);
 
