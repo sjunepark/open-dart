@@ -7,6 +7,7 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::Display;
 
+#[derive(Debug)]
 pub struct OpenDartApi {
     client: reqwest::Client,
     config: OpenDartConfig,
@@ -106,7 +107,7 @@ impl Default for OpenDartApi {
     }
 }
 
-#[derive(Builder, Clone)]
+#[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct OpenDartConfig {
     /// API version to use
@@ -140,8 +141,8 @@ mod tests {
     use crate::TestContext;
 
     #[tokio::test]
-    async fn test_get_list_default() -> anyhow::Result<()> {
-        // region: Arrange
+    #[tracing::instrument]
+    async fn get_list_default() -> anyhow::Result<()> {
         let test_name = get_test_name();
         let mut test_context = TestContext::new().await;
 

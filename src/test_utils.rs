@@ -13,6 +13,7 @@ use tracing_subscriber::EnvFilter;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, ResponseTemplate};
 
+#[derive(Debug)]
 pub struct TestContext {
     pub api: OpenDartApi,
     pub mock_server: wiremock::MockServer,
@@ -84,6 +85,7 @@ impl TestContext {
         }
     }
 
+    #[tracing::instrument(skip(self))]
     pub async fn test_endpoint_default(
         &mut self,
         test_name: &str,
@@ -132,7 +134,7 @@ impl TestContext {
                 let response = ResponseTemplate::new(200).set_body_json(&golden_file_body);
 
                 Mock::given(method("GET"))
-                    .and(path(format!("{}", api_path)))
+                    .and(path(api_path.to_string()))
                     .respond_with(response)
                     .mount(&self.mock_server)
                     .await;
@@ -140,7 +142,7 @@ impl TestContext {
                 self.api.set_domain(&self.mock_server.uri());
             }
             ResponseSource::External => {
-                tracing::debug!(response_source = ?response_source, file_path = ?golden_file_path, "Getting response body from external API");
+                tracing::debug!(response_source = ?response_source, "Getting response body from external API");
                 self.api.set_domain("https://opendart.fss.or.kr");
             }
         }
@@ -205,8 +207,8 @@ pub fn get_test_name() -> String {
         .name()
         .expect("Test name must be set")
         .split("::")
-        .last()
-        .expect("Failed to get last element within test name parts")
+        .collect::<Vec<_>>()
+        .join("-")
         .to_string()
 }
 
