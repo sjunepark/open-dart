@@ -1,4 +1,120 @@
 {
-  "status": "013",
-  "message": "조회된 데이타가 없습니다."
+  "status": "000",
+  "message": "정상",
+  "page_no": 1,
+  "page_count": 10,
+  "total_count": 53,
+  "total_page": 6,
+  "list": [
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "증권발행실적보고서",
+      "rcept_no": "20240913000450",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240913",
+      "rm": ""
+    },
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "투자설명서(일괄신고)",
+      "rcept_no": "20240913000356",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240913",
+      "rm": ""
+    },
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "rcept_no": "20240913000320",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240913",
+      "rm": ""
+    },
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "[기재정정]증권발행실적보고서",
+      "rcept_no": "20240913000308",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240913",
+      "rm": ""
+    },
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "투자설명서(일괄신고)",
+      "rcept_no": "20240913000264",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240913",
+      "rm": ""
+    },
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "증권발행실적보고서",
+      "rcept_no": "20240913000196",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240913",
+      "rm": "정"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "rcept_no": "20240913000150",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240913",
+      "rm": ""
+    },
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "투자설명서(일괄신고)",
+      "rcept_no": "20240912000360",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240912",
+      "rm": ""
+    },
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "rcept_no": "20240912000242",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240912",
+      "rm": ""
+    },
+    {
+      "corp_cls": "Y",
+      "corp_name": "NH투자증권",
+      "corp_code": "00120182",
+      "stock_code": "005940",
+      "report_nm": "증권발행실적보고서",
+      "rcept_no": "20240912000040",
+      "flr_nm": "NH투자증권",
+      "rcept_dt": "20240912",
+      "rm": ""
+    }
+  ]
 }

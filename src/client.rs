@@ -1,5 +1,5 @@
 use crate::endpoints::{List, ListRequestParams, OpenDartResponse, OpenDartResponseBody};
-use crate::error::{map_deserialization_error, OpenDartError};
+use crate::error::OpenDartError;
 use derive_builder::Builder;
 use reqwest;
 use reqwest::IntoUrl;
@@ -58,17 +58,16 @@ impl OpenDartApi {
     where
         U: Display + IntoUrl,
         P: Serialize,
-        R: Serialize + DeserializeOwned,
+        R: Serialize + DeserializeOwned + std::fmt::Debug,
     {
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
+        tracing::trace!(response = ?response, "Got response");
 
         let headers = response.headers().clone();
         let status = response.status();
 
-        let bytes = response.bytes().await?;
-        let response_body: OpenDartResponseBody<R> =
-            serde_json::from_slice(&bytes).map_err(|e| map_deserialization_error(e, &bytes))?;
+        let response_body = response.json::<OpenDartResponseBody<R>>().await?;
 
         let response = OpenDartResponse::new(status, headers, response_body);
         Ok(response)
@@ -137,8 +136,11 @@ impl Default for OpenDartConfig {
 
 #[cfg(test)]
 mod tests {
-    use crate::endpoints::List;
+    use crate::endpoints::{List, ListRequestParamsBuilder};
+    use crate::test_utils::MockDefault;
+    use crate::types::{BgnDe, CorpCode};
     use crate::TestContext;
+    use anyhow::Context;
 
     #[tokio::test]
     #[tracing::instrument]
@@ -146,7 +148,34 @@ mod tests {
         let mut test_context = TestContext::new().await;
 
         test_context
-            .test_endpoint_default::<List>("/api/list.json")
+            .arrange_test_endpoint::<List>("/api/list.json")
+            .await?;
+
+        // region: Action
+        let params = ListRequestParamsBuilder::default()
+            .corp_code(CorpCode::mock_default())
+            .bgn_de(BgnDe::mock_default())
+            .build()?;
+        tracing::debug!(?params, "Request parameters");
+
+        let response = test_context
+            .api
+            .get_list(params)
             .await
+            .context("get_list should succeed")?;
+        // endregion
+
+        // region: Assert
+        assert!(
+            response.status().is_success(),
+            "Response didn't return a status code of 2xx"
+        );
+        // endregion
+
+        // region: Save response body
+        test_context.goldrust.save(response.body)?;
+        // endregion
+
+        Ok(())
     }
 }

@@ -16,7 +16,7 @@ use wiremock::{Mock, ResponseTemplate};
 pub struct TestContext {
     pub api: OpenDartApi,
     pub mock_server: wiremock::MockServer,
-    goldrust: Goldrust,
+    pub goldrust: Goldrust,
 }
 
 impl TestContext {
@@ -68,9 +68,9 @@ impl TestContext {
     }
 
     #[tracing::instrument(skip(self))]
-    pub async fn test_endpoint_default<R>(&mut self, api_path: &str) -> anyhow::Result<()>
+    pub async fn arrange_test_endpoint<R>(&mut self, api_path: &str) -> anyhow::Result<()>
     where
-        R: Serialize + DeserializeOwned,
+        R: Serialize + DeserializeOwned + std::fmt::Debug,
     {
         let response_source = &self.goldrust.response_source;
         let golden_file_path = &self.goldrust.golden_file_path;
@@ -92,8 +92,11 @@ impl TestContext {
                 let response = ResponseTemplate::new(200).set_body_json(&golden_file_body);
 
                 Mock::given(method("GET"))
-                    .and(path(api_path.to_string()))
-                    .respond_with(response)
+                    .and(path(api_path))
+                    .respond_with({
+                        tracing::debug!(?golden_file_body, "Responding from mock server");
+                        response
+                    })
                     .mount(&self.mock_server)
                     .await;
             }
@@ -101,25 +104,6 @@ impl TestContext {
                 tracing::debug!(?response_source, "Getting response body from external API");
             }
         }
-        // endregion
-
-        // region: Action
-        let response = self
-            .api
-            .get_list(Default::default())
-            .await
-            .context("get_list should succeed")?;
-        // endregion
-
-        // region: Assert
-        assert!(
-            response.status().is_success(),
-            "Response didn't return a status code of 2xx"
-        );
-        // endregion
-
-        // region: Save response body
-        self.goldrust.save(response.body)?;
         // endregion
 
         Ok(())
