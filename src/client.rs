@@ -137,17 +137,16 @@ impl Default for OpenDartConfig {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_utils::get_test_name;
+    use crate::endpoints::List;
     use crate::TestContext;
 
     #[tokio::test]
     #[tracing::instrument]
     async fn get_list_default() -> anyhow::Result<()> {
-        let test_name = get_test_name();
         let mut test_context = TestContext::new().await;
 
         test_context
-            .test_endpoint_default(&test_name, "/api/list.json")
+            .test_endpoint_default::<List>("/api/list.json")
             .await
     }
 }
