@@ -3,7 +3,6 @@
 use crate::client::{OpenDartApi, OpenDartConfigBuilder};
 use crate::endpoints::OpenDartResponseBody;
 
-use anyhow::Context;
 use goldrust::{goldrust, Goldrust, ResponseSource};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -56,7 +55,7 @@ impl TestContext {
     }
 
     #[tracing::instrument(skip(self))]
-    pub async fn arrange_test_endpoint<R>(&mut self, api_path: &str) -> anyhow::Result<()>
+    pub async fn arrange_test_endpoint<R>(&mut self, api_path: &str)
     where
         R: Serialize + DeserializeOwned + std::fmt::Debug,
     {
@@ -72,10 +71,10 @@ impl TestContext {
                     "Getting response body from file"
                 );
                 let golden_file_str = std::fs::read_to_string(golden_file_path)
-                    .context("Failed to read response body from file")?;
+                    .expect("Failed to read response body from file");
                 let golden_file_body: OpenDartResponseBody<R> =
                     serde_json::from_str(&golden_file_str)
-                        .context("Failed to deserialize response body")?;
+                        .expect("Failed to deserialize response body");
 
                 let response = ResponseTemplate::new(200).set_body_json(&golden_file_body);
 
@@ -93,8 +92,6 @@ impl TestContext {
             }
         }
         // endregion
-
-        Ok(())
     }
 }
 
@@ -112,11 +109,7 @@ pub(crate) mod tracing_setup {
             .pretty()
             .finish();
 
-        tracing::subscriber::set_global_default(subscriber)
-            .inspect_err(|e| {
-                tracing::trace!("Failed to set subscriber: {:?}", e);
-            })
-            .ok();
+        tracing::subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
     }
 
     #[macro_export]

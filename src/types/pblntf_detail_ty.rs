@@ -191,23 +191,20 @@ enum Inner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::Context;
 
     #[test]
-    fn serialize() -> anyhow::Result<()> {
+    fn serialize() {
         let pblntf_detail_ty = PblntfDetailTy(Inner::F001);
-        let serialized = serde_json::to_string(&pblntf_detail_ty).context("Failed to serialize")?;
+        let serialized = serde_json::to_string(&pblntf_detail_ty).expect("Failed to serialize");
         assert_eq!(serialized, r#""F001""#);
-        Ok(())
     }
 
     #[test]
-    fn deserialize() -> anyhow::Result<()> {
+    fn deserialize() {
         let pblntf_detail_ty = PblntfDetailTy(Inner::F001);
         let deserialized: PblntfDetailTy =
-            serde_json::from_str(r#""F001""#).context("Failed to deserialize")?;
+            serde_json::from_str(r#""F001""#).expect("Failed to deserialize");
         assert_eq!(deserialized, pblntf_detail_ty);
-        Ok(())
     }
 
     #[test]

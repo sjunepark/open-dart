@@ -42,29 +42,25 @@ impl MockDefault for CorpName {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::Context;
 
     #[test]
-    fn serialize() -> anyhow::Result<()> {
+    fn serialize() {
         let corp_name =
-            CorpName::try_new("NH투자증권".to_string()).context("failed to create corp_name")?;
-        let serialized = serde_json::to_string(&corp_name).context("failed to serialize")?;
+            CorpName::try_new("NH투자증권".to_string()).expect("failed to create corp_name");
+        let serialized = serde_json::to_string(&corp_name).expect("failed to serialize");
         assert_eq!(serialized, "\"NH투자증권\"");
-        Ok(())
     }
 
     #[test]
-    fn deserialize() -> anyhow::Result<()> {
+    fn deserialize() {
         let corp_name =
-            serde_json::from_str::<CorpName>("\"NH투자증권\"").context("failed to deserialize")?;
+            serde_json::from_str::<CorpName>("\"NH투자증권\"").expect("failed to deserialize");
         assert_eq!(corp_name.into_inner(), "NH투자증권");
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_empty_string_should_fail() -> anyhow::Result<()> {
+    fn try_new_with_empty_string_should_fail() {
         let corp_name = CorpName::try_new("".to_string());
         assert!(corp_name.is_err());
-        Ok(())
     }
 }

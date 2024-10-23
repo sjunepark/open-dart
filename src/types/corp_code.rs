@@ -38,52 +38,45 @@ fn is_digits(s: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::Context;
 
     #[test]
-    fn serialize() -> anyhow::Result<()> {
+    fn serialize() {
         let corp_code =
-            CorpCode::try_new("00120182".to_string()).context("failed to create corp_code")?;
-        let serialized = serde_json::to_string(&corp_code).context("failed to serialize")?;
+            CorpCode::try_new("00120182".to_string()).expect("failed to create corp_code");
+        let serialized = serde_json::to_string(&corp_code).expect("failed to serialize");
         assert_eq!(serialized, "\"00120182\"");
-        Ok(())
     }
 
     #[test]
-    fn deserialize() -> anyhow::Result<()> {
+    fn deserialize() {
         let corp_code =
-            serde_json::from_str::<CorpCode>("\"00120182\"").context("failed to deserialize")?;
+            serde_json::from_str::<CorpCode>("\"00120182\"").expect("failed to deserialize");
         assert_eq!(corp_code.into_inner(), "00120182");
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_valid_length_and_digits_should_succeed() -> anyhow::Result<()> {
+    fn try_new_with_valid_length_and_digits_should_succeed() {
         let corp_code =
-            CorpCode::try_new("00120182".to_string()).context("failed to create corp_code")?;
+            CorpCode::try_new("00120182".to_string()).expect("failed to create corp_code");
         assert_eq!(corp_code.into_inner(), "00120182");
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_whitespace_should_fail() -> anyhow::Result<()> {
+    fn try_new_with_whitespace_should_fail() {
         let corp_code = CorpCode::try_new("00120182 ".to_string());
         assert!(corp_code.is_err());
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_invalid_length_should_fail() -> anyhow::Result<()> {
+    fn try_new_with_invalid_length_should_fail() {
         // Invalid length of 7
         let corp_code = CorpCode::try_new("0012018".to_string());
         assert!(corp_code.is_err());
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_invalid_char_should_fail() -> anyhow::Result<()> {
+    fn try_new_with_invalid_char_should_fail() {
         let corp_code = CorpCode::try_new("0012018a".to_string());
         assert!(corp_code.is_err());
-        Ok(())
     }
 }

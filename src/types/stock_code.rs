@@ -36,52 +36,45 @@ fn is_digits(s: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::Context;
 
     #[test]
-    fn serialize() -> anyhow::Result<()> {
+    fn serialize() {
         let stock_code =
-            StockCode::try_new("005930".to_string()).context("failed to create stock_code")?;
-        let serialized = serde_json::to_string(&stock_code).context("failed to serialize")?;
+            StockCode::try_new("005930".to_string()).expect("failed to create stock_code");
+        let serialized = serde_json::to_string(&stock_code).expect("failed to serialize");
         assert_eq!(serialized, "\"005930\"");
-        Ok(())
     }
 
     #[test]
-    fn deserialize() -> anyhow::Result<()> {
+    fn deserialize() {
         let stock_code =
-            serde_json::from_str::<StockCode>("\"005930\"").context("failed to deserialize")?;
+            serde_json::from_str::<StockCode>("\"005930\"").expect("failed to deserialize");
         assert_eq!(stock_code.into_inner(), "005930");
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_valid_length_and_digits_should_succeed() -> anyhow::Result<()> {
+    fn try_new_with_valid_length_and_digits_should_succeed() {
         let stock_code =
-            StockCode::try_new("005930".to_string()).context("failed to create stock_code")?;
+            StockCode::try_new("005930".to_string()).expect("failed to create stock_code");
         assert_eq!(stock_code.into_inner(), "005930");
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_whitespace_should_fail() -> anyhow::Result<()> {
+    fn try_new_with_whitespace_should_fail() {
         let stock_code = StockCode::try_new("005930 ".to_string());
         assert!(stock_code.is_err());
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_invalid_length_should_fail() -> anyhow::Result<()> {
+    fn try_new_with_invalid_length_should_fail() {
         // Invalid length of 7
         let stock_code = StockCode::try_new("0059301".to_string());
         assert!(stock_code.is_err());
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_invalid_char_should_fail() -> anyhow::Result<()> {
+    fn try_new_with_invalid_char_should_fail() {
         let stock_code = StockCode::try_new("00593a".to_string());
         assert!(stock_code.is_err());
-        Ok(())
     }
 }

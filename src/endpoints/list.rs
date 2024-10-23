@@ -110,10 +110,9 @@ struct ListCorp {
 mod tests {
     use super::*;
     use crate::test_utils::MockDefault;
-    use anyhow::Context;
 
     #[test]
-    fn list_request_params_builder_works_with_all_fields_specified() -> anyhow::Result<()> {
+    fn list_request_params_builder_works_with_all_fields_specified() {
         let corp_code = CorpCode::mock_default();
         let bgn_de = BgnDe::mock_default();
         let end_de = EndDe::mock_default();
@@ -139,7 +138,7 @@ mod tests {
             .page_no(page_no)
             .page_count(page_count)
             .build()
-            .context("ListRequestParams should build")?;
+            .expect("ListRequestParams should build");
 
         assert_eq!(params.corp_code, Some(corp_code));
         assert_eq!(params.bgn_de, Some(bgn_de));
@@ -152,7 +151,5 @@ mod tests {
         assert_eq!(params.sort_mth, Some(sort_mth));
         assert_eq!(params.page_no, Some(page_no));
         assert_eq!(params.page_count, Some(page_count));
-
-        Ok(())
     }
 }

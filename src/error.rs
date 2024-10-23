@@ -15,9 +15,6 @@ pub enum OpenDartError {
     /// OpenDart returns error object with details of API call failure
     #[error("{0}")]
     ApiError(String),
-    /// Validation error for struct fields
-    #[error("{0}")]
-    Validation(#[from] validator::ValidationErrors),
 }
 
 impl From<UninitializedFieldError> for OpenDartError {
