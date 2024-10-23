@@ -11,7 +11,7 @@ name: check
 
 env:
   RUST_LOG: ${{ vars.RUST_LOG }}
-  NOPECHA_API_KEY: ${{ secrets.NOPECHA_API_KEY }}
+  OPEN_DART_API_KEY: ${{ vars.OPEN_DART_API_KEY }}
 
 permissions:
   contents: read
