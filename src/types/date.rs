@@ -86,77 +86,67 @@ impl MockDefault for Date {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::Context;
 
     #[test]
-    fn serialize() -> anyhow::Result<()> {
-        let date = NaiveDate::from_ymd_opt(2021, 1, 1).context("failed to create NaiveDate")?;
-        let date = Date::try_new(date).context("failed to create date")?;
-        let serialized = serde_json::to_string(&date).context("failed to serialize")?;
+    fn serialize() {
+        let date = NaiveDate::from_ymd_opt(2021, 1, 1).expect("failed to create NaiveDate");
+        let date = Date::try_new(date).expect("failed to create date");
+        let serialized = serde_json::to_string(&date).expect("failed to serialize");
         assert_eq!(serialized, "\"20210101\"");
-        Ok(())
     }
 
     #[test]
-    fn deserialize() -> anyhow::Result<()> {
-        let date = serde_json::from_str::<Date>("\"20210101\"").context("failed to deserialize")?;
+    fn deserialize() {
+        let date = serde_json::from_str::<Date>("\"20210101\"").expect("failed to deserialize");
         let expected_date =
-            NaiveDate::from_ymd_opt(2021, 1, 1).context("failed to create NaiveDate")?;
+            NaiveDate::from_ymd_opt(2021, 1, 1).expect("failed to create NaiveDate");
         assert_eq!(date.into_inner(), expected_date);
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_valid_date_should_succeed() -> anyhow::Result<()> {
+    fn try_new_with_valid_date_should_succeed() {
         let expected_date =
-            NaiveDate::from_ymd_opt(2021, 1, 1).context("failed to create NaiveDate")?;
-        let date = Date::try_new(expected_date).context("failed to create Date")?;
+            NaiveDate::from_ymd_opt(2021, 1, 1).expect("failed to create NaiveDate");
+        let date = Date::try_new(expected_date).expect("failed to create Date");
         assert_eq!(date.into_inner(), expected_date);
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_future_date_should_fail() -> anyhow::Result<()> {
+    fn try_new_with_future_date_should_fail() {
         let date = chrono::Local::now().naive_local() + chrono::Duration::days(1);
         let date = Date::try_new(date.into());
         assert!(date.is_err());
-        Ok(())
     }
 
     #[test]
-    fn from_str_with_valid_date_should_succeed() -> anyhow::Result<()> {
-        let date = Date::from_str("20210101")?;
+    fn from_str_with_valid_date_should_succeed() {
+        let date = Date::from_str("20210101").expect("failed to create Date");
         let expected_date =
-            NaiveDate::from_ymd_opt(2021, 1, 1).context("failed to create NaiveDate")?;
+            NaiveDate::from_ymd_opt(2021, 1, 1).expect("failed to create NaiveDate");
         assert_eq!(date.into_inner(), expected_date);
-        Ok(())
     }
 
     #[test]
-    fn from_str_with_future_date_should_fail() -> anyhow::Result<()> {
+    fn from_str_with_future_date_should_fail() {
         let date = Date::from_str("99991231");
         assert!(date.is_err());
-        Ok(())
     }
 
     #[test]
-    fn from_str_with_invalid_date_should_fail() -> anyhow::Result<()> {
+    fn from_str_with_invalid_date_should_fail() {
         let date = Date::from_str("20231232");
         assert!(date.is_err());
-        Ok(())
     }
 
     #[test]
-    fn deserialize_future_date_should_fail() -> anyhow::Result<()> {
+    fn deserialize_future_date_should_fail() {
         let result = serde_json::from_str::<Date>("\"99991231\"");
         assert!(result.is_err());
-        Ok(())
     }
 
     #[test]
-    fn deserialize_invalid_date_should_fail() -> anyhow::Result<()> {
+    fn deserialize_invalid_date_should_fail() {
         let result = serde_json::from_str::<Date>("\"18991232\"");
         assert!(result.is_err());
-        Ok(())
     }
 }

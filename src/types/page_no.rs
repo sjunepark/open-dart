@@ -47,34 +47,29 @@ impl MockDefault for PageNo {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::Context;
 
     #[test]
-    fn serialize() -> anyhow::Result<()> {
-        let page_no = PageNo::try_new(101).context("failed to create page_no")?;
-        let serialized = serde_json::to_string(&page_no).context("failed to serialize")?;
+    fn serialize() {
+        let page_no = PageNo::try_new(101).expect("failed to create page_no");
+        let serialized = serde_json::to_string(&page_no).expect("failed to serialize");
         assert_eq!(serialized, "101");
-        Ok(())
     }
 
     #[test]
-    fn deserialize() -> anyhow::Result<()> {
-        let page_no = serde_json::from_str::<PageNo>("101").context("failed to deserialize")?;
+    fn deserialize() {
+        let page_no = serde_json::from_str::<PageNo>("101").expect("failed to deserialize");
         assert_eq!(page_no.into_inner(), 101);
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_valid_range_should_succeed() -> anyhow::Result<()> {
-        let page_no = PageNo::try_new(101).context("failed to create page_no")?;
+    fn try_new_with_valid_range_should_succeed() {
+        let page_no = PageNo::try_new(101).expect("failed to create page_no");
         assert_eq!(page_no.into_inner(), 101);
-        Ok(())
     }
 
     #[test]
-    fn try_new_with_invalid_range_should_fail() -> anyhow::Result<()> {
+    fn try_new_with_invalid_range_should_fail() {
         let page_no = PageNo::try_new(0);
         assert!(page_no.is_err());
-        Ok(())
     }
 }

@@ -120,31 +120,31 @@ mod tests {
     use crate::test_utils::MockDefault;
     use crate::types::{BgnDe, CorpCode};
     use crate::{subscribe_tracing_with_span, test_context, TestContext};
-    use anyhow::Context;
     use goldrust::Content;
 
     #[tokio::test]
     #[tracing::instrument]
-    async fn get_list_default() -> anyhow::Result<()> {
+    async fn get_list_default() {
         subscribe_tracing_with_span!("test");
         let mut test_context = test_context!().await;
 
         test_context
             .arrange_test_endpoint::<List>("/api/list.json")
-            .await?;
+            .await;
 
         // region: Action
         let params = ListRequestParamsBuilder::default()
             .corp_code(CorpCode::mock_default())
             .bgn_de(BgnDe::mock_default())
-            .build()?;
+            .build()
+            .expect("Failed to build ListRequestParams");
         tracing::debug!(?params, "Request parameters");
 
         let response = test_context
             .api
             .get_list(params)
             .await
-            .context("get_list should succeed")?;
+            .expect("get_list should succeed");
         // endregion
 
         // region: Assert
@@ -155,11 +155,13 @@ mod tests {
         // endregion
 
         // region: Save response body
-        test_context.goldrust.save(Content::Json(
-            serde_json::to_value(response.body).expect("Failed to convert to serde_json::Value"),
-        ))?;
+        test_context
+            .goldrust
+            .save(Content::Json(
+                serde_json::to_value(response.body)
+                    .expect("Failed to convert to serde_json::Value"),
+            ))
+            .expect("Failed to save response body");
         // endregion
-
-        Ok(())
     }
 }

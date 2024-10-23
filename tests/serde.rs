@@ -1,4 +1,3 @@
-use anyhow::Context;
 use serde::{Deserialize, Serialize};
 
 // region: rename_all
@@ -11,18 +10,15 @@ enum SortBy {
 }
 
 #[test]
-pub fn serialize_rename_all() -> anyhow::Result<()> {
+pub fn serialize_rename_all() {
     let sort = SortBy::Name;
-    let serialized = serde_json::to_string(&sort).context("Failed to serialize")?;
+    let serialized = serde_json::to_string(&sort).expect("Failed to serialize");
     assert_eq!(serialized, r#""name""#);
-    Ok(())
 }
 
 #[test]
-pub fn deserialize_rename_all() -> anyhow::Result<()> {
-    let _deserialized: SortBy =
-        serde_json::from_str(r#""name""#).context("Failed to deserialize")?;
-    Ok(())
+pub fn deserialize_rename_all() {
+    let _deserialized: SortBy = serde_json::from_str(r#""name""#).expect("Failed to deserialize");
 }
 // endregion
 
@@ -31,17 +27,14 @@ pub fn deserialize_rename_all() -> anyhow::Result<()> {
 struct Outer(SortBy);
 
 #[test]
-pub fn serialize_inner_rename_all() -> anyhow::Result<()> {
+pub fn serialize_inner_rename_all() {
     let outer = Outer(SortBy::Name);
-    let serialized = serde_json::to_string(&outer).context("Failed to serialize")?;
+    let serialized = serde_json::to_string(&outer).expect("Failed to serialize");
     assert_eq!(serialized, r#""name""#);
-    Ok(())
 }
 
 #[test]
-pub fn deserialize_inner_rename_all() -> anyhow::Result<()> {
-    let _deserialized: Outer =
-        serde_json::from_str(r#""name""#).context("Failed to deserialize")?;
-    Ok(())
+pub fn deserialize_inner_rename_all() {
+    let _deserialized: Outer = serde_json::from_str(r#""name""#).expect("Failed to deserialize");
 }
 // endregion

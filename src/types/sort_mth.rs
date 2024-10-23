@@ -45,22 +45,19 @@ enum Inner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::Context;
 
     #[test]
-    fn serialize() -> anyhow::Result<()> {
+    fn serialize() {
         let sort = SortMth::ASC;
-        let serialized = serde_json::to_string(&sort).context("Failed to serialize")?;
+        let serialized = serde_json::to_string(&sort).expect("Failed to serialize");
         assert_eq!(serialized, r#""asc""#);
-        Ok(())
     }
 
     #[test]
-    fn deserialize() -> anyhow::Result<()> {
+    fn deserialize() {
         let deserialized: SortMth =
-            serde_json::from_str(r#""asc""#).context("Failed to deserialize")?;
+            serde_json::from_str(r#""asc""#).expect("Failed to deserialize");
         assert_eq!(deserialized, SortMth::ASC);
-        Ok(())
     }
 
     #[test]
