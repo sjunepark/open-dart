@@ -1,30 +1,46 @@
 use crate::assert_impl_commons_without_default;
-use nutype::nutype;
-use std::fmt::Display;
+use derive_more::{AsRef, Display};
+use serde::{Deserialize, Serialize};
+
+use crate::error::{OpenDartError, ValidationError};
+#[cfg(feature = "diesel")]
+use diesel_derive_newtype::DieselNewType;
 
 assert_impl_commons_without_default!(CorpName);
 
 /// ### 종목명(법인명)
 /// 공시대상회사의 종목명(상장사) 또는 법인명(기타법인)
-#[nutype(
-    validate(not_empty),
-    derive(
-        Clone,
-        Eq,
-        PartialEq,
-        Ord,
-        PartialOrd,
-        Debug,
-        Serialize,
-        Deserialize,
-        AsRef
-    )
+#[derive(
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    // derive_more
+    AsRef,
+    Display,
+    // serde
+    Serialize,
+    Deserialize,
 )]
+#[cfg_attr(feature = "diesel", derive(DieselNewType))]
 pub struct CorpName(String);
 
-impl Display for CorpName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_ref())
+impl CorpName {
+    pub fn try_new(value: &str) -> Result<Self, OpenDartError> {
+        if value.is_empty() {
+            return Err(ValidationError {
+                value: value.to_string(),
+                message: "empty string is not allowed".to_string(),
+            })?;
+        };
+        Ok(Self(value.to_string()))
+    }
+
+    pub fn into_inner(self) -> String {
+        self.0
     }
 }
 
@@ -45,8 +61,7 @@ mod tests {
 
     #[test]
     fn serialize() {
-        let corp_name =
-            CorpName::try_new("NH투자증권".to_string()).expect("failed to create corp_name");
+        let corp_name = CorpName::try_new("NH투자증권").expect("failed to create corp_name");
         let serialized = serde_json::to_string(&corp_name).expect("failed to serialize");
         assert_eq!(serialized, "\"NH투자증권\"");
     }
@@ -60,7 +75,7 @@ mod tests {
 
     #[test]
     fn try_new_with_empty_string_should_fail() {
-        let corp_name = CorpName::try_new("".to_string());
+        let corp_name = CorpName::try_new("");
         assert!(corp_name.is_err());
     }
 }
