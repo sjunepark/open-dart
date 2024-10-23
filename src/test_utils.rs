@@ -109,11 +109,7 @@ pub(crate) mod tracing_setup {
             .pretty()
             .finish();
 
-        tracing::subscriber::set_global_default(subscriber)
-            .inspect_err(|e| {
-                tracing::trace!("Failed to set subscriber: {:?}", e);
-            })
-            .ok();
+        tracing::subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
     }
 
     #[macro_export]

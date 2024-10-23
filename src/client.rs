@@ -1,5 +1,6 @@
 use crate::endpoints::{List, ListRequestParams, OpenDartResponse, OpenDartResponseBody};
 use crate::error::OpenDartError;
+
 use derive_builder::Builder;
 use reqwest;
 use reqwest::IntoUrl;
