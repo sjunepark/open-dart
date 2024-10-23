@@ -10,7 +10,6 @@ edition = "2021"
 anyhow = "1.0.86"
 bytes = "1.6.1"
 chrono = { version = "0.4.38", features = ["serde"] }
-config = "0.14.0"
 const_format = "0.2.33"
 derive_builder = "0.20.0"
 derive_more = { version = "1.0.0", features = ["as_ref", "display", "from", "from_str"] }
