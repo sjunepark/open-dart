@@ -7,11 +7,11 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
-syn = { version = "2.0.77", features = ["parsing"] }
+syn = { version = "2.0.82", features = ["parsing"] }
 quote = "1.0.37"
 
 [dev-dependencies]
-trybuild = "1.0.99"
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = "1.0.128"
+trybuild = "1.0.101"
+serde = { version = "1.0.213", features = ["derive"] }
+serde_json = "1.0.132"
 derive_more = { version = "1.0.0", features = ["as_ref", "display"] }
