@@ -8,10 +8,9 @@ use crate::types::{
     StockCode, TotalCount, TotalPage, YesNo,
 };
 use crate::types::{EndDe, PblntfDetailTy};
+
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
-
-assert_impl_commons!(ListRequestParams);
 
 // region: Request Params
 /// Documentation exists in each field's types
@@ -37,6 +36,7 @@ pub struct ListRequestParams {
     pub page_no: Option<PageNo>,
     pub page_count: Option<PageCount>,
 }
+assert_impl_commons!(ListRequestParams);
 
 impl std::fmt::Display for ListRequestParams {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

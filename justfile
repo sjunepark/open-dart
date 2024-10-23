@@ -1,29 +1,76 @@
-set dotenv-required
-set dotenv-filename := ".env.dev"
+# Tests are run by nextest
+# --all-features is not passed since `minify-html` is a optional dependency which takes long to compile,
+# and is not going to be included in local development.
+# CI will run with the `--all-features` flag.
 
+set dotenv-required := true
+set dotenv-filename := ".env"
+
+watch_base := "cargo watch -q -c -i 'tests/resources/**/*'"
+no_capture := if env_var("TEST_LOG") == "true" { "--no-capture" } else { "" }
+
+run bin="":
+    clear
+    cargo run --bin {{ bin }} -r
 
 # Watch
 
 watch:
-     cargo watch -i "tests/resources/**/*" -q -c -x "c" --env-file .env.dev
+    {{ watch_base }} -x "c --all-targets"
 
 watch-test name="":
-    cargo watch -i "tests/resources/**/*" -q -c -s "just test {{name}}" --env-file .env.dev
+    {{ watch_base }} -s "just test {{ name }}"
 
-watch-example name="":
-    cargo watch -i "tests/resources/**/*" -q -c -x "run --example {{name}}" --env-file .env.dev
+watch-test-pkg pkg:
+    {{ watch_base }} -s "just test-pkg {{ pkg }}"
 
-watch-generate_consts:
-    cargo watch -i "tests/resources/**/*" -w generate-consts -q -c -x "test -p generate_consts -- --nocapture" --env-file .env.dev
+watch-example package name:
+    {{ watch_base }} -s "just example {{ package }} {{ name }}"
 
 watch-test-integration:
-    cargo watch -i "tests/resources/**/*" -w tests -q -c -x 'test --test "*" -- --nocapture' --env-file .env.dev
+    {{ watch_base }} -x "nextest run -E 'kind(test)'"
 
+watch-bench name="":
+    {{ watch_base }} -s "just bench {{ name }}"
 
 # Individual commands
 
 test name="":
-    cargo test --all-features {{name}} -- --nocapture
+    clear
+    cargo nextest run {{ no_capture }} --all-targets {{ name }}
 
-example name="":
-    cargo run --example {{name}}
+test-pkg pkg:
+    clear
+    cargo nextest run --all-targets --package {{ pkg }}
+
+test-doc:
+    clear
+    cargo test --doc
+
+check-lib-bins:
+    clear
+    cargo check --lib --bins
+
+example package name:
+    clear
+    cargo run -p {{ package }} --example {{ name }}
+
+bench package name="":
+    clear
+    cargo bench --all-features --all-targets -p {{ package }} {{ name }}
+
+cov:
+    clear
+    rustup run nightly cargo llvm-cov nextest --open --lib --locked
+
+lint:
+    clear
+    cargo clippy --all-targets --locked
+
+tree crate:
+    clear
+    cargo tree --all-features --all-targets -i {{ crate }}
+
+# Others
+git-gc:
+    git gc --prune=now --aggressive

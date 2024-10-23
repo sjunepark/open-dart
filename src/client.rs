@@ -1,5 +1,5 @@
 use crate::endpoints::{List, ListRequestParams, OpenDartResponse, OpenDartResponseBody};
-use crate::error::{map_deserialization_error, OpenDartError};
+use crate::error::OpenDartError;
 use derive_builder::Builder;
 use reqwest;
 use reqwest::IntoUrl;
@@ -23,10 +23,6 @@ impl OpenDartApi {
 
     // region: Public APIs
     pub fn new(config: OpenDartConfig) -> Self {
-        if config.api_version != 1 {
-            panic!("The only supported API version is 1");
-        }
-
         Self {
             client: reqwest::Client::builder()
                 .default_headers(Self::default_headers())
@@ -34,10 +30,6 @@ impl OpenDartApi {
                 .expect("Failed to build reqwest client"),
             config,
         }
-    }
-
-    pub fn set_domain(&mut self, domain: &str) {
-        self.config.domain = domain.to_string();
     }
 
     pub async fn get_list(
@@ -58,17 +50,16 @@ impl OpenDartApi {
     where
         U: Display + IntoUrl,
         P: Serialize,
-        R: Serialize + DeserializeOwned,
+        R: Serialize + DeserializeOwned + std::fmt::Debug,
     {
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
+        tracing::trace!(response = ?response, "Got response");
 
         let headers = response.headers().clone();
         let status = response.status();
 
-        let bytes = response.bytes().await?;
-        let response_body: OpenDartResponseBody<R> =
-            serde_json::from_slice(&bytes).map_err(|e| map_deserialization_error(e, &bytes))?;
+        let response_body = response.json::<OpenDartResponseBody<R>>().await?;
 
         let response = OpenDartResponse::new(status, headers, response_body);
         Ok(response)
@@ -93,7 +84,7 @@ impl OpenDartApi {
         );
         headers
     }
-    // endregion
+    // endregion: Public APIs
 }
 
 impl Default for OpenDartApi {
@@ -110,44 +101,65 @@ impl Default for OpenDartApi {
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct OpenDartConfig {
-    /// API version to use
-    api_version: u32,
     /// The domain, which will default to 'https://opendart.fss.or.kr'
     /// This field exists to be adjusted in testing environments
     domain: String,
 }
 
-impl OpenDartConfig {
-    pub fn set_domain(&mut self, domain: &str) {
-        self.domain = domain.to_string();
-    }
-}
-
 impl Default for OpenDartConfig {
     fn default() -> Self {
-        let api_version = 1;
         let domain = "https://opendart.fss.or.kr".to_string();
 
-        Self {
-            api_version,
-            domain,
-        }
+        Self { domain }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::test_utils::get_test_name;
-    use crate::TestContext;
+    use crate::endpoints::{List, ListRequestParamsBuilder};
+    use crate::test_utils::MockDefault;
+    use crate::types::{BgnDe, CorpCode};
+    use crate::{subscribe_tracing_with_span, test_context, TestContext};
+    use anyhow::Context;
+    use goldrust::Content;
 
     #[tokio::test]
     #[tracing::instrument]
     async fn get_list_default() -> anyhow::Result<()> {
-        let test_name = get_test_name();
-        let mut test_context = TestContext::new().await;
+        subscribe_tracing_with_span!("test");
+        let mut test_context = test_context!().await;
 
         test_context
-            .test_endpoint_default(&test_name, "/api/list.json")
+            .arrange_test_endpoint::<List>("/api/list.json")
+            .await?;
+
+        // region: Action
+        let params = ListRequestParamsBuilder::default()
+            .corp_code(CorpCode::mock_default())
+            .bgn_de(BgnDe::mock_default())
+            .build()?;
+        tracing::debug!(?params, "Request parameters");
+
+        let response = test_context
+            .api
+            .get_list(params)
             .await
+            .context("get_list should succeed")?;
+        // endregion
+
+        // region: Assert
+        assert!(
+            response.status().is_success(),
+            "Response didn't return a status code of 2xx"
+        );
+        // endregion
+
+        // region: Save response body
+        test_context.goldrust.save(Content::Json(
+            serde_json::to_value(response.body).expect("Failed to convert to serde_json::Value"),
+        ))?;
+        // endregion
+
+        Ok(())
     }
 }
