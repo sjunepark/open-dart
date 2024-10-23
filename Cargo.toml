@@ -7,35 +7,27 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-generate_consts = { path = "generate-consts" }
-
+anyhow = "1.0.86"
+bytes = "1.6.1"
+chrono = { version = "0.4.38", features = ["serde"] }
 config = "0.14.0"
-
+const_format = "0.2.33"
 derive_builder = "0.20.0"
 derive_more = { version = "1.0.0", features = ["as_ref", "display", "from", "from_str"] }
-
-bytes = "1.6.1"
+generate_consts = { path = "generate-consts" }
+impls = "1.0.3"
+nutype = { version = "0.5.0", features = ["serde"] }
 reqwest = { version = "0.12.5", features = ["json"] }
-tokio = { version = "1.38.1", features = ["full"] }
-
-anyhow = "1.0.86"
-thiserror = "1.0.63"
-
 serde = { version = "1.0.204", features = ["derive"] }
 serde_json = "1.0.120"
-
+static_assertions = "1.1.0"
+thiserror = "1.0.63"
+tokio = { version = "1.38.1", features = ["full"] }
 tracing = "0.1.40"
 validator = { version = "0.18.1", features = ["derive"] }
-static_assertions = "1.1.0"
-nutype = { version = "0.5.0", features = ["serde"] }
-impls = "1.0.3"
-const_format = "0.2.33"
-
-chrono = { version = "0.4.38", features = ["serde"] }
 
 [dev-dependencies]
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+goldrust = "0.1.10"
 tracing-log = "0.2.0"
-
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 wiremock = "0.6.2"
-goldrust = { path = "../goldrust" }

@@ -2,15 +2,20 @@
 
 use crate::client::{OpenDartApi, OpenDartConfigBuilder};
 use crate::endpoints::OpenDartResponseBody;
+
 use anyhow::Context;
-use goldrust::{Goldrust, ResponseSource};
+use goldrust::{goldrust, Goldrust, ResponseSource};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use tracing::metadata::LevelFilter;
-use tracing_log::AsLog;
-use tracing_subscriber::EnvFilter;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, ResponseTemplate};
+
+#[macro_export]
+macro_rules! test_context {
+    () => {
+        TestContext::new($crate::function_id!())
+    };
+}
 
 #[derive(Debug)]
 pub struct TestContext {
@@ -20,29 +25,12 @@ pub struct TestContext {
 }
 
 impl TestContext {
-    pub async fn new() -> Self {
-        // region: Tracing setup
-        let subscriber = tracing_subscriber::fmt()
-            .with_env_filter(EnvFilter::from_default_env())
-            .pretty()
-            .finish();
-
-        let _ = tracing::subscriber::set_global_default(subscriber);
-
-        let current_level = LevelFilter::current();
-
-        let _ = tracing_log::LogTracer::builder()
-            // Note that we must call this *after* setting the global default subscriber
-            // so that we get its max level hint.
-            .with_max_level(current_level.as_log())
-            .init();
-        // endregion
+    pub async fn new(function_id: &str) -> Self {
+        let goldrust = goldrust!("json", function_id);
 
         // region: Mock server setup
         let mock_server = wiremock::MockServer::start().await;
         // endregion
-
-        let goldrust = Goldrust::default();
 
         // region: Goldrust setup
         let domain = match goldrust.response_source {
@@ -112,4 +100,47 @@ impl TestContext {
 
 pub trait MockDefault: Sized {
     fn mock_default() -> Self;
+}
+
+pub(crate) mod tracing_setup {
+    use tracing_subscriber::EnvFilter;
+
+    pub fn subscribe() {
+        let subscriber = tracing_subscriber::fmt()
+            .with_test_writer()
+            .with_env_filter(EnvFilter::from_default_env())
+            .pretty()
+            .finish();
+
+        tracing::subscriber::set_global_default(subscriber)
+            .inspect_err(|e| {
+                tracing::trace!("Failed to set subscriber: {:?}", e);
+            })
+            .ok();
+    }
+
+    #[macro_export]
+    macro_rules! subscribe_tracing_with_span {
+        ($span_name:expr) => {
+            $crate::subscribe();
+
+            let function_id = $crate::function_id!();
+            let _span = tracing::info_span!($span_name, ?function_id).entered();
+        };
+    }
+}
+
+#[macro_export]
+macro_rules! function_id {
+    () => {{
+        fn f() {}
+        fn type_name_of_val<T>(_: T) -> &'static str {
+            std::any::type_name::<T>()
+        }
+        let mut name = type_name_of_val(f).strip_suffix("::f").unwrap_or("");
+        while let Some(rest) = name.strip_suffix("::{{closure}}") {
+            name = rest;
+        }
+        &name.replace("::", "-")
+    }};
 }

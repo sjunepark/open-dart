@@ -6,5 +6,5 @@ pub mod types;
 mod statics;
 
 #[cfg(test)]
-pub use test_utils::TestContext;
+pub(crate) use test_utils::{tracing_setup::subscribe, TestContext};
 mod test_utils;

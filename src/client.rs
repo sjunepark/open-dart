@@ -23,10 +23,6 @@ impl OpenDartApi {
 
     // region: Public APIs
     pub fn new(config: OpenDartConfig) -> Self {
-        if config.api_version != 1 {
-            panic!("The only supported API version is 1");
-        }
-
         Self {
             client: reqwest::Client::builder()
                 .default_headers(Self::default_headers())
@@ -34,10 +30,6 @@ impl OpenDartApi {
                 .expect("Failed to build reqwest client"),
             config,
         }
-    }
-
-    pub fn set_domain(&mut self, domain: &str) {
-        self.config.domain = domain.to_string();
     }
 
     pub async fn get_list(
@@ -92,7 +84,7 @@ impl OpenDartApi {
         );
         headers
     }
-    // endregion
+    // endregion: Public APIs
 }
 
 impl Default for OpenDartApi {
@@ -109,28 +101,16 @@ impl Default for OpenDartApi {
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct OpenDartConfig {
-    /// API version to use
-    api_version: u32,
     /// The domain, which will default to 'https://opendart.fss.or.kr'
     /// This field exists to be adjusted in testing environments
     domain: String,
 }
 
-impl OpenDartConfig {
-    pub fn set_domain(&mut self, domain: &str) {
-        self.domain = domain.to_string();
-    }
-}
-
 impl Default for OpenDartConfig {
     fn default() -> Self {
-        let api_version = 1;
         let domain = "https://opendart.fss.or.kr".to_string();
 
-        Self {
-            api_version,
-            domain,
-        }
+        Self { domain }
     }
 }
 
@@ -139,13 +119,15 @@ mod tests {
     use crate::endpoints::{List, ListRequestParamsBuilder};
     use crate::test_utils::MockDefault;
     use crate::types::{BgnDe, CorpCode};
-    use crate::TestContext;
+    use crate::{subscribe_tracing_with_span, test_context, TestContext};
     use anyhow::Context;
+    use goldrust::Content;
 
     #[tokio::test]
     #[tracing::instrument]
     async fn get_list_default() -> anyhow::Result<()> {
-        let mut test_context = TestContext::new().await;
+        subscribe_tracing_with_span!("test");
+        let mut test_context = test_context!().await;
 
         test_context
             .arrange_test_endpoint::<List>("/api/list.json")
@@ -173,7 +155,9 @@ mod tests {
         // endregion
 
         // region: Save response body
-        test_context.goldrust.save(response.body)?;
+        test_context.goldrust.save(Content::Json(
+            serde_json::to_value(response.body).expect("Failed to convert to serde_json::Value"),
+        ))?;
         // endregion
 
         Ok(())
