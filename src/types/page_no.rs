@@ -34,9 +34,7 @@ impl Display for PageNo {
 }
 
 #[cfg(test)]
-use crate::test_utils::MockDefault;
-#[cfg(test)]
-impl MockDefault for PageNo {
+impl crate::test_utils::MockDefault for PageNo {
     fn mock_default() -> Self {
         let page_no = 1;
         PageNo::try_new(page_no)

@@ -35,9 +35,7 @@ impl Display for PageCount {
 }
 
 #[cfg(test)]
-use crate::test_utils::MockDefault;
-#[cfg(test)]
-impl MockDefault for PageCount {
+impl crate::test_utils::MockDefault for PageCount {
     fn mock_default() -> Self {
         let page_count = 1;
         PageCount::try_new(page_count)

@@ -1,42 +1,27 @@
-use crate::assert_impl_commons_without_default;
-use derive_more::{AsMut, AsRef, Display};
-use generate_consts::generate_consts;
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
+
+use crate::assert_impl_commons_without_default;
 
 assert_impl_commons_without_default!(PblntfDetailTy);
 
 /// ### 공시상세유형
-/// The detailed documentation exists on each constants(A001, A002, ...).
-///
-/// A: 정기공시
-/// B: 주요사항보고
-/// C: 발행공시
-/// D: 지분공시
-/// E: 기타공시
-/// F: 외부감사관련
-/// G: 펀드공시
-/// H: 자산유동화
-/// I: 거래소공시
-/// J: 공정위공시
+/// The detailed documentation exists on each constant(A001, A002, ...).
 #[derive(
-    Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize, AsMut, AsRef,
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    // derive_more
+    Display,
+    // serde
+    Serialize,
+    Deserialize,
 )]
-pub struct PblntfDetailTy(Inner);
-
-#[cfg(test)]
-use crate::test_utils::MockDefault;
-
-#[cfg(test)]
-impl MockDefault for PblntfDetailTy {
-    fn mock_default() -> Self {
-        Self(Inner::F001)
-    }
-}
-
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize)]
-#[display("{_variant}")]
-#[generate_consts(PblntfDetailTy)]
-enum Inner {
+pub enum PblntfDetailTy {
     // region A 정기공시
     /// 사업보고서
     A001,
@@ -189,19 +174,26 @@ enum Inner {
 }
 
 #[cfg(test)]
+impl crate::test_utils::MockDefault for PblntfDetailTy {
+    fn mock_default() -> Self {
+        Self::F001
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn serialize() {
-        let pblntf_detail_ty = PblntfDetailTy(Inner::F001);
+        let pblntf_detail_ty = PblntfDetailTy::F001;
         let serialized = serde_json::to_string(&pblntf_detail_ty).expect("Failed to serialize");
         assert_eq!(serialized, r#""F001""#);
     }
 
     #[test]
     fn deserialize() {
-        let pblntf_detail_ty = PblntfDetailTy(Inner::F001);
+        let pblntf_detail_ty = PblntfDetailTy::F001;
         let deserialized: PblntfDetailTy =
             serde_json::from_str(r#""F001""#).expect("Failed to deserialize");
         assert_eq!(deserialized, pblntf_detail_ty);
@@ -209,6 +201,6 @@ mod tests {
 
     #[test]
     fn display() {
-        assert_eq!(PblntfDetailTy(Inner::F001).to_string(), "F001");
+        assert_eq!(PblntfDetailTy::F001.to_string(), "F001");
     }
 }

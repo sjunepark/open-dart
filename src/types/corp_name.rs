@@ -47,9 +47,7 @@ impl CorpName {
 }
 
 #[cfg(test)]
-use crate::test_utils::MockDefault;
-#[cfg(test)]
-impl MockDefault for CorpName {
+impl crate::test_utils::MockDefault for CorpName {
     fn mock_default() -> Self {
         let name = "NH투자증권".to_string();
         CorpName::try_new(&name)

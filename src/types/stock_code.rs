@@ -19,9 +19,7 @@ impl Display for StockCode {
 }
 
 #[cfg(test)]
-use crate::test_utils::MockDefault;
-#[cfg(test)]
-impl MockDefault for StockCode {
+impl crate::test_utils::MockDefault for StockCode {
     fn mock_default() -> Self {
         let stock_code = "005930".to_string();
         StockCode::try_new(&stock_code)

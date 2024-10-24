@@ -1,45 +1,41 @@
-use crate::assert_impl_commons_without_default;
-use derive_more::{AsMut, AsRef, Display, FromStr};
-use generate_consts::generate_consts;
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::fmt::Formatter;
+
+use crate::assert_impl_commons_without_default;
 
 assert_impl_commons_without_default!(SortMth);
 
 /// ### 정렬방법
 ///
-/// - asc : 오름차순
-/// - desc : 내림차순
-///
 /// ※ 기본값 : desc
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, AsRef, AsMut)]
-pub struct SortMth(Inner);
-
-impl Display for SortMth {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_ref())
-    }
-}
-
-#[cfg(test)]
-use crate::test_utils::MockDefault;
-#[cfg(test)]
-impl MockDefault for SortMth {
-    fn mock_default() -> Self {
-        Self(Inner::Dsc)
-    }
-}
-
-#[allow(non_upper_case_globals)]
 #[derive(
-    Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display, Serialize, Deserialize, FromStr,
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    // derive_more
+    Display,
+    // serde
+    Serialize,
+    Deserialize,
 )]
+#[allow(non_upper_case_globals)]
 #[serde(rename_all = "lowercase")]
-#[display("{_variant}")]
-#[generate_consts(SortMth)]
-enum Inner {
+pub enum SortMth {
+    /// 오름차순
     Asc,
-    Dsc,
+    /// 내림차순
+    Desc,
+}
+
+#[cfg(test)]
+impl crate::test_utils::MockDefault for SortMth {
+    fn mock_default() -> Self {
+        Self::Desc
+    }
 }
 
 #[cfg(test)]
@@ -48,7 +44,7 @@ mod tests {
 
     #[test]
     fn serialize() {
-        let sort = SortMth::ASC;
+        let sort = SortMth::Asc;
         let serialized = serde_json::to_string(&sort).expect("Failed to serialize");
         assert_eq!(serialized, r#""asc""#);
     }
@@ -57,11 +53,11 @@ mod tests {
     fn deserialize() {
         let deserialized: SortMth =
             serde_json::from_str(r#""asc""#).expect("Failed to deserialize");
-        assert_eq!(deserialized, SortMth::ASC);
+        assert_eq!(deserialized, SortMth::Asc);
     }
 
     #[test]
     fn display() {
-        assert_eq!(SortMth::ASC.to_string(), "Asc");
+        assert_eq!(SortMth::Asc.to_string(), "Asc");
     }
 }

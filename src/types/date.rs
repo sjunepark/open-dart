@@ -90,9 +90,7 @@ mod opendart_date_format {
 }
 
 #[cfg(test)]
-use crate::test_utils::MockDefault;
-#[cfg(test)]
-impl MockDefault for Date {
+impl crate::test_utils::MockDefault for Date {
     fn mock_default() -> Self {
         let today = chrono::Local::now().naive_local().date();
         let year_before = today - chrono::Duration::days(365);
