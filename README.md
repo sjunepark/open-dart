@@ -1,10 +1,7 @@
 ## Todos
 
-- [ ] Check clippy. The below doesn't work
-    ```rust
-    #[allow(non_camel_case_types)]
-    #[allow(non_upper_case_globals)]
-    ```
+- [ ] Test diesel
+- [ ] Use `time` instead of `chrono`
 - [ ] Finish implementing types
 
 ## Limitations

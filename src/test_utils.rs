@@ -18,6 +18,7 @@ macro_rules! test_context {
 
 #[derive(Debug)]
 pub struct TestContext {
+    function_id: String,
     pub api: OpenDartApi,
     pub mock_server: wiremock::MockServer,
     pub goldrust: Goldrust,
@@ -48,6 +49,7 @@ impl TestContext {
         // endregion
 
         Self {
+            function_id: function_id.to_string(),
             api,
             mock_server,
             goldrust,
@@ -136,4 +138,18 @@ macro_rules! function_id {
         }
         &name.replace("::", "-")
     }};
+}
+
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_context_function_id_should_be_as_expected() {
+        let ctx = test_context!().await;
+        let expected = function_id!();
+        assert_eq!(
+            ctx.function_id, *expected,
+            "function_id should be as expected"
+        );
+    }
 }

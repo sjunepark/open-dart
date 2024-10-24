@@ -1,4 +1,5 @@
 use crate::types::CrtfcKey;
+use derive_more::Display;
 use reqwest::{header::HeaderMap, StatusCode};
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +13,8 @@ pub trait OpenDartApiKey {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Display)]
+#[display("status: {status}, message: {message}")]
 pub struct Message {
     /// ### 에러 및 정보 코드
     /// (※메시지 설명 참조)
@@ -21,18 +23,6 @@ pub struct Message {
     /// ### 에러 및 정보 메시지
     /// (※메시지 설명 참조)
     pub message: String,
-}
-
-impl std::fmt::Display for Message {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "status: {}, message: {}", self.status, self.message)
-    }
-}
-
-impl Message {
-    pub fn is_success(&self) -> bool {
-        self.status == "000"
-    }
 }
 
 #[derive(Debug)]
@@ -54,10 +44,6 @@ impl<R: Serialize> OpenDartResponse<R> {
         }
     }
 
-    pub fn headers(&self) -> &HeaderMap {
-        &self.header_map
-    }
-
     pub fn status(&self) -> StatusCode {
         self.status
     }
@@ -72,8 +58,4 @@ pub struct OpenDartResponseBody<R> {
     pub content: Option<R>,
 }
 
-impl<R> OpenDartResponseBody<R> {
-    pub fn is_success(&self) -> bool {
-        self.message.is_success()
-    }
-}
+impl<R> OpenDartResponseBody<R> {}

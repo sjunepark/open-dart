@@ -4,8 +4,8 @@
 use crate::assert_impl_commons;
 use crate::error::OpenDartError;
 use crate::types::{
-    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, PageCount, PageNo, PblntfTy, Sort, SortMth,
-    StockCode, TotalCount, TotalPage, YesNo,
+    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, LastReprtAt, PageCount, PageNo, PblntfTy, Sort,
+    SortMth, StockCode, TotalCount, TotalPage,
 };
 use crate::types::{EndDe, PblntfDetailTy};
 
@@ -27,7 +27,7 @@ pub struct ListRequestParams {
     pub corp_code: Option<CorpCode>,
     pub bgn_de: Option<BgnDe>,
     pub end_de: Option<EndDe>,
-    pub last_reprt_at: Option<YesNo>,
+    pub last_reprt_at: Option<LastReprtAt>,
     pub pblntf_ty: Option<PblntfTy>,
     pub pblntf_detail_ty: Option<PblntfDetailTy>,
     pub corp_cls: Option<CorpCls>,
@@ -110,6 +110,7 @@ struct ListCorp {
 mod tests {
     use super::*;
     use crate::test_utils::MockDefault;
+    use crate::types::YesNo;
 
     #[test]
     fn list_request_params_builder_works_with_all_fields_specified() {

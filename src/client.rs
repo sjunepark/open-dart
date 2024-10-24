@@ -127,11 +127,9 @@ mod tests {
     #[tracing::instrument]
     async fn get_list_default() {
         subscribe_tracing_with_span!("test");
-        let mut test_context = test_context!().await;
+        let mut ctx = test_context!().await;
 
-        test_context
-            .arrange_test_endpoint::<List>("/api/list.json")
-            .await;
+        ctx.arrange_test_endpoint::<List>("/api/list.json").await;
 
         // region: Action
         let params = ListRequestParamsBuilder::default()
@@ -141,11 +139,12 @@ mod tests {
             .expect("Failed to build ListRequestParams");
         tracing::debug!(?params, "Request parameters");
 
-        let response = test_context
+        let response = ctx
             .api
             .get_list(params)
             .await
             .expect("get_list should succeed");
+        tracing::info!(?response, "Got response");
         // endregion
 
         // region: Assert
@@ -156,8 +155,7 @@ mod tests {
         // endregion
 
         // region: Save response body
-        test_context
-            .goldrust
+        ctx.goldrust
             .save(Content::Json(
                 serde_json::to_value(response.body)
                     .expect("Failed to convert to serde_json::Value"),

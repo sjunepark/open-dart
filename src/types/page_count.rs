@@ -1,7 +1,9 @@
-use crate::assert_impl_commons_without_default;
-use nutype::nutype;
+use derive_more::{AsRef, Display, From, Into};
+use serde::{Deserialize, Serialize};
 use static_assertions::assert_impl_all;
-use std::fmt::Display;
+
+use crate::assert_impl_commons_without_default;
+use crate::error::{OpenDartError, ValidationError};
 
 assert_impl_commons_without_default!(PageCount);
 assert_impl_all! {PageCount: Copy}
@@ -11,33 +13,49 @@ assert_impl_all! {PageCount: Copy}
 ///
 /// - 기본값 : 10
 /// - 최대값 : 100
-#[nutype(
-    validate(greater_or_equal = 1, less_or_equal = 100),
-    derive(
-        Clone,
-        Eq,
-        PartialEq,
-        Ord,
-        PartialOrd,
-        Debug,
-        Serialize,
-        Deserialize,
-        AsRef,
-        Copy
-    )
+#[derive(
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    Copy,
+    // derive_more
+    AsRef,
+    Display,
+    From,
+    Into,
+    // serde
+    Serialize,
+    Deserialize,
+)]
+#[cfg_attr(
+    feature = "diesel_newtype",
+    derive(diesel_derive_newtype::DieselNewType)
 )]
 pub struct PageCount(u16);
 
-impl Display for PageCount {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_ref())
+impl PageCount {
+    pub fn try_new(page_count: u16) -> Result<Self, OpenDartError> {
+        if (1..=100).contains(&page_count) {
+            Ok(Self(page_count))
+        } else {
+            Err(ValidationError {
+                value: page_count.to_string(),
+                message: "page_count must be between 1 and 100".to_string(),
+            })?
+        }
+    }
+
+    pub fn into_inner(self) -> u16 {
+        self.0
     }
 }
 
 #[cfg(test)]
-use crate::test_utils::MockDefault;
-#[cfg(test)]
-impl MockDefault for PageCount {
+impl crate::test_utils::MockDefault for PageCount {
     fn mock_default() -> Self {
         let page_count = 1;
         PageCount::try_new(page_count)

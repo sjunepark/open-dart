@@ -1,10 +1,7 @@
-use crate::assert_impl_commons_without_default;
-use derive_more::{AsMut, AsRef, Display, FromStr};
-use generate_consts::generate_consts;
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::fmt::Formatter;
 
-assert_impl_commons_without_default!(CorpCls);
+use crate::assert_impl_commons_without_default;
 
 /// ### 법인구분
 ///
@@ -14,30 +11,21 @@ assert_impl_commons_without_default!(CorpCls);
 /// - E : 기타
 ///
 /// ※ 없으면 전체조회, 복수조건 불가
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, AsRef, AsMut)]
-pub struct CorpCls(Inner);
-
-impl Display for CorpCls {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_ref())
-    }
-}
-
-#[cfg(test)]
-use crate::test_utils::MockDefault;
-#[cfg(test)]
-impl MockDefault for CorpCls {
-    fn mock_default() -> Self {
-        Self(Inner::Y)
-    }
-}
-
 #[derive(
-    Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display, Serialize, Deserialize, FromStr,
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    // derive_more
+    Display,
+    // serde
+    Serialize,
+    Deserialize,
 )]
-#[display("{_variant}")]
-#[generate_consts(CorpCls)]
-enum Inner {
+pub enum CorpCls {
     /// 유가
     Y,
     /// 코스닥
@@ -46,6 +34,14 @@ enum Inner {
     N,
     /// 기타
     E,
+}
+assert_impl_commons_without_default!(CorpCls);
+
+#[cfg(test)]
+impl crate::test_utils::MockDefault for CorpCls {
+    fn mock_default() -> Self {
+        Self::Y
+    }
 }
 
 #[cfg(test)]

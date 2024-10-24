@@ -1,7 +1,8 @@
 use crate::assert_impl_commons_without_default;
-use nutype::nutype;
+use crate::error::{OpenDartError, ValidationError};
+use derive_more::{AsRef, Display, From, Into};
+use serde::{Deserialize, Serialize};
 use static_assertions::assert_impl_all;
-use std::fmt::Display;
 
 assert_impl_commons_without_default!(PageNo);
 assert_impl_all! {PageNo: Copy}
@@ -10,33 +11,49 @@ assert_impl_all! {PageNo: Copy}
 /// 페이지 번호(1~n)
 ///
 /// - 기본값 : 1
-#[nutype(
-    validate(greater_or_equal = 1),
-    derive(
-        Clone,
-        Eq,
-        PartialEq,
-        Ord,
-        PartialOrd,
-        Debug,
-        Serialize,
-        Deserialize,
-        AsRef,
-        Copy
-    )
+#[derive(
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    Copy,
+    // derive_more
+    AsRef,
+    Display,
+    From,
+    Into,
+    // serde
+    Serialize,
+    Deserialize,
 )]
-pub struct PageNo(usize);
+#[cfg_attr(
+    feature = "diesel_newtype",
+    derive(diesel_derive_newtype::DieselNewType)
+)]
+pub struct PageNo(u64);
 
-impl Display for PageNo {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_ref())
+impl PageNo {
+    pub fn try_new(page_no: u64) -> Result<Self, OpenDartError> {
+        if page_no == 0 {
+            Err(ValidationError {
+                value: page_no.to_string(),
+                message: "page_no must be greater than 0".to_string(),
+            })?
+        } else {
+            Ok(Self(page_no))
+        }
+    }
+
+    pub fn into_inner(self) -> u64 {
+        self.0
     }
 }
 
 #[cfg(test)]
-use crate::test_utils::MockDefault;
-#[cfg(test)]
-impl MockDefault for PageNo {
+impl crate::test_utils::MockDefault for PageNo {
     fn mock_default() -> Self {
         let page_no = 1;
         PageNo::try_new(page_no)

@@ -1,41 +1,26 @@
-use crate::assert_impl_commons_without_default;
-use derive_more::{AsMut, AsRef, Display};
-use generate_consts::generate_consts;
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
+
+use crate::assert_impl_commons_without_default;
 
 assert_impl_commons_without_default!(PblntfTy);
 
 /// ### 공시유형
-///
-/// - A : 정기공시
-/// - B : 주요사항보고
-/// - C : 발행공시
-/// - D : 지분공시
-/// - E : 기타공시
-/// - F : 외부감사관련
-/// - G : 펀드공시
-/// - H : 자산유동화
-/// - I : 거래소공시
-/// - J : 공정위공시
 #[derive(
-    Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize, AsMut, AsRef,
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    // derive_more
+    Display,
+    // serde
+    Serialize,
+    Deserialize,
 )]
-pub struct PblntfTy(Inner);
-
-#[cfg(test)]
-use crate::test_utils::MockDefault;
-
-#[cfg(test)]
-impl MockDefault for PblntfTy {
-    fn mock_default() -> Self {
-        Self(Inner::F)
-    }
-}
-
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Display, Serialize, Deserialize)]
-#[display("{_variant}")]
-#[generate_consts(PblntfTy)]
-enum Inner {
+pub enum PblntfTy {
     /// 정기공시
     A,
     /// 주요사항보고
@@ -56,6 +41,13 @@ enum Inner {
     I,
     /// 공정위공시
     J,
+}
+
+#[cfg(test)]
+impl crate::test_utils::MockDefault for PblntfTy {
+    fn mock_default() -> Self {
+        Self::F
+    }
 }
 
 #[cfg(test)]

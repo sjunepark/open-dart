@@ -13,7 +13,8 @@ mod sort_mth;
 mod stock_code;
 mod yes_no;
 
-pub use alias::{BgnDe, EndDe, TotalCount, TotalPage};
+pub use alias::*;
+
 pub use corp_cls::CorpCls;
 pub use corp_code::CorpCode;
 pub use corp_name::CorpName;
