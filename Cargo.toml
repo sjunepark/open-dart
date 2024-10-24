@@ -1,6 +1,3 @@
-[workspace]
-members = ["generate-consts"]
-
 [package]
 name = "open-dart"
 version = "0.0.1"
