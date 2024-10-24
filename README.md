@@ -2,7 +2,6 @@
 
 - [ ] Test diesel
 - [ ] Use `time` instead of `chrono`
-- [ ] Remove nutype
 - [ ] Finish implementing types
 
 ## Limitations

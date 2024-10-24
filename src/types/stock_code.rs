@@ -1,20 +1,48 @@
 use crate::assert_impl_commons_without_default;
-use nutype::nutype;
-use std::fmt::Display;
+use derive_more::{AsRef, Display, From, Into};
+use serde::{Deserialize, Serialize};
 
 assert_impl_commons_without_default!(StockCode);
 
 /// ### 종목코드
 /// 상장회사의 종목코드(6자리)
-#[nutype(
-    validate(len_char_min = 6, len_char_max = 6, predicate = is_digits),
-    derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, AsRef)
+#[derive(
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    // derive_more
+    AsRef,
+    Display,
+    From,
+    Into,
+    // serde
+    Serialize,
+    Deserialize,
+)]
+#[cfg_attr(
+    feature = "diesel_newtype",
+    derive(diesel_derive_newtype::DieselNewType)
 )]
 pub struct StockCode(String);
 
-impl Display for StockCode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_ref())
+impl StockCode {
+    pub fn try_new(value: &str) -> Result<Self, crate::error::OpenDartError> {
+        if value.len() == 6 && is_digits(value) {
+            Ok(Self(value.to_string()))
+        } else {
+            Err(crate::error::ValidationError {
+                value: value.to_string(),
+                message: "stock_code must be 6 digits".to_string(),
+            })?
+        }
+    }
+
+    pub fn into_inner(self) -> String {
+        self.0
     }
 }
 
@@ -37,8 +65,7 @@ mod tests {
 
     #[test]
     fn serialize() {
-        let stock_code =
-            StockCode::try_new("005930".to_string()).expect("failed to create stock_code");
+        let stock_code = StockCode::try_new("005930").expect("failed to create stock_code");
         let serialized = serde_json::to_string(&stock_code).expect("failed to serialize");
         assert_eq!(serialized, "\"005930\"");
     }
@@ -52,27 +79,26 @@ mod tests {
 
     #[test]
     fn try_new_with_valid_length_and_digits_should_succeed() {
-        let stock_code =
-            StockCode::try_new("005930".to_string()).expect("failed to create stock_code");
+        let stock_code = StockCode::try_new("005930").expect("failed to create stock_code");
         assert_eq!(stock_code.into_inner(), "005930");
     }
 
     #[test]
     fn try_new_with_whitespace_should_fail() {
-        let stock_code = StockCode::try_new("005930 ".to_string());
+        let stock_code = StockCode::try_new("005930 ");
         assert!(stock_code.is_err());
     }
 
     #[test]
     fn try_new_with_invalid_length_should_fail() {
         // Invalid length of 7
-        let stock_code = StockCode::try_new("0059301".to_string());
+        let stock_code = StockCode::try_new("0059301");
         assert!(stock_code.is_err());
     }
 
     #[test]
     fn try_new_with_invalid_char_should_fail() {
-        let stock_code = StockCode::try_new("00593a".to_string());
+        let stock_code = StockCode::try_new("00593a");
         assert!(stock_code.is_err());
     }
 }
