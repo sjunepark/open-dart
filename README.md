@@ -1,6 +1,8 @@
 ## Todos
 
-- [ ] Use `time` instead of `chrono`h
+- [ ] Test diesel
+- [ ] Use `time` instead of `chrono`
+- [ ] Remove nutype
 - [ ] Finish implementing types
 
 ## Limitations
