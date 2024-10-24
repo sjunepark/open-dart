@@ -16,7 +16,7 @@ run bin="":
 # Watch
 
 watch:
-    {{ watch_base }} -x "c --all-targets"
+    {{ watch_base }} -x "c --all-targets --all-features"
 
 watch-test name="":
     {{ watch_base }} -s "just test {{ name }}"
@@ -37,11 +37,11 @@ watch-bench name="":
 
 test name="":
     clear
-    cargo nextest run {{ no_capture }} --all-targets {{ name }}
+    cargo nextest run {{ no_capture }} --all-targets --all-features {{ name }}
 
 test-pkg pkg:
     clear
-    cargo nextest run --all-targets --package {{ pkg }}
+    cargo nextest run --all-targets --all--features --package {{ pkg }}
 
 test-doc:
     clear
@@ -57,7 +57,7 @@ example package name:
 
 bench package name="":
     clear
-    cargo bench --all-features --all-targets -p {{ package }} {{ name }}
+    cargo bench --all-features --all-targets --all-features -p {{ package }} {{ name }}
 
 cov:
     clear
@@ -65,7 +65,7 @@ cov:
 
 lint:
     clear
-    cargo clippy --all-targets --locked
+    cargo clippy --all-targets  --all-features --locked
 
 tree crate:
     clear

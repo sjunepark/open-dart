@@ -1,10 +1,8 @@
 use crate::assert_impl_commons_without_default;
-use derive_more::{AsRef, Display};
+use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 
 use crate::error::{OpenDartError, ValidationError};
-#[cfg(feature = "diesel")]
-use diesel_derive_newtype::DieselNewType;
 
 assert_impl_commons_without_default!(CorpName);
 
@@ -21,11 +19,16 @@ assert_impl_commons_without_default!(CorpName);
     // derive_more
     AsRef,
     Display,
+    From,
+    Into,
     // serde
     Serialize,
     Deserialize,
 )]
-#[cfg_attr(feature = "diesel", derive(DieselNewType))]
+#[cfg_attr(
+    feature = "diesel_newtype",
+    derive(diesel_derive_newtype::DieselNewType)
+)]
 pub struct CorpName(String);
 
 impl CorpName {

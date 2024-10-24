@@ -1,11 +1,6 @@
 ## Todos
 
-- [ ] Use `time` instead of `chrono`
-- [ ] Check clippy. The below doesn't work
-    ```rust
-    #[allow(non_camel_case_types)]
-    #[allow(non_upper_case_globals)]
-    ```
+- [ ] Use `time` instead of `chrono`h
 - [ ] Finish implementing types
 
 ## Limitations

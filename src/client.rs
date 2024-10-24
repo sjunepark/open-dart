@@ -144,6 +144,7 @@ mod tests {
             .get_list(params)
             .await
             .expect("get_list should succeed");
+        tracing::info!(?response, "Got response");
         // endregion
 
         // region: Assert

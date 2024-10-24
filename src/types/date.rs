@@ -6,7 +6,7 @@ use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[cfg(feature = "diesel")]
+#[cfg(feature = "diesel_newtype")]
 use diesel_derive_newtype::DieselNewType;
 
 assert_impl_commons_without_default!(Date);
@@ -33,7 +33,7 @@ assert_impl_commons_without_default!(Date);
     Serialize,
     Deserialize,
 )]
-#[cfg_attr(feature = "diesel", derive(DieselNewType))]
+#[cfg_attr(feature = "diesel_newtype", derive(DieselNewType))]
 pub struct Date(#[serde(with = "opendart_date_format")] NaiveDate);
 
 impl Date {
