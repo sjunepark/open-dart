@@ -44,8 +44,7 @@ impl StatusCode {
 }
 ```
 
-String values are implemented in the same way
-[`http::method::Method`](https://docs.rs/http/latest/http/method/struct.Method.html) is implemented.
+String values, etc. are implemented in the same way .
 
 ### Optional fields
 
