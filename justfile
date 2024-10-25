@@ -5,6 +5,7 @@
 
 set dotenv-required := true
 set dotenv-filename := ".env"
+set windows-shell := ["pwsh", "-NoLogo", "-NoProfile", "-Command"]
 
 watch_base := "cargo watch -q -c -i 'tests/resources/**/*'"
 no_capture := if env_var("TEST_LOG") == "true" { "--no-capture" } else { "" }
