@@ -1,4 +1,5 @@
 use derive_builder::UninitializedFieldError;
+use std::num::ParseIntError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]

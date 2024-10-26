@@ -3,6 +3,7 @@ use derive_more::Display;
 use reqwest::{header::HeaderMap, StatusCode};
 use serde::{Deserialize, Serialize};
 
+mod fnltt_multi_acnt;
 mod list;
 
 pub use list::{List, ListRequestParams, ListRequestParamsBuilder};

@@ -1,8 +1,6 @@
 ## Todos
 
 - [ ] Test diesel
-- [ ] Use `time` instead of `chrono`
-- [ ] Finish implementing types
 
 ## Limitations
 
