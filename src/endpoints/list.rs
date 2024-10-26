@@ -4,8 +4,8 @@
 use crate::assert_impl_commons;
 use crate::error::OpenDartError;
 use crate::types::{
-    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, LastReprtAt, PageCount, PageNo, PblntfTy, Sort,
-    SortMth, StockCode, TotalCount, TotalPage,
+    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, LastReprtAt, PageCount, PageNo, PblntfTy,
+    ReportNm, Sort, SortMth, StockCode, TotalCount, TotalPage,
 };
 use crate::types::{EndDe, PblntfDetailTy};
 
@@ -57,25 +57,13 @@ pub struct List {
     list: Vec<ListCorp>,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 struct ListCorp {
     corp_cls: CorpCls,
     corp_name: CorpName,
     corp_code: CorpCode,
     stock_code: StockCode,
-
-    /// ### 보고서명
-    /// 공시구분+보고서명+기타정보
-    /// - \[기재정정\] : 본 보고서명으로 이미 제출된 보고서의 기재내용이 변경되어 제출된 것임
-    /// - \[첨부정정\] : 본 보고서명으로 이미 제출된 보고서의 첨부내용이 변경되어 제출된 것임
-    /// - \[첨부추가\] : 본 보고서명으로 이미 제출된 보고서의 첨부서류가 추가되어 제출된 것임
-    /// - \[변경등록\] : 본 보고서명으로 이미 제출된 보고서의 유동화계획이 변경되어 제출된 것임
-    /// - \[연장결정\] : 본 보고서명으로 이미 제출된 보고서의 신탁계약이 연장되어 제출된 것임
-    /// - \[발행조건확정\] : 본 보고서명으로 이미 제출된 보고서의 유가증권 발행조건이 확정되어 제출된 것임
-    /// - \[정정명령부과\] : 본 보고서에 대하여 금융감독원이 정정명령을 부과한 것임
-    /// - \[정정제출요구\] : 본 보고서에 대하여 금융감독원이 정정제출요구을 부과한 것임
-    report_nm: String,
+    report_nm: ReportNm,
 
     /// ### 접수번호
     /// 접수번호(14자리)
