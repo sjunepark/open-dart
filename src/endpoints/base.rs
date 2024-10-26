@@ -1,5 +1,6 @@
+use crate::assert_impl_commons_without_default;
 use crate::types::CrtfcKey;
-use derive_more::Display;
+use derive_more::{Display, From, Into};
 use reqwest::header::HeaderMap;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
@@ -10,7 +11,22 @@ pub trait OpenDartApiKey {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Display)]
+#[derive(
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    // derive_more
+    Display,
+    From,
+    Into,
+    // serde
+    Serialize,
+    Deserialize,
+)]
 #[display("status: {status}, message: {message}")]
 pub struct Message {
     /// ### 에러 및 정보 코드
@@ -21,19 +37,20 @@ pub struct Message {
     /// (※메시지 설명 참조)
     pub message: String,
 }
+assert_impl_commons_without_default!(Message);
 
 #[derive(Debug)]
-pub struct OpenDartResponse<R>
+pub struct OpenDartResponse<B>
 where
-    R: Serialize,
+    B: Serialize,
 {
     status: StatusCode,
     header_map: HeaderMap,
-    pub body: OpenDartResponseBody<R>,
+    pub body: Option<B>,
 }
 
-impl<R: Serialize> OpenDartResponse<R> {
-    pub fn new(status: StatusCode, header_map: HeaderMap, body: OpenDartResponseBody<R>) -> Self {
+impl<B: Serialize> OpenDartResponse<B> {
+    pub fn new(status: StatusCode, header_map: HeaderMap, body: Option<B>) -> Self {
         Self {
             status,
             header_map,
@@ -45,14 +62,3 @@ impl<R: Serialize> OpenDartResponse<R> {
         self.status
     }
 }
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct OpenDartResponseBody<R> {
-    #[serde(flatten)]
-    pub message: Message,
-
-    #[serde(flatten)]
-    pub content: Option<R>,
-}
-
-impl<R> OpenDartResponseBody<R> {}
