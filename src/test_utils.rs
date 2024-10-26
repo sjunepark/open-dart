@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use crate::client::{OpenDartApi, OpenDartConfigBuilder};
-use crate::endpoints::OpenDartResponseBody;
+use crate::endpoints::base::OpenDartResponseBody;
 
 use goldrust::{goldrust, Goldrust, ResponseSource};
 use serde::de::DeserializeOwned;

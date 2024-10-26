@@ -111,10 +111,11 @@ mod tests {
             .corp_code(corp_code.clone())
             .bsns_year(bsns_year.clone())
             .reprt_code(reprt_code.clone())
+            .build()
             .expect("FnlttMultiAcntRequestParams should build");
 
-        assert_eq!(params.corp_code, Some(corp_code));
-        assert_eq!(params.bsns_year, Some(bsns_year));
-        assert_eq!(params.reprt_code, Some(reprt_code));
+        assert_eq!(params.corp_code, corp_code);
+        assert_eq!(params.bsns_year, bsns_year);
+        assert_eq!(params.reprt_code, reprt_code);
     }
 }
