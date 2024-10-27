@@ -45,7 +45,7 @@ where
     B: Serialize,
 {
     status: StatusCode,
-    header_map: HeaderMap,
+    _header_map: HeaderMap,
     pub body: Option<B>,
 }
 
@@ -53,7 +53,7 @@ impl<B: Serialize> OpenDartResponse<B> {
     pub fn new(status: StatusCode, header_map: HeaderMap, body: Option<B>) -> Self {
         Self {
             status,
-            header_map,
+            _header_map: header_map,
             body,
         }
     }
