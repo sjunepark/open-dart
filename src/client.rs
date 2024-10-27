@@ -24,7 +24,7 @@ impl OpenDartApi {
     }
 
     // region: Public APIs
-    pub fn new(config: OpenDartConfig) -> Self {
+    pub(crate) fn with_config(config: OpenDartConfig) -> Self {
         Self {
             client: reqwest::Client::builder()
                 .default_headers(Self::default_headers())
@@ -104,16 +104,15 @@ impl Default for OpenDartApi {
     /// Create a new `OpenDartApi` instance with the default configuration.
     ///
     /// The default configuration is as below:
-    /// - `api_version`: 1
     /// - `domain`: <https://opendart.fss.or.kr>
     fn default() -> Self {
-        Self::new(OpenDartConfig::default())
+        Self::with_config(OpenDartConfig::default())
     }
 }
 
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
-pub struct OpenDartConfig {
+pub(crate) struct OpenDartConfig {
     /// The domain, which will default to <https://opendart.fss.or.kr>
     /// This field exists to be adjusted in testing environments
     domain: String,

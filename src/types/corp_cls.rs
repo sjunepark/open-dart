@@ -1,8 +1,8 @@
+use crate::statics::assert_impl_commons_without_default;
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
-use crate::assert_impl_commons_without_default;
-
+assert_impl_commons_without_default!(CorpCls);
 /// ### 법인구분
 ///
 /// - Y : 유가
@@ -35,7 +35,6 @@ pub enum CorpCls {
     /// 기타
     E,
 }
-assert_impl_commons_without_default!(CorpCls);
 
 #[cfg(test)]
 impl crate::test_utils::MockDefault for CorpCls {

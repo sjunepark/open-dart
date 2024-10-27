@@ -1,10 +1,9 @@
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
-use crate::assert_impl_commons_without_default;
+use crate::statics::assert_impl_commons_without_default;
 
 assert_impl_commons_without_default!(PblntfTy);
-
 /// ### 공시유형
 #[derive(
     Debug,

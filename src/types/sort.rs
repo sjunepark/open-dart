@@ -1,10 +1,8 @@
+use crate::statics::assert_impl_commons_without_default;
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
-use crate::assert_impl_commons_without_default;
-
 assert_impl_commons_without_default!(Sort);
-
 /// ### 정렬
 ///
 /// ※ 기본값 : date

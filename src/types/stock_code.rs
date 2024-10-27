@@ -1,9 +1,8 @@
-use crate::assert_impl_commons_without_default;
+use crate::statics::assert_impl_commons_without_default;
 use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 
 assert_impl_commons_without_default!(StockCode);
-
 /// ### 종목코드
 /// 상장회사의 종목코드(6자리)
 #[derive(

@@ -1,19 +1,19 @@
-//! ## 공시검색
-//! [link](https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019001)
+//! # 공시검색
+//! <https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019001>
+//!
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
-
-use derive_builder::Builder;
-use derive_more::{Display, From, Into};
-use serde::{Deserialize, Serialize};
 
 use crate::endpoints::base::Message;
 use crate::error::OpenDartError;
+use crate::statics::{assert_impl_commons, assert_impl_commons_without_default};
 use crate::types::{
     BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, LastReprtAt, PageCount, PageNo, PblntfTy,
     ReportNm, Sort, SortMth, StockCode, TotalCount, TotalPage,
 };
 use crate::types::{EndDe, PblntfDetailTy};
-use crate::{assert_impl_commons, assert_impl_commons_without_default};
+use derive_builder::Builder;
+use derive_more::{Display, From, Into};
+use serde::{Deserialize, Serialize};
 
 // region: Request Params
 assert_impl_commons!(Params);
