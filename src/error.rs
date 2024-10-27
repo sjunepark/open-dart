@@ -1,4 +1,5 @@
 use derive_builder::UninitializedFieldError;
+use std::str::Utf8Error;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -15,6 +16,8 @@ pub enum OpenDartError {
     /// or when the builder fails to build request before making API call
     #[error("derive_builder uninitialized field error: {0}")]
     UninitializedField(#[from] UninitializedFieldError),
+    #[error("utf8 error: {0}")]
+    Utf8(#[from] Utf8Error),
     #[error("validation error: {0}")]
     Validation(#[from] ValidationError),
 }

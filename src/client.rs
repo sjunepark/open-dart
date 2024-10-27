@@ -1,6 +1,7 @@
-use crate::endpoints::{List, ListRequestParams, OpenDartResponse, OpenDartResponseBody};
 use crate::error::OpenDartError;
 
+use crate::endpoints::base::OpenDartResponse;
+use crate::endpoints::list;
 use derive_builder::Builder;
 use reqwest;
 use reqwest::IntoUrl;
@@ -35,32 +36,43 @@ impl OpenDartApi {
 
     pub async fn get_list(
         &self,
-        args: ListRequestParams,
-    ) -> Result<OpenDartResponse<List>, OpenDartError> {
+        args: list::Params,
+    ) -> Result<OpenDartResponse<list::ResponseBody>, OpenDartError> {
         self.get(self.url("/api/list.json"), args).await
     }
 
     // endregion
 
     // region: Generic APIs
-    async fn get<'de, U, P, R>(
+    #[tracing::instrument(skip(self))]
+    async fn get<'de, U, P, B>(
         &self,
         url: U,
         params: P,
-    ) -> Result<OpenDartResponse<R>, OpenDartError>
+    ) -> Result<OpenDartResponse<B>, OpenDartError>
     where
-        U: Display + IntoUrl,
-        P: Serialize,
-        R: Serialize + DeserializeOwned + std::fmt::Debug,
+        U: Display + IntoUrl + std::fmt::Debug,
+        P: Serialize + std::fmt::Debug,
+        B: Serialize + DeserializeOwned + std::fmt::Debug,
     {
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
-        tracing::trace!(response = ?response, "Got response");
 
         let headers = response.headers().clone();
         let status = response.status();
 
-        let response_body = response.json::<OpenDartResponseBody<R>>().await?;
+        let bytes = response
+            .bytes()
+            .await
+            .inspect_err(|_e| tracing::error!("Failed to parse response body as bytes"))?;
+        // For debugging
+        let text = std::str::from_utf8(&bytes).inspect_err(|_e| {
+            tracing::error!("Failed to parse response body as text");
+        })?;
+
+        let response_body = serde_json::from_slice::<Option<B>>(&bytes).inspect_err(|_e| {
+            tracing::error!(body = ?text, "Failed to deserialize response body");
+        })?;
 
         let response = OpenDartResponse::new(status, headers, response_body);
         Ok(response)
@@ -117,7 +129,7 @@ impl Default for OpenDartConfig {
 
 #[cfg(test)]
 mod tests {
-    use crate::endpoints::{List, ListRequestParamsBuilder};
+    use crate::endpoints::list;
     use crate::test_utils::MockDefault;
     use crate::types::{BgnDe, CorpCode};
     use crate::{subscribe_tracing_with_span, test_context, TestContext};
@@ -129,10 +141,11 @@ mod tests {
         subscribe_tracing_with_span!("test");
         let mut ctx = test_context!().await;
 
-        ctx.arrange_test_endpoint::<List>("/api/list.json").await;
+        ctx.arrange_test_endpoint::<list::ResponseBody>("/api/list.json")
+            .await;
 
         // region: Action
-        let params = ListRequestParamsBuilder::default()
+        let params = list::ParamsBuilder::default()
             .corp_code(CorpCode::mock_default())
             .bgn_de(BgnDe::mock_default())
             .build()

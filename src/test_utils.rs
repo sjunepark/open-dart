@@ -1,7 +1,6 @@
 #![cfg(test)]
 
 use crate::client::{OpenDartApi, OpenDartConfigBuilder};
-use crate::endpoints::OpenDartResponseBody;
 
 use goldrust::{goldrust, Goldrust, ResponseSource};
 use serde::de::DeserializeOwned;
@@ -74,9 +73,8 @@ impl TestContext {
                 );
                 let golden_file_str = std::fs::read_to_string(golden_file_path)
                     .expect("Failed to read response body from file");
-                let golden_file_body: OpenDartResponseBody<R> =
-                    serde_json::from_str(&golden_file_str)
-                        .expect("Failed to deserialize response body");
+                let golden_file_body: R = serde_json::from_str(&golden_file_str)
+                    .expect("Failed to deserialize response body");
 
                 let response = ResponseTemplate::new(200).set_body_json(&golden_file_body);
 
