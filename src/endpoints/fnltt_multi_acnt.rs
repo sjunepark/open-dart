@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 #[builder(setter(into, strip_option))]
 #[builder(derive(Debug))]
 #[builder(build_fn(error = "OpenDartError"))]
-pub struct FnlttMultiAcntRequestParams {
+pub struct Params {
     #[builder(setter(skip))]
     crtfc_key: CrtfcKey,
 
@@ -22,9 +22,9 @@ pub struct FnlttMultiAcntRequestParams {
     pub bsns_year: BsnsYear,
     pub reprt_code: ReprtCode,
 }
-assert_impl_commons_without_default!(FnlttMultiAcntRequestParams);
+assert_impl_commons_without_default!(Params);
 
-impl std::fmt::Display for FnlttMultiAcntRequestParams {
+impl std::fmt::Display for Params {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }

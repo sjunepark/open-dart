@@ -1,15 +1,9 @@
-use crate::assert_impl_commons_without_default;
-use crate::types::CrtfcKey;
 use derive_more::{Display, From, Into};
 use reqwest::header::HeaderMap;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 
-pub trait OpenDartApiKey {
-    fn open_dart_api_key() -> CrtfcKey {
-        CrtfcKey::default()
-    }
-}
+use crate::assert_impl_commons_without_default;
 
 #[derive(
     Debug,
