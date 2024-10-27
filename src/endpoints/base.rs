@@ -1,16 +1,11 @@
-use crate::assert_impl_commons_without_default;
-use crate::types::CrtfcKey;
 use derive_more::{Display, From, Into};
 use reqwest::header::HeaderMap;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 
-pub trait OpenDartApiKey {
-    fn open_dart_api_key() -> CrtfcKey {
-        CrtfcKey::default()
-    }
-}
+use crate::statics::assert_impl_commons_without_default;
 
+assert_impl_commons_without_default!(Message);
 #[derive(
     Debug,
     Clone,
@@ -37,7 +32,6 @@ pub struct Message {
     /// (※메시지 설명 참조)
     pub message: String,
 }
-assert_impl_commons_without_default!(Message);
 
 #[derive(Debug)]
 pub struct OpenDartResponse<B>

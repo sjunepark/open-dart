@@ -1,13 +1,11 @@
+use crate::error::{OpenDartError, ValidationError};
+use crate::statics::assert_impl_commons_without_default;
 use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 use static_assertions::assert_impl_all;
 
-use crate::assert_impl_commons_without_default;
-use crate::error::{OpenDartError, ValidationError};
-
 assert_impl_commons_without_default!(PageCount);
 assert_impl_all! {PageCount: Copy}
-
 /// ### 페이지 별 건수
 /// 페이지당 건수(1~100)
 ///

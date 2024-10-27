@@ -1,11 +1,10 @@
 use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 
-use crate::assert_impl_commons;
 use crate::error::{OpenDartError, ValidationError};
+use crate::statics::assert_impl_commons;
 
 assert_impl_commons!(CrtfcKey);
-
 /// ### API 인증키
 /// 발급받은 인증키(40자리)
 #[derive(

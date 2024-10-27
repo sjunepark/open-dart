@@ -22,11 +22,8 @@ watch:
 watch-test name="":
     {{ watch_base }} -s "just test {{ name }}"
 
-watch-test-pkg pkg:
-    {{ watch_base }} -s "just test-pkg {{ pkg }}"
-
-watch-example package name:
-    {{ watch_base }} -s "just example {{ package }} {{ name }}"
+watch-example name:
+    {{ watch_base }} -s "just example {{ name }}"
 
 watch-test-integration:
     {{ watch_base }} -x "nextest run -E 'kind(test)'"
@@ -34,15 +31,11 @@ watch-test-integration:
 watch-bench name="":
     {{ watch_base }} -s "just bench {{ name }}"
 
-# Individual commands
+# Test commands
 
 test name="":
     clear
     cargo nextest run {{ no_capture }} --all-targets --all-features {{ name }}
-
-test-pkg pkg:
-    clear
-    cargo nextest run --all-targets --all--features --package {{ pkg }}
 
 test-doc:
     clear
@@ -52,13 +45,13 @@ check-lib-bins:
     clear
     cargo check --lib --bins
 
-example package name:
+example name:
     clear
-    cargo run -p {{ package }} --example {{ name }}
+    cargo run --example {{ name }}
 
-bench package name="":
+bench name="":
     clear
-    cargo bench --all-features --all-targets --all-features -p {{ package }} {{ name }}
+    cargo bench --all-features --all-targets --all-features {{ name }}
 
 cov:
     clear
@@ -73,5 +66,9 @@ tree crate:
     cargo tree --all-features --all-targets -i {{ crate }}
 
 # Others
+doc:
+    clear
+    cargo doc --no-deps --open
+
 git-gc:
     git gc --prune=now --aggressive

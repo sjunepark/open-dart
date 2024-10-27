@@ -19,9 +19,11 @@ tokio = { version = "1.41.0", features = ["full"] }
 tracing = { version = "0.1.40", features = ["log"] }
 
 [dev-dependencies]
-goldrust = "0.1.10"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 wiremock = "0.6.2"
+
+# Github dependencies
+goldrust = { git = "https://github.com/sjunepark/goldrust", branch = "dev" }
 
 [features]
 diesel_newtype = ["diesel", "diesel-derive-newtype"]

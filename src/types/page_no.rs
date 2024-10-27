@@ -1,12 +1,11 @@
-use crate::assert_impl_commons_without_default;
 use crate::error::{OpenDartError, ValidationError};
+use crate::statics::assert_impl_commons_without_default;
 use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 use static_assertions::assert_impl_all;
 
 assert_impl_commons_without_default!(PageNo);
 assert_impl_all! {PageNo: Copy}
-
 /// ### 페이지 번호
 /// 페이지 번호(1~n)
 ///

@@ -1,8 +1,8 @@
+use crate::statics::assert_impl_commons_without_default;
 use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 
-use crate::assert_impl_commons_without_default;
-
+assert_impl_commons_without_default!(CorpCode);
 /// ### 고유번호
 /// 공시대상회사의 고유번호(8자리)
 ///     
@@ -29,7 +29,6 @@ use crate::assert_impl_commons_without_default;
     derive(diesel_derive_newtype::DieselNewType)
 )]
 pub struct CorpCode(String);
-assert_impl_commons_without_default!(CorpCode);
 
 impl CorpCode {
     pub fn try_new(value: &str) -> Result<Self, String> {

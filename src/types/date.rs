@@ -1,16 +1,11 @@
-use crate::assert_impl_commons_without_default;
 use crate::error::OpenDartError;
-
+use crate::statics::assert_impl_commons_without_default;
 use chrono::NaiveDate;
 use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[cfg(feature = "diesel_newtype")]
-use diesel_derive_newtype::DieselNewType;
-
 assert_impl_commons_without_default!(Date);
-
 /// ### 시작일
 /// 검색시작 접수일자(YYYYMMDD)
 ///
@@ -33,7 +28,10 @@ assert_impl_commons_without_default!(Date);
     Serialize,
     Deserialize,
 )]
-#[cfg_attr(feature = "diesel_newtype", derive(DieselNewType))]
+#[cfg_attr(
+    feature = "diesel_newtype",
+    derive(diesel_derive_newtype::DieselNewType)
+)]
 pub struct Date(#[serde(with = "opendart_date_format")] NaiveDate);
 
 impl Date {

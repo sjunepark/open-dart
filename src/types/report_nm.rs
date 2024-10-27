@@ -1,8 +1,8 @@
-use crate::assert_impl_commons_without_default;
-use crate::error::{OpenDartError, ValidationError};
-
 use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
+
+use crate::error::{OpenDartError, ValidationError};
+use crate::statics::assert_impl_commons_without_default;
 
 /// ### 보고서명
 /// 공시구분+보고서명+기타정보

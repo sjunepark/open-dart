@@ -1,28 +1,46 @@
-//! ## 공시검색
-//! [link](https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019001)
+//! # 공시검색
+//! <https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019001>
+//!
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
 
+use crate::endpoints::base::Message;
 use crate::error::OpenDartError;
+use crate::statics::{assert_impl_commons, assert_impl_commons_without_default};
 use crate::types::{
     BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, LastReprtAt, PageCount, PageNo, PblntfTy,
     ReportNm, Sort, SortMth, StockCode, TotalCount, TotalPage,
 };
 use crate::types::{EndDe, PblntfDetailTy};
-use crate::{assert_impl_commons, assert_impl_commons_without_default};
-
-use crate::endpoints::base::Message;
 use derive_builder::Builder;
 use derive_more::{Display, From, Into};
 use serde::{Deserialize, Serialize};
 
 // region: Request Params
+assert_impl_commons!(Params);
 /// Documentation exists in each field's types
 #[derive(
-    Builder, Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, Default,
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    Default,
+    // derive_more
+    Display,
+    From,
+    Into,
+    // serde
+    Serialize,
+    Deserialize,
+    // builder
+    Builder,
 )]
 #[builder(setter(into, strip_option), default)]
 #[builder(derive(Debug))]
 #[builder(build_fn(error = "OpenDartError"))]
+#[display("{self:?}")]
 pub struct Params {
     #[builder(setter(skip))]
     crtfc_key: CrtfcKey,
@@ -38,13 +56,6 @@ pub struct Params {
     pub sort_mth: Option<SortMth>,
     pub page_no: Option<PageNo>,
     pub page_count: Option<PageCount>,
-}
-assert_impl_commons!(Params);
-
-impl std::fmt::Display for Params {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
 }
 // endregion: Request Params
 
@@ -66,7 +77,7 @@ assert_impl_commons_without_default!(ResponseBody);
     Serialize,
     Deserialize,
 )]
-#[display("page_no: {page_no}, page_count: {page_count}, total_count: {total_count}, total_page: {total_page}")]
+#[display("{self:?}")]
 pub struct ResponseBody {
     #[serde(flatten)]
     pub message: Message,
@@ -96,7 +107,7 @@ assert_impl_commons_without_default!(ListCorp);
     Serialize,
     Deserialize,
 )]
-#[display("corp_code: {corp_code}, corp_name: {corp_name}")]
+#[display("{self:?}")]
 struct ListCorp {
     corp_code: CorpCode,
     corp_name: CorpName,
@@ -139,7 +150,7 @@ mod tests {
     use crate::types::YesNo;
 
     #[test]
-    fn list_request_params_builder_works_with_all_fields_specified() {
+    fn params_builder_works_with_all_fields_specified() {
         let corp_code = CorpCode::mock_default();
         let bgn_de = BgnDe::mock_default();
         let end_de = EndDe::mock_default();

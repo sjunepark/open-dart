@@ -1,9 +1,9 @@
-use crate::assert_impl_commons_without_default;
 use crate::error::{OpenDartError, ValidationError};
-
+use crate::statics::assert_impl_commons_without_default;
 use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 
+assert_impl_commons_without_default!(CorpName);
 /// ### 종목명(법인명)
 /// 공시대상회사의 종목명(상장사) 또는 법인명(기타법인)
 #[derive(
@@ -28,7 +28,6 @@ use serde::{Deserialize, Serialize};
     derive(diesel_derive_newtype::DieselNewType)
 )]
 pub struct CorpName(String);
-assert_impl_commons_without_default!(CorpName);
 
 impl CorpName {
     pub fn try_new(value: &str) -> Result<Self, OpenDartError> {

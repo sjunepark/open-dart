@@ -44,7 +44,7 @@ impl TestContext {
             .domain(domain)
             .build()
             .expect("Failed to build OpenDartConfig");
-        let api = OpenDartApi::new(config);
+        let api = OpenDartApi::with_config(config);
         // endregion
 
         Self {
