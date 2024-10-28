@@ -8,6 +8,7 @@ mod crtfc_key;
 mod date;
 mod industry_code;
 mod jurir_no;
+mod mytext;
 mod page_count;
 mod page_no;
 mod pblntf_detail_ty;
