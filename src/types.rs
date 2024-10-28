@@ -8,7 +8,6 @@ mod crtfc_key;
 mod date;
 mod industry_code;
 mod jurir_no;
-mod mytext;
 mod page_count;
 mod page_no;
 mod pblntf_detail_ty;
@@ -21,6 +20,7 @@ mod text;
 mod yes_no;
 
 pub use alias::*;
+pub use text::*;
 
 pub use acc_mt::AccMt;
 pub use bizr_no::BizrNo;
@@ -39,5 +39,4 @@ pub use reprt_code::ReprtCode;
 pub use sort::Sort;
 pub use sort_mth::SortMth;
 pub use stock_code::StockCode;
-pub use text::Text;
 pub use yes_no::YesNo;

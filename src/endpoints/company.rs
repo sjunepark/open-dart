@@ -7,9 +7,10 @@ use crate::endpoints::base::Message;
 use crate::error::OpenDartError;
 use crate::statics::{assert_impl_commons, assert_impl_commons_without_default};
 use crate::types::{
-    Adres, BizrNo, CeoNm, EstDt, FaxNo, HmUrl, IndustryCode, IrUrl, JurirNo, PhnNo, StockName,
+    Adres, BizrNo, CeoNm, CorpName, EstDt, FaxNo, HmUrl, IndustryCode, IrUrl, JurirNo, PhnNo,
+    StockName,
 };
-use crate::types::{CorpCls, CorpCode, CorpName, CrtfcKey, StockCode};
+use crate::types::{CorpCls, CorpCode, CrtfcKey, StockCode};
 use derive_builder::Builder;
 use derive_more::{Display, From, Into};
 use serde::{Deserialize, Serialize};
