@@ -55,9 +55,16 @@ macro_rules! text {
     };
 }
 
-pub(crate) use text;
-
 // region: Implementations
+
+text!(Adres, false, "경기도 수원시 영통구  삼성로 129 (매탄동)", {
+    /// ## 주소
+});
+
+text!(CeoNm, false, "한종희", {
+    /// ## 대표자명
+});
+
 text!(CorpName, false, "삼성전자(주)", {
     /// ## 종목명(법인명)
     ///
@@ -66,6 +73,22 @@ text!(CorpName, false, "삼성전자(주)", {
 
 text!(CorpNameEng, false, "SAMSUNG ELECTRONICS CO,.LTD", {
     /// ## 영문정식회사명칭
+});
+
+text!(HmUrl, false, "www.samsung.com/sec", {
+    /// ## 홈페이지
+});
+
+text!(FaxNo, false, "031-200-7538", {
+    /// ## 팩스번호
+});
+
+text!(IrUrl, true, "", {
+    /// ## IR홈페이지
+});
+
+text!(PhnNo, false, "02-2255-0114", {
+    /// ## 전화번호
 });
 
 text!(ReportNm, false, "[첨부추가]일괄신고추가서류(파생결합증권-주가연계증권)", {
@@ -86,34 +109,10 @@ text!(StockName, false, "삼성전자", {
     /// ## 종목명(상장사) 또는 약식명칭(기타법인)
 });
 
-text!(CeoNm, false, "한종희", {
-    /// ## 대표자명
-});
-
-text!(Adres, false, "경기도 수원시 영통구  삼성로 129 (매탄동)", {
-    /// ## 주소
-});
-
-text!(HmUrl, false, "www.samsung.com/sec", {
-    /// ## 홈페이지
-});
-
-text!(IrUrl, true, "", {
-    /// ## IR홈페이지
-});
-
-text!(PhnNo, false, "02-2255-0114", {
-    /// ## 전화번호
-});
-
-text!(FaxNo, false, "031-200-7538", {
-    /// ## 팩스번호
-});
 // endregion: Implementations
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_utils::MockDefault;
 
     text!(Name, false, "Mock Name", {
@@ -136,7 +135,7 @@ mod tests {
     }
 
     #[test]
-    fn text_should_not_allow_empty() {
+    fn should_not_allow_empty() {
         let _error = Name::try_new("").expect_err("empty name should not be allowed");
     }
 
