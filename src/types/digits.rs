@@ -51,6 +51,14 @@ macro_rules! digit {
             }
         }
 
+        impl TryFrom<&str> for $name {
+            type Error = $crate::error::OpenDartError;
+
+            fn try_from(value: &str) -> Result<Self, Self::Error> {
+                Self::try_new(value)
+            }
+        }
+
         #[cfg(test)]
         impl crate::test_utils::MockDefault for $name {
             fn mock_default() -> Self {
@@ -79,7 +87,7 @@ digit!(CorpCode, false, "00126380", 8, {
     /// ※ 개발가이드 > 공시정보 > 고유번호 참고
 });
 
-digit!(IndustryCode, false, "264", 3, {
+digit!(IndutyCode, false, "264", 3, {
     /// ## 업종코드
     ///
     /// 3자리

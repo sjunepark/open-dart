@@ -3,7 +3,9 @@
 //!
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
 
+use crate::client::OpenDartApi;
 use crate::endpoints::base::Message;
+use crate::endpoints::OpenDartResponse;
 use crate::error::OpenDartError;
 use crate::statics::{assert_impl_commons, assert_impl_commons_without_default};
 use crate::types::{
@@ -15,7 +17,17 @@ use derive_builder::Builder;
 use derive_more::{Display, From, Into};
 use serde::{Deserialize, Serialize};
 
+impl OpenDartApi {
+    pub async fn get_list(
+        &self,
+        args: Params,
+    ) -> Result<OpenDartResponse<ResponseBody>, OpenDartError> {
+        self.get(self.url("/api/list.json"), args).await
+    }
+}
+
 // region: Request Params
+
 assert_impl_commons!(Params);
 /// Documentation exists in each field's types
 #[derive(
@@ -57,6 +69,7 @@ pub struct Params {
     pub page_no: Option<PageNo>,
     pub page_count: Option<PageCount>,
 }
+
 // endregion: Request Params
 
 // region: Response
@@ -146,8 +159,10 @@ struct ListCorp {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utils::MockDefault;
+    use crate::test_utils::tracing_setup::subscribe_tracing_with_span;
+    use crate::test_utils::{test_context, MockDefault};
     use crate::types::YesNo;
+    use goldrust::Content;
 
     #[test]
     fn params_builder_works_with_all_fields_specified() {
@@ -189,5 +204,47 @@ mod tests {
         assert_eq!(params.sort_mth, Some(sort_mth));
         assert_eq!(params.page_no, Some(page_no));
         assert_eq!(params.page_count, Some(page_count));
+    }
+
+    #[tokio::test]
+    #[tracing::instrument]
+    async fn get_list_default() {
+        subscribe_tracing_with_span!("test");
+        let mut ctx = test_context!().await;
+
+        ctx.arrange_test_endpoint::<ResponseBody>("/api/list.json")
+            .await;
+
+        // region: Action
+        let params = ParamsBuilder::default()
+            .corp_code(CorpCode::mock_default())
+            .bgn_de(BgnDe::mock_default())
+            .build()
+            .expect("Failed to build ListRequestParams");
+        tracing::debug!(?params, "Request parameters");
+
+        let response = ctx
+            .api
+            .get_list(params)
+            .await
+            .expect("get_list should succeed");
+        tracing::info!(?response, "Got response");
+        // endregion
+
+        // region: Assert
+        assert!(
+            response.status().is_success(),
+            "Response didn't return a status code of 2xx"
+        );
+        // endregion
+
+        // region: Save response body
+        ctx.goldrust
+            .save(Content::Json(
+                serde_json::to_value(response.body)
+                    .expect("Failed to convert to serde_json::Value"),
+            ))
+            .expect("Failed to save response body");
+        // endregion
     }
 }
