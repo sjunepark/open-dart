@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 assert_impl_commons_without_default!(Date);
-/// ### 시작일
+/// ## 시작일
 /// 검색시작 접수일자(YYYYMMDD)
 ///
 /// - 기본값 : 종료일(end_de)

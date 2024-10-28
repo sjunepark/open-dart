@@ -3,7 +3,7 @@ use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 
 assert_impl_commons_without_default!(CorpCode);
-/// ### 고유번호
+/// ## 고유번호
 /// 공시대상회사의 고유번호(8자리)
 ///     
 /// ※ 개발가이드 > 공시정보 > 고유번호 참고

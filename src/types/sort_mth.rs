@@ -3,7 +3,7 @@ use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 assert_impl_commons_without_default!(SortMth);
-/// ### 정렬방법
+/// ## 정렬방법
 ///
 /// ※ 기본값 : desc
 #[derive(

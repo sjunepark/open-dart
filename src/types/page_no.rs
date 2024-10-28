@@ -6,7 +6,7 @@ use static_assertions::assert_impl_all;
 
 assert_impl_commons_without_default!(PageNo);
 assert_impl_all! {PageNo: Copy}
-/// ### 페이지 번호
+/// ## 페이지 번호
 /// 페이지 번호(1~n)
 ///
 /// - 기본값 : 1
