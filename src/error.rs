@@ -22,7 +22,23 @@ pub enum OpenDartError {
     Validation(#[from] ValidationError),
 }
 
-#[derive(Debug, Error, Clone)]
+#[derive(
+    std::fmt::Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    // derive_more
+    derive_more::From,
+    derive_more::Into,
+    // serde
+    serde::Serialize,
+    serde::Deserialize,
+    // thiserror
+    Error,
+)]
 #[error("value: {value}, message: {message}")]
 pub struct ValidationError {
     pub value: String,
