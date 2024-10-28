@@ -3,7 +3,7 @@ use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 assert_impl_commons_without_default!(CorpCls);
-/// ### 법인구분
+/// ## 법인구분
 ///
 /// - Y : 유가
 /// - K : 코스닥

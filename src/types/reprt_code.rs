@@ -3,7 +3,7 @@ use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 assert_impl_commons_without_default!(ReprtCode);
-/// ### 보고서 코드
+/// ## 보고서 코드
 #[derive(
     Debug,
     Clone,

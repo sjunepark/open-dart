@@ -6,7 +6,7 @@ use static_assertions::assert_impl_all;
 
 assert_impl_commons_without_default!(PageCount);
 assert_impl_all! {PageCount: Copy}
-/// ### 페이지 별 건수
+/// ## 페이지 별 건수
 /// 페이지당 건수(1~100)
 ///
 /// - 기본값 : 10

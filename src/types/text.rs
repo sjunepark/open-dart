@@ -3,9 +3,7 @@ use crate::statics::assert_impl_commons_without_default;
 use derive_more::{AsRef, Display, From, Into};
 use serde::{Deserialize, Serialize};
 
-assert_impl_commons_without_default!(CorpName);
-/// ### 종목명(법인명)
-/// 공시대상회사의 종목명(상장사) 또는 법인명(기타법인)
+assert_impl_commons_without_default!(Text);
 #[derive(
     Debug,
     Clone,
@@ -27,9 +25,9 @@ assert_impl_commons_without_default!(CorpName);
     feature = "diesel_newtype",
     derive(diesel_derive_newtype::DieselNewType)
 )]
-pub struct CorpName(String);
+pub struct Text(String);
 
-impl CorpName {
+impl Text {
     pub fn try_new(value: &str) -> Result<Self, OpenDartError> {
         if value.is_empty() {
             return Err(ValidationError {
@@ -46,11 +44,10 @@ impl CorpName {
 }
 
 #[cfg(test)]
-impl crate::test_utils::MockDefault for CorpName {
+impl crate::test_utils::MockDefault for Text {
     fn mock_default() -> Self {
         let name = "NH투자증권".to_string();
-        CorpName::try_new(&name)
-            .unwrap_or_else(|_| panic!("failed to create CorpName with: {}", name))
+        Text::try_new(&name).unwrap_or_else(|_| panic!("failed to create Name with: {}", name))
     }
 }
 
@@ -60,21 +57,20 @@ mod tests {
 
     #[test]
     fn serialize() {
-        let corp_name = CorpName::try_new("NH투자증권").expect("failed to create corp_name");
-        let serialized = serde_json::to_string(&corp_name).expect("failed to serialize");
+        let name = Text::try_new("NH투자증권").expect("failed to create name");
+        let serialized = serde_json::to_string(&name).expect("failed to serialize");
         assert_eq!(serialized, "\"NH투자증권\"");
     }
 
     #[test]
     fn deserialize() {
-        let corp_name =
-            serde_json::from_str::<CorpName>("\"NH투자증권\"").expect("failed to deserialize");
-        assert_eq!(corp_name.into_inner(), "NH투자증권");
+        let name = serde_json::from_str::<Text>("\"NH투자증권\"").expect("failed to deserialize");
+        assert_eq!(name.into_inner(), "NH투자증권");
     }
 
     #[test]
     fn try_new_with_empty_string_should_fail() {
-        let corp_name = CorpName::try_new("");
-        assert!(corp_name.is_err());
+        let name = Text::try_new("");
+        assert!(name.is_err());
     }
 }

@@ -3,7 +3,7 @@ use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 assert_impl_commons_without_default!(Sort);
-/// ### 정렬
+/// ## 정렬
 ///
 /// ※ 기본값 : date
 #[derive(
