@@ -1,5 +1,4 @@
 mod acc_mt;
-mod alias;
 mod bsns_year;
 mod corp_cls;
 mod crtfc_key;
@@ -15,9 +14,11 @@ mod sort_mth;
 mod text;
 mod yes_no;
 
-pub use alias::*;
+pub use date::*;
 pub use digits::*;
+pub use page_no::*;
 pub use text::*;
+pub use yes_no::*;
 
 pub use acc_mt::AccMt;
 pub use bsns_year::BsnsYear;
@@ -25,10 +26,8 @@ pub use corp_cls::CorpCls;
 pub use crtfc_key::CrtfcKey;
 pub use date::Date;
 pub use page_count::PageCount;
-pub use page_no::PageNo;
 pub use pblntf_detail_ty::PblntfDetailTy;
 pub use pblntf_ty::PblntfTy;
 pub use reprt_code::ReprtCode;
 pub use sort::Sort;
 pub use sort_mth::SortMth;
-pub use yes_no::YesNo;

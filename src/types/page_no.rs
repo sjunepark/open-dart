@@ -51,6 +51,17 @@ impl PageNo {
     }
 }
 
+// region: Implementation
+
+/// ## 총 건수
+/// 총 페이지 수
+pub type TotalCount = PageNo;
+
+/// ## 총 페이지 수
+pub type TotalPage = PageNo;
+
+// endregion: Implementation
+
 #[cfg(test)]
 impl crate::test_utils::MockDefault for PageNo {
     fn mock_default() -> Self {

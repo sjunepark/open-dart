@@ -30,6 +30,16 @@ impl crate::test_utils::MockDefault for YesNo {
     }
 }
 
+// region: Implementations
+
+/// ## 최종보고서 검색여부
+/// 최종보고서만 검색여부(Y or N)
+///
+/// - 기본값 : N(정정이 있는 경우 최종정정만 검색)
+pub type LastReprtAt = YesNo;
+
+// endregion: Implementations
+
 #[cfg(test)]
 mod tests {
     use super::*;

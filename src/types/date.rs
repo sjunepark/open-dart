@@ -6,11 +6,6 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 assert_impl_commons_without_default!(Date);
-/// ## 시작일
-/// 검색시작 접수일자(YYYYMMDD)
-///
-/// - 기본값 : 종료일(end_de)
-/// - 고유번호(corp_code)가 없는 경우 검색기간은 3개월로 제한
 #[derive(
     Debug,
     Clone,
@@ -32,7 +27,7 @@ assert_impl_commons_without_default!(Date);
     feature = "diesel_newtype",
     derive(diesel_derive_newtype::DieselNewType)
 )]
-pub struct Date(#[serde(with = "opendart_date_format")] NaiveDate);
+pub struct Date(#[serde(with = "dart_date_format")] NaiveDate);
 
 impl Date {
     pub fn new(date: NaiveDate) -> Self {
@@ -49,7 +44,7 @@ impl FromStr for Date {
     }
 }
 
-mod opendart_date_format {
+mod dart_date_format {
     use chrono::NaiveDate;
     use serde::{self, Deserialize, Deserializer, Serializer};
 
@@ -95,6 +90,29 @@ impl crate::test_utils::MockDefault for Date {
         Date::new(year_before)
     }
 }
+
+// region: Implementations
+
+/// ## 시작일
+/// 검색시작 접수일자(YYYYMMDD)
+///
+/// - 기본값 : 종료일(end_de)
+/// - 고유번호(corp_code)가 없는 경우 검색기간은 3개월로 제한
+pub type BgnDe = Date;
+
+/// ## 종료일
+/// 검색종료 접수일자(YYYYMMDD)
+///
+/// - 기본값 : 당일
+/// - 고유번호(corp_code)가 없는 경우 검색기간은 3개월로 제한
+pub type EndDe = Date;
+
+/// ## 설립일
+///
+/// YYYYMMDD
+pub type EstDt = Date;
+
+// endregion: Implementations
 
 #[cfg(test)]
 mod tests {
