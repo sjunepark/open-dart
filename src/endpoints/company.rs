@@ -4,13 +4,13 @@
 //! DART에 등록되어있는 기업의 개황정보를 제공합니다.
 
 use crate::client::OpenDartApi;
-use crate::endpoints::base::Message;
-use crate::endpoints::OpenDartResponse;
-use crate::error::OpenDartError;
+use crate::endpoints::base::{is_success, ResponseBody};
+use crate::endpoints::{OpenDartResponse, ResponseCheck};
+use crate::error::{OpenDartError, ResponseError};
 use crate::statics::assert_impl_commons_without_default;
 use crate::types::{
-    AccMt, Adres, BizrNo, CeoNm, CorpName, EstDt, FaxNo, HmUrl, IndutyCode, IrUrl, JurirNo, PhnNo,
-    StockName,
+    AccMt, Adres, BizrNo, CeoNm, CorpName, CorpNameEng, EstDt, FaxNo, HmUrl, IndutyCode, IrUrl,
+    JurirNo, PhnNo, StockName,
 };
 use crate::types::{CorpCls, CorpCode, CrtfcKey, StockCode};
 use derive_builder::Builder;
@@ -21,7 +21,7 @@ impl OpenDartApi {
     pub async fn get_company(
         &self,
         args: Params,
-    ) -> Result<OpenDartResponse<ResponseBody>, OpenDartError> {
+    ) -> Result<OpenDartResponse<ResponseBody<Company>>, OpenDartError> {
         self.get(self.url("/api/company.json"), args).await
     }
 }
@@ -62,7 +62,8 @@ pub struct Params {
 // endregion: Request Params
 
 // region: Response
-assert_impl_commons_without_default!(ResponseBody);
+
+assert_impl_commons_without_default!(Company);
 #[derive(
     Debug,
     Clone,
@@ -80,11 +81,14 @@ assert_impl_commons_without_default!(ResponseBody);
     Deserialize,
 )]
 #[display("{self:?}")]
-pub struct ResponseBody {
-    #[serde(flatten)]
-    pub message: Message,
+#[serde(deny_unknown_fields)]
+pub struct Company {
+    status: String,
+    message: String,
 
+    corp_code: CorpCode,
     corp_name: CorpName,
+    corp_name_eng: CorpNameEng,
     stock_name: StockName,
     stock_code: StockCode,
     ceo_nm: CeoNm,
@@ -100,6 +104,13 @@ pub struct ResponseBody {
     est_dt: EstDt,
     acc_mt: AccMt,
 }
+
+impl ResponseCheck for Company {
+    fn is_success(&self) -> Result<(), ResponseError> {
+        is_success(&self.status)
+    }
+}
+
 // endregion: Response
 
 #[cfg(test)]
@@ -127,7 +138,7 @@ mod tests {
         subscribe_tracing_with_span!("test");
         let mut ctx = test_context!().await;
 
-        ctx.arrange_test_endpoint::<ResponseBody>("/api/company.json")
+        ctx.arrange_test_endpoint::<ResponseBody<Company>>("/api/company.json")
             .await;
 
         // region: Action
@@ -159,6 +170,52 @@ mod tests {
                     .expect("Failed to convert to serde_json::Value"),
             ))
             .expect("Failed to save response body");
+        // endregion
+    }
+
+    #[tokio::test]
+    async fn get_should_fail_when_receiving_dart_message_code_other_than_000() {
+        // Set an invalid API key to get a 200 response with an error message
+        std::env::set_var(
+            "OPEN_DART_API_KEY",
+            "0123456789012345678901234567890123456789",
+        );
+
+        subscribe_tracing_with_span!("test");
+        let mut ctx = test_context!().await;
+
+        ctx.arrange_test_endpoint::<ResponseBody<Company>>("/api/company.json")
+            .await;
+
+        // region: Action
+        let params = ParamsBuilder::default()
+            .corp_code(CorpCode::mock_default())
+            .build()
+            .expect("Failed to build CompanyRequestParams");
+        tracing::debug!(?params, "Request parameters");
+
+        let error = ctx
+            .api
+            .get_company(params)
+            .await
+            .expect_err("get_company should fail");
+        // endregion
+
+        // region: Assert
+        assert!(matches!(
+            error,
+            OpenDartError::Response(ResponseError { .. })
+        ));
+        // endregion
+
+        // region: Save response body
+        if let OpenDartError::Response(error) = error {
+            ctx.goldrust
+                .save(Content::Json(
+                    serde_json::to_value(error).expect("Failed to convert to serde_json::Value"),
+                ))
+                .expect("Failed to save response body");
+        }
         // endregion
     }
 }

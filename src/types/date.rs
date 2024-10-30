@@ -112,6 +112,10 @@ pub type EndDe = Date;
 /// YYYYMMDD
 pub type EstDt = Date;
 
+/// ### 접수일자
+/// 공시 접수일자(YYYYMMDD)
+pub type RceptDt = Date;
+
 // endregion: Implementations
 
 #[cfg(test)]

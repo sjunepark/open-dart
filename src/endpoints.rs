@@ -1,6 +1,8 @@
-mod base;
+pub(crate) mod base;
 pub mod company;
 mod fnltt_multi_acnt;
 pub mod list;
 
-pub use base::OpenDartResponse;
+pub(crate) use base::ResponseCheck;
+
+pub use base::{Message, OpenDartResponse};

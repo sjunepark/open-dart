@@ -1,7 +1,5 @@
 ## Todos
 
-- [ ] Implement company
-
 ## Limitations
 
 ### Doesn't support XML responses

@@ -1,3 +1,4 @@
+use crate::endpoints::Message;
 use derive_builder::UninitializedFieldError;
 use std::str::Utf8Error;
 use thiserror::Error;
@@ -12,6 +13,12 @@ pub enum OpenDartError {
     /// Underlying error from the reqwest library after an API call was made
     #[error("reqwest error: {0}")]
     Reqwest(#[from] reqwest::Error),
+    /// Error when a response is not successful.
+    ///
+    /// This will usually appear when a 200 status code was received,
+    /// but the response body indicates an error.
+    #[error("response error: {0}")]
+    Response(#[from] ResponseError),
     /// Error from client side validation
     /// or when the builder fails to build request before making API call
     #[error("derive_builder uninitialized field error: {0}")]
@@ -39,8 +46,30 @@ pub enum OpenDartError {
     // thiserror
     Error,
 )]
-#[error("value: {value}, message: {message}")]
+#[error("{self:?}")]
 pub struct ValidationError {
     pub value: String,
     pub message: String,
+}
+
+#[derive(
+    std::fmt::Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    // derive_more
+    derive_more::From,
+    derive_more::Into,
+    // serde
+    serde::Serialize,
+    serde::Deserialize,
+    // thiserror
+    Error,
+)]
+#[error("{self:?}")]
+pub struct ResponseError {
+    pub message: Message,
 }

@@ -99,6 +99,14 @@ digit!(JurirNo, false, "1301110006246", 13, {
     /// 13자리
 });
 
+digit!(RceptNo, false, "20200117000486", 14, {
+    /// ### 접수번호
+    /// 접수번호(14자리)
+    ///
+    /// ※ 공시뷰어 연결에 이용예시
+    /// - PC용 : https://dart.fss.or.kr/dsaf001/main.do?rcpNo=접수번호
+});
+
 digit!(StockCode, false, "005930", 6, {
     /// ## 주식코드
     ///

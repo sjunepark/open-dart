@@ -5,7 +5,8 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::Display;
 
-use crate::endpoints::OpenDartResponse;
+use crate::endpoints::base::ResponseBody;
+use crate::endpoints::{OpenDartResponse, ResponseCheck};
 use crate::error::OpenDartError;
 
 #[derive(Debug)]
@@ -41,11 +42,11 @@ impl OpenDartApi {
         &self,
         url: U,
         params: P,
-    ) -> Result<OpenDartResponse<B>, OpenDartError>
+    ) -> Result<OpenDartResponse<ResponseBody<B>>, OpenDartError>
     where
         U: Display + IntoUrl + std::fmt::Debug,
         P: Serialize + std::fmt::Debug,
-        B: Serialize + DeserializeOwned + std::fmt::Debug,
+        B: Serialize + ResponseCheck + DeserializeOwned + std::fmt::Debug,
     {
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
@@ -57,14 +58,22 @@ impl OpenDartApi {
             .bytes()
             .await
             .inspect_err(|_e| tracing::error!("Failed to parse response body as bytes"))?;
+
         // For debugging
         let text = std::str::from_utf8(&bytes).inspect_err(|_e| {
             tracing::error!("Failed to parse response body as text");
         })?;
 
-        let response_body = serde_json::from_slice::<Option<B>>(&bytes).inspect_err(|_e| {
-            tracing::error!(body = ?text, "Failed to deserialize response body");
-        })?;
+        // The deserialization type should be an `Option`
+        // because there can be no body in the case of an unsuccessful response
+        let response_body =
+            serde_json::from_slice::<Option<ResponseBody<B>>>(&bytes).inspect_err(|_e| {
+                tracing::error!(body = ?text, "Failed to deserialize response body");
+            })?;
+
+        if let Some(body) = &response_body {
+            body.is_success()?;
+        }
 
         let response = OpenDartResponse::new(status, headers, response_body);
         Ok(response)

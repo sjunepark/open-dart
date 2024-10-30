@@ -74,7 +74,10 @@ impl TestContext {
                 let golden_file_str = std::fs::read_to_string(golden_file_path)
                     .expect("Failed to read response body from file");
                 let golden_file_body: R = serde_json::from_str(&golden_file_str)
-                    .expect("Failed to deserialize response body");
+                    .inspect_err(|e| {
+                        tracing::error!(?e, ?golden_file_str, "Failed to deserialize response body")
+                    })
+                    .unwrap();
 
                 let response = ResponseTemplate::new(200).set_body_json(&golden_file_body);
 
