@@ -3,19 +3,31 @@
 //!
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
 
-use crate::endpoints::base::Message;
-use crate::error::OpenDartError;
+use crate::client::OpenDartApi;
+use crate::endpoints::base::{is_success, ResponseBody};
+use crate::endpoints::{OpenDartResponse, ResponseCheck};
+use crate::error::{OpenDartError, ResponseError};
 use crate::statics::{assert_impl_commons, assert_impl_commons_without_default};
 use crate::types::{
-    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, LastReprtAt, PageCount, PageNo, PblntfTy,
-    ReportNm, Sort, SortMth, StockCode, TotalCount, TotalPage,
+    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, FlrNm, LastReprtAt, PageCount, PageNo, PblntfTy,
+    RceptDt, RceptNo, ReportNm, Sort, SortMth, StockCode, TotalCount, TotalPage, RM,
 };
 use crate::types::{EndDe, PblntfDetailTy};
 use derive_builder::Builder;
 use derive_more::{Display, From, Into};
 use serde::{Deserialize, Serialize};
 
+impl OpenDartApi {
+    pub async fn get_list(
+        &self,
+        args: Params,
+    ) -> Result<OpenDartResponse<ResponseBody<List>>, OpenDartError> {
+        self.get(self.url("/api/list.json"), args).await
+    }
+}
+
 // region: Request Params
+
 assert_impl_commons!(Params);
 /// Documentation exists in each field's types
 #[derive(
@@ -57,10 +69,12 @@ pub struct Params {
     pub page_no: Option<PageNo>,
     pub page_count: Option<PageCount>,
 }
+
 // endregion: Request Params
 
 // region: Response
-assert_impl_commons_without_default!(ResponseBody);
+
+assert_impl_commons_without_default!(List);
 #[derive(
     Debug,
     Clone,
@@ -78,14 +92,15 @@ assert_impl_commons_without_default!(ResponseBody);
     Deserialize,
 )]
 #[display("{self:?}")]
-pub struct ResponseBody {
-    #[serde(flatten)]
-    pub message: Message,
+#[serde(deny_unknown_fields)]
+pub struct List {
+    status: String,
+    message: String,
 
-    page_no: PageNo,
-    page_count: PageCount,
-    total_count: TotalCount,
-    total_page: TotalPage,
+    page_no: Option<PageNo>,
+    page_count: Option<PageCount>,
+    total_count: Option<TotalCount>,
+    total_page: Option<TotalPage>,
 
     list: Vec<ListCorp>,
 }
@@ -114,40 +129,27 @@ struct ListCorp {
     stock_code: StockCode,
     corp_cls: CorpCls,
     report_nm: ReportNm,
-
-    /// ### 접수번호
-    /// 접수번호(14자리)
-    ///
-    /// ※ 공시뷰어 연결에 이용예시
-    /// - PC용 : https://dart.fss.or.kr/dsaf001/main.do?rcpNo=접수번호
-    rcept_no: String,
-
-    /// ### 공시 제출인명
-    flr_nm: String,
-
-    /// ### 접수일자
-    /// 공시 접수일자(YYYYMMDD)
-    rcept_dt: String,
-
-    /// ### 비고
-    /// 조합된 문자로 각각은 아래와 같은 의미가 있음
-    /// - 유 : 본 공시사항은 한국거래소 유가증권시장본부 소관임
-    /// - 코 : 본 공시사항은 한국거래소 코스닥시장본부 소관임
-    /// - 채 : 본 문서는 한국거래소 채권상장법인 공시사항임
-    /// - 넥 : 본 문서는 한국거래소 코넥스시장 소관임
-    /// - 공 : 본 공시사항은 공정거래위원회 소관임
-    /// - 연 : 본 보고서는 연결부분을 포함한 것임
-    /// - 정 : 본 보고서 제출 후 정정신고가 있으니 관련 보고서를 참조하시기 바람
-    /// - 철 : 본 보고서는 철회(간주)되었으니 관련 철회신고서(철회간주안내)를 참고하시기 바람
-    rm: String,
+    rcept_no: RceptNo,
+    flr_nm: FlrNm,
+    rcept_dt: RceptDt,
+    rm: RM,
 }
+
+impl ResponseCheck for List {
+    fn is_success(&self) -> Result<(), ResponseError> {
+        is_success(&self.status)
+    }
+}
+
 // endregion: Response
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utils::MockDefault;
+    use crate::test_utils::tracing_setup::subscribe_tracing_with_span;
+    use crate::test_utils::{test_context, MockDefault};
     use crate::types::YesNo;
+    use goldrust::Content;
 
     #[test]
     fn params_builder_works_with_all_fields_specified() {
@@ -189,5 +191,46 @@ mod tests {
         assert_eq!(params.sort_mth, Some(sort_mth));
         assert_eq!(params.page_no, Some(page_no));
         assert_eq!(params.page_count, Some(page_count));
+    }
+
+    #[tokio::test]
+    #[tracing::instrument]
+    async fn get_list_default() {
+        subscribe_tracing_with_span!("test");
+        let mut ctx = test_context!().await;
+
+        ctx.arrange_test_endpoint::<List>("/api/list.json").await;
+
+        // region: Action
+        let params = ParamsBuilder::default()
+            .corp_code(CorpCode::mock_default())
+            .bgn_de(BgnDe::mock_default())
+            .build()
+            .expect("Failed to build ListRequestParams");
+        tracing::debug!(?params, "Request parameters");
+
+        let response = ctx
+            .api
+            .get_list(params)
+            .await
+            .expect("get_list should succeed");
+        tracing::info!(?response, "Got response");
+        // endregion
+
+        // region: Assert
+        assert!(
+            response.status().is_success(),
+            "Response didn't return a status code of 2xx"
+        );
+        // endregion
+
+        // region: Save response body
+        ctx.goldrust
+            .save(Content::Json(
+                serde_json::to_value(response.body)
+                    .expect("Failed to convert to serde_json::Value"),
+            ))
+            .expect("Failed to save response body");
+        // endregion
     }
 }

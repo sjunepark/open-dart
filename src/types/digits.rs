@@ -51,6 +51,14 @@ macro_rules! digit {
             }
         }
 
+        impl TryFrom<&str> for $name {
+            type Error = $crate::error::OpenDartError;
+
+            fn try_from(value: &str) -> Result<Self, Self::Error> {
+                Self::try_new(value)
+            }
+        }
+
         #[cfg(test)]
         impl crate::test_utils::MockDefault for $name {
             fn mock_default() -> Self {
@@ -79,7 +87,7 @@ digit!(CorpCode, false, "00126380", 8, {
     /// ※ 개발가이드 > 공시정보 > 고유번호 참고
 });
 
-digit!(IndustryCode, false, "264", 3, {
+digit!(IndutyCode, false, "264", 3, {
     /// ## 업종코드
     ///
     /// 3자리
@@ -89,6 +97,14 @@ digit!(JurirNo, false, "1301110006246", 13, {
     /// ## 법인등록번호
     ///
     /// 13자리
+});
+
+digit!(RceptNo, false, "20200117000486", 14, {
+    /// ### 접수번호
+    /// 접수번호(14자리)
+    ///
+    /// ※ 공시뷰어 연결에 이용예시
+    /// - PC용 : https://dart.fss.or.kr/dsaf001/main.do?rcpNo=접수번호
 });
 
 digit!(StockCode, false, "005930", 6, {

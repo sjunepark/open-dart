@@ -5,8 +5,8 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::Display;
 
-use crate::endpoints::list;
-use crate::endpoints::OpenDartResponse;
+use crate::endpoints::base::ResponseBody;
+use crate::endpoints::{OpenDartResponse, ResponseCheck};
 use crate::error::OpenDartError;
 
 #[derive(Debug)]
@@ -16,7 +16,7 @@ pub struct OpenDartApi {
 }
 
 impl OpenDartApi {
-    fn url(&self, path: &str) -> String {
+    pub(crate) fn url(&self, path: &str) -> String {
         if !path.starts_with("/") {
             panic!("Path must start with a slash");
         }
@@ -34,26 +34,19 @@ impl OpenDartApi {
         }
     }
 
-    pub async fn get_list(
-        &self,
-        args: list::Params,
-    ) -> Result<OpenDartResponse<list::ResponseBody>, OpenDartError> {
-        self.get(self.url("/api/list.json"), args).await
-    }
-
     // endregion
 
     // region: Generic APIs
     #[tracing::instrument(skip(self))]
-    async fn get<'de, U, P, B>(
+    pub(crate) async fn get<'de, U, P, B>(
         &self,
         url: U,
         params: P,
-    ) -> Result<OpenDartResponse<B>, OpenDartError>
+    ) -> Result<OpenDartResponse<ResponseBody<B>>, OpenDartError>
     where
         U: Display + IntoUrl + std::fmt::Debug,
         P: Serialize + std::fmt::Debug,
-        B: Serialize + DeserializeOwned + std::fmt::Debug,
+        B: Serialize + ResponseCheck + DeserializeOwned + std::fmt::Debug,
     {
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
@@ -65,14 +58,22 @@ impl OpenDartApi {
             .bytes()
             .await
             .inspect_err(|_e| tracing::error!("Failed to parse response body as bytes"))?;
+
         // For debugging
         let text = std::str::from_utf8(&bytes).inspect_err(|_e| {
             tracing::error!("Failed to parse response body as text");
         })?;
 
-        let response_body = serde_json::from_slice::<Option<B>>(&bytes).inspect_err(|_e| {
-            tracing::error!(body = ?text, "Failed to deserialize response body");
-        })?;
+        // The deserialization type should be an `Option`
+        // because there can be no body in the case of an unsuccessful response
+        let response_body =
+            serde_json::from_slice::<Option<ResponseBody<B>>>(&bytes).inspect_err(|_e| {
+                tracing::error!(body = ?text, "Failed to deserialize response body");
+            })?;
+
+        if let Some(body) = &response_body {
+            body.is_success()?;
+        }
 
         let response = OpenDartResponse::new(status, headers, response_body);
         Ok(response)
@@ -123,56 +124,5 @@ impl Default for OpenDartConfig {
         let domain = "https://opendart.fss.or.kr".to_string();
 
         Self { domain }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::endpoints::list;
-    use crate::test_utils::MockDefault;
-    use crate::types::{BgnDe, CorpCode};
-    use crate::{subscribe_tracing_with_span, test_context, TestContext};
-    use goldrust::Content;
-
-    #[tokio::test]
-    #[tracing::instrument]
-    async fn get_list_default() {
-        subscribe_tracing_with_span!("test");
-        let mut ctx = test_context!().await;
-
-        ctx.arrange_test_endpoint::<list::ResponseBody>("/api/list.json")
-            .await;
-
-        // region: Action
-        let params = list::ParamsBuilder::default()
-            .corp_code(CorpCode::mock_default())
-            .bgn_de(BgnDe::mock_default())
-            .build()
-            .expect("Failed to build ListRequestParams");
-        tracing::debug!(?params, "Request parameters");
-
-        let response = ctx
-            .api
-            .get_list(params)
-            .await
-            .expect("get_list should succeed");
-        tracing::info!(?response, "Got response");
-        // endregion
-
-        // region: Assert
-        assert!(
-            response.status().is_success(),
-            "Response didn't return a status code of 2xx"
-        );
-        // endregion
-
-        // region: Save response body
-        ctx.goldrust
-            .save(Content::Json(
-                serde_json::to_value(response.body)
-                    .expect("Failed to convert to serde_json::Value"),
-            ))
-            .expect("Failed to save response body");
-        // endregion
     }
 }

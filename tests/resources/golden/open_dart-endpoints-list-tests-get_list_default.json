@@ -1,0 +1,120 @@
+{
+  "list": [
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "김원경",
+      "rcept_dt": "20241030",
+      "rcept_no": "20241030000189",
+      "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "rm": "",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "조영준",
+      "rcept_dt": "20241029",
+      "rcept_no": "20241029000438",
+      "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "rm": "",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "최청호",
+      "rcept_dt": "20241029",
+      "rcept_no": "20241029000253",
+      "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "rm": "",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "김동욱",
+      "rcept_dt": "20241029",
+      "rcept_no": "20241029000077",
+      "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "rm": "",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "삼성전자",
+      "rcept_dt": "20241028",
+      "rcept_no": "20241028800701",
+      "report_nm": "최대주주등소유주식변동신고서              ",
+      "rm": "유",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "삼성물산",
+      "rcept_dt": "20241025",
+      "rcept_no": "20241025000551",
+      "report_nm": "주식등의대량보유상황보고서(일반)",
+      "rm": "",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "삼성물산",
+      "rcept_dt": "20241025",
+      "rcept_no": "20241025000548",
+      "report_nm": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "rm": "",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "삼성물산",
+      "rcept_dt": "20241025",
+      "rcept_no": "20241025000545",
+      "report_nm": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "rm": "",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "삼성물산",
+      "rcept_dt": "20241025",
+      "rcept_no": "20241025000537",
+      "report_nm": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "rm": "",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
+      "flr_nm": "삼성물산",
+      "rcept_dt": "20241025",
+      "rcept_no": "20241025000530",
+      "report_nm": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "rm": "",
+      "stock_code": "005930"
+    }
+  ],
+  "message": "정상",
+  "page_count": 10,
+  "page_no": 1,
+  "status": "000",
+  "total_count": 250,
+  "total_page": 25
+}

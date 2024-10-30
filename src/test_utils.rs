@@ -8,12 +8,12 @@ use serde::Serialize;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, ResponseTemplate};
 
-#[macro_export]
 macro_rules! test_context {
     () => {
-        TestContext::new($crate::function_id!())
+        $crate::test_utils::TestContext::new($crate::function_id!())
     };
 }
+pub(crate) use test_context;
 
 #[derive(Debug)]
 pub struct TestContext {
@@ -74,7 +74,10 @@ impl TestContext {
                 let golden_file_str = std::fs::read_to_string(golden_file_path)
                     .expect("Failed to read response body from file");
                 let golden_file_body: R = serde_json::from_str(&golden_file_str)
-                    .expect("Failed to deserialize response body");
+                    .inspect_err(|e| {
+                        tracing::error!(?e, ?golden_file_str, "Failed to deserialize response body")
+                    })
+                    .unwrap();
 
                 let response = ResponseTemplate::new(200).set_body_json(&golden_file_body);
 
@@ -99,6 +102,7 @@ pub trait MockDefault: Sized {
     fn mock_default() -> Self;
 }
 
+#[cfg(test)]
 pub(crate) mod tracing_setup {
     use tracing_subscriber::EnvFilter;
 
@@ -112,15 +116,15 @@ pub(crate) mod tracing_setup {
         tracing::subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
     }
 
-    #[macro_export]
     macro_rules! subscribe_tracing_with_span {
         ($span_name:expr) => {
-            $crate::subscribe();
+            $crate::test_utils::tracing_setup::subscribe();
 
             let function_id = $crate::function_id!();
             let _span = tracing::info_span!($span_name, ?function_id).entered();
         };
     }
+    pub(crate) use subscribe_tracing_with_span;
 }
 
 #[macro_export]
