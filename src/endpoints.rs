@@ -1,5 +1,6 @@
 pub(crate) mod base;
 pub mod company;
+mod corp_code;
 mod fnltt_multi_acnt;
 pub mod list;
 

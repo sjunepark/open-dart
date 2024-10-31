@@ -6,7 +6,7 @@
 use crate::client::OpenDartApi;
 use crate::endpoints::base::{is_success, ResponseBody};
 use crate::endpoints::{OpenDartResponse, ResponseCheck};
-use crate::error::{OpenDartError, ResponseError};
+use crate::error::{MessageError, OpenDartError};
 use crate::statics::{assert_impl_commons, assert_impl_commons_without_default};
 use crate::types::{
     BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, FlrNm, LastReprtAt, PageCount, PageNo, PblntfTy,
@@ -136,7 +136,7 @@ struct ListCorp {
 }
 
 impl ResponseCheck for List {
-    fn is_success(&self) -> Result<(), ResponseError> {
+    fn is_success(&self) -> Result<(), MessageError> {
         is_success(&self.status)
     }
 }

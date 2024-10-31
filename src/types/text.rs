@@ -29,11 +29,15 @@ macro_rules! text {
 
         impl $name {
             pub fn try_new(value: &str) -> Result<Self, $crate::error::OpenDartError> {
-                if value.is_empty() && !$allow_empty {
-                    return Err($crate::error::ValidationError {
-                        value: value.to_string(),
-                        message: "Empty value is not allowed".to_string(),
-                    })?;
+                if value.is_empty() {
+                    if $allow_empty {
+                        return Ok(Self(value.to_string()));
+                    } else {
+                        return Err($crate::error::ValidationError {
+                            value: value.to_string(),
+                            message: format!("Empty value is not allowed for {}", stringify!($name)),
+                        })?;
+                    }
                 };
                 Ok(Self(value.to_string()))
             }
