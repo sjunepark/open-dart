@@ -136,9 +136,9 @@ mod tests {
     #[tracing::instrument]
     async fn get_company_default() {
         subscribe_tracing_with_span!("test");
-        let mut ctx = test_context!().await;
+        let mut ctx = test_context!("json").await;
 
-        ctx.arrange_test_endpoint::<ResponseBody<Company>>("/api/company.json")
+        ctx.arrange_test_endpoint_json::<ResponseBody<Company>>("/api/company.json")
             .await;
 
         // region: Action
@@ -182,9 +182,9 @@ mod tests {
         );
 
         subscribe_tracing_with_span!("test");
-        let mut ctx = test_context!().await;
+        let mut ctx = test_context!("json").await;
 
-        ctx.arrange_test_endpoint::<ResponseBody<Company>>("/api/company.json")
+        ctx.arrange_test_endpoint_json::<ResponseBody<Company>>("/api/company.json")
             .await;
 
         // region: Action

@@ -130,6 +130,21 @@ impl CorpInfos {
                 Ok(Event::Decl(_)) => {
                     tracing::trace!("Skipping XML declaration tag.");
                 }
+                Ok(Event::Empty(e)) => {
+                    let field = String::from_utf8_lossy(e.name().as_ref()).to_string();
+                    match field.as_str() {
+                        "corp_code" => current_item.corp_code = "".to_string(),
+                        "corp_name" => current_item.corp_name = "".to_string(),
+                        "stock_code" => current_item.stock_code = "".to_string(),
+                        "modify_date" => current_item.modify_date = "".to_string(),
+                        field => {
+                            Err(ValidationError {
+                                value: field.to_string(),
+                                message: "Unexpected field while parsing xml.".to_string(),
+                            })?;
+                        }
+                    }
+                }
                 Ok(Event::Start(ref e)) => {
                     current_field = String::from_utf8_lossy(e.name().as_ref()).to_string();
                 }
@@ -187,6 +202,7 @@ mod tests {
     use crate::test_utils::test_context;
     use crate::test_utils::tracing_setup::subscribe_tracing_with_span;
     use goldrust::Content;
+    use serde::Serialize;
     use std::io::Write;
     use zip::write::FileOptions;
     use zip::ZipWriter;
@@ -260,23 +276,47 @@ mod tests {
         assert!(corp_infos.is_err());
     }
 
+    // todo: add assertion
     #[tokio::test]
-    async fn get_corp_code_works() {
+    async fn get_corp_codes_works() {
         subscribe_tracing_with_span!("test");
-        let mut ctx = test_context!().await;
-        ctx.arrange_test_endpoint::<CorpInfos>("/api/corpCode.xml")
-            .await;
+        let mut ctx = test_context!("zip").await;
+        ctx.arrange_test_endpoint_zip("/api/corpCode.xml").await;
         let corp_infos = ctx.api.get_corp_codes().await.unwrap();
-
-        assert!(!corp_infos.0.is_empty());
 
         // Use only the first 10 items for testing
         // since the actual data is too large to be saved in the test context.
-        let corp_infos_first_10 = &corp_infos.0.iter().take(10).collect::<Vec<_>>();
+        let corp_infos_first_10 = &corp_infos.0.into_iter().take(10).collect::<Vec<_>>();
+        tracing::debug!(?corp_infos_first_10);
+        assert!(!corp_infos_first_10.is_empty());
+
+        // region: Serialize to XML
+        #[derive(Serialize)]
+        #[serde(rename = "result")]
+        struct Root {
+            list: Vec<CorpInfo>,
+        }
+        let root = Root {
+            list: corp_infos_first_10.to_owned(),
+        };
+        let xml = quick_xml::se::to_string(&root).unwrap();
+        tracing::debug!(?xml);
+        // endregion: Serialize to XML
+
+        // region: Save to a golden file
+        let xml = xml.as_bytes();
+
+        let mut buf = Vec::new();
+        let mut writer = ZipWriter::new(Cursor::new(&mut buf));
+        writer
+            .start_file::<&str, ()>("corp_infos.xml", FileOptions::default())
+            .unwrap();
+        writer.write_all(xml).unwrap();
+        writer.finish().unwrap();
+
         ctx.goldrust
-            .save(Content::Json(
-                serde_json::to_value(corp_infos_first_10).expect("failed to serialize corp_infos"),
-            ))
+            .save(Content::Zip(buf))
             .expect("failed to save corp_infos");
+        // endregion: Save to a golden file
     }
 }

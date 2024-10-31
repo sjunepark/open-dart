@@ -1,6 +1,6 @@
 ## Todos
 
-- [ ] Finish `corp_code.rs` reading the latest Claude chat.l
+- [ ] Implement saving zip file for golden file
 
 ## Limitations
 

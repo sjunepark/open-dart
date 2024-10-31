@@ -115,8 +115,8 @@ digit!(StockCode, true, "005930", 6, {
     /// ## 주식코드
     ///
     /// 6자리
-
 });
+
 // endregion: Implementations
 
 #[cfg(test)]
@@ -183,5 +183,19 @@ mod tests {
     fn try_new_with_invalid_char_should_fail() {
         let name = FiveDigit::try_new("1234a");
         assert!(name.is_err());
+    }
+
+    digit!(EmptyDefault, true, "012345", 6);
+
+    impl Default for EmptyDefault {
+        fn default() -> Self {
+            EmptyDefault::try_new("").expect("failed to create empty EmptyDefault")
+        }
+    }
+
+    #[test]
+    fn should_be_able_to_create_default_empty_stock_code() {
+        let stock_code = EmptyDefault::default();
+        assert_eq!(stock_code.into_inner(), "");
     }
 }

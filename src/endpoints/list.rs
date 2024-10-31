@@ -197,9 +197,10 @@ mod tests {
     #[tracing::instrument]
     async fn get_list_default() {
         subscribe_tracing_with_span!("test");
-        let mut ctx = test_context!().await;
+        let mut ctx = test_context!("json").await;
 
-        ctx.arrange_test_endpoint::<List>("/api/list.json").await;
+        ctx.arrange_test_endpoint_json::<List>("/api/list.json")
+            .await;
 
         // region: Action
         let params = ParamsBuilder::default()
