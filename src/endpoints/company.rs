@@ -6,7 +6,7 @@
 use crate::client::OpenDartApi;
 use crate::endpoints::base::{is_success, ResponseBody};
 use crate::endpoints::{OpenDartResponse, ResponseCheck};
-use crate::error::{OpenDartError, ResponseError};
+use crate::error::{MessageError, OpenDartError};
 use crate::statics::assert_impl_commons_without_default;
 use crate::types::{
     AccMt, Adres, BizrNo, CeoNm, CorpName, CorpNameEng, EstDt, FaxNo, HmUrl, IndutyCode, IrUrl,
@@ -106,7 +106,7 @@ pub struct Company {
 }
 
 impl ResponseCheck for Company {
-    fn is_success(&self) -> Result<(), ResponseError> {
+    fn is_success(&self) -> Result<(), MessageError> {
         is_success(&self.status)
     }
 }
@@ -136,9 +136,9 @@ mod tests {
     #[tracing::instrument]
     async fn get_company_default() {
         subscribe_tracing_with_span!("test");
-        let mut ctx = test_context!().await;
+        let mut ctx = test_context!("json").await;
 
-        ctx.arrange_test_endpoint::<ResponseBody<Company>>("/api/company.json")
+        ctx.arrange_test_endpoint_json::<ResponseBody<Company>>("/api/company.json")
             .await;
 
         // region: Action
@@ -182,9 +182,9 @@ mod tests {
         );
 
         subscribe_tracing_with_span!("test");
-        let mut ctx = test_context!().await;
+        let mut ctx = test_context!("json").await;
 
-        ctx.arrange_test_endpoint::<ResponseBody<Company>>("/api/company.json")
+        ctx.arrange_test_endpoint_json::<ResponseBody<Company>>("/api/company.json")
             .await;
 
         // region: Action
@@ -202,14 +202,11 @@ mod tests {
         // endregion
 
         // region: Assert
-        assert!(matches!(
-            error,
-            OpenDartError::Response(ResponseError { .. })
-        ));
+        assert!(matches!(error, OpenDartError::Message(MessageError { .. })));
         // endregion
 
         // region: Save response body
-        if let OpenDartError::Response(error) = error {
+        if let OpenDartError::Message(error) = error {
             ctx.goldrust
                 .save(Content::Json(
                     serde_json::to_value(error).expect("Failed to convert to serde_json::Value"),

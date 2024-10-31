@@ -1,13 +1,14 @@
+use crate::endpoints::base::ResponseBody;
+use crate::endpoints::{OpenDartResponse, ResponseCheck};
+use crate::error::{OpenDartError, ResponseError};
+use crate::types::CrtfcKey;
+use bytes::Bytes;
 use derive_builder::Builder;
 use reqwest;
 use reqwest::IntoUrl;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::Display;
-
-use crate::endpoints::base::ResponseBody;
-use crate::endpoints::{OpenDartResponse, ResponseCheck};
-use crate::error::OpenDartError;
 
 #[derive(Debug)]
 pub struct OpenDartApi {
@@ -77,6 +78,38 @@ impl OpenDartApi {
 
         let response = OpenDartResponse::new(status, headers, response_body);
         Ok(response)
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub(crate) async fn get_zip<U>(&self, url: U) -> Result<Bytes, OpenDartError>
+    where
+        U: Display + IntoUrl + std::fmt::Debug,
+    {
+        #[derive(Debug, Serialize)]
+        struct Params {
+            crtfc_key: CrtfcKey,
+        }
+        let params = Params {
+            crtfc_key: CrtfcKey::default(),
+        };
+        let request = self.client.get(url).query(&params).build()?;
+
+        let response = self.client.execute(request).await?;
+
+        let headers = response.headers().clone();
+        let status = response.status();
+
+        if status != reqwest::StatusCode::OK {
+            tracing::error!(?status, ?headers, "Failed to get zip file");
+            Err(ResponseError { status, headers })?;
+        }
+
+        let bytes = response
+            .bytes()
+            .await
+            .inspect_err(|_e| tracing::error!("Failed to parse response body as bytes"))?;
+
+        Ok(bytes)
     }
 
     // endregion

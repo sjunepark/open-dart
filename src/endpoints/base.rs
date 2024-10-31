@@ -1,4 +1,4 @@
-use crate::error::ResponseError;
+use crate::error::MessageError;
 use crate::statics::assert_impl_commons_without_default;
 use derive_more::{Display, From, Into};
 use reqwest::header::HeaderMap;
@@ -92,7 +92,7 @@ impl<B> ResponseCheck for ResponseBody<B>
 where
     B: Serialize + ResponseCheck,
 {
-    fn is_success(&self) -> Result<(), ResponseError> {
+    fn is_success(&self) -> Result<(), MessageError> {
         match self {
             ResponseBody::Message(message) => message.is_success(),
             ResponseBody::UnTaggedMessage(message) => message.is_success(),
@@ -137,16 +137,16 @@ pub struct Message {
 }
 
 impl ResponseCheck for Message {
-    fn is_success(&self) -> Result<(), ResponseError> {
+    fn is_success(&self) -> Result<(), MessageError> {
         is_success(&self.status)
     }
 }
 
-pub(crate) fn is_success(status: &str) -> Result<(), ResponseError> {
+pub(crate) fn is_success(status: &str) -> Result<(), MessageError> {
     if status == "000" {
         Ok(())
     } else {
-        Err(ResponseError {
+        Err(MessageError {
             message: Message {
                 status: status.to_string(),
                 message: "".to_string(),
@@ -158,7 +158,7 @@ pub(crate) fn is_success(status: &str) -> Result<(), ResponseError> {
 // endregion: Message
 
 pub trait ResponseCheck {
-    fn is_success(&self) -> Result<(), ResponseError>;
+    fn is_success(&self) -> Result<(), MessageError>;
 }
 
 #[cfg(test)]

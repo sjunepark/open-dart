@@ -9,8 +9,8 @@ use wiremock::matchers::{method, path};
 use wiremock::{Mock, ResponseTemplate};
 
 macro_rules! test_context {
-    () => {
-        $crate::test_utils::TestContext::new($crate::function_id!())
+    ($goldrust_file_extension:expr) => {
+        $crate::test_utils::TestContext::new($goldrust_file_extension, $crate::function_id!())
     };
 }
 pub(crate) use test_context;
@@ -24,8 +24,8 @@ pub struct TestContext {
 }
 
 impl TestContext {
-    pub async fn new(function_id: &str) -> Self {
-        let goldrust = goldrust!("json", function_id);
+    pub async fn new(goldrust_file_extension: &str, function_id: &str) -> Self {
+        let goldrust = goldrust!(goldrust_file_extension, function_id);
 
         // region: Mock server setup
         let mock_server = wiremock::MockServer::start().await;
@@ -56,14 +56,13 @@ impl TestContext {
     }
 
     #[tracing::instrument(skip(self))]
-    pub async fn arrange_test_endpoint<R>(&mut self, api_path: &str)
+    pub async fn arrange_test_endpoint_json<R>(&mut self, api_path: &str)
     where
         R: Serialize + DeserializeOwned + std::fmt::Debug,
     {
         let response_source = &self.goldrust.response_source;
         let golden_file_path = &self.goldrust.golden_file_path;
 
-        // region: Arrange
         match response_source {
             ResponseSource::Local => {
                 tracing::debug!(
@@ -94,7 +93,39 @@ impl TestContext {
                 tracing::debug!(?response_source, "Getting response body from external API");
             }
         }
-        // endregion
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub async fn arrange_test_endpoint_zip(&mut self, api_path: &str) {
+        let response_source = &self.goldrust.response_source;
+        let golden_file_path = &self.goldrust.golden_file_path;
+
+        match response_source {
+            ResponseSource::Local => {
+                tracing::debug!(
+                    ?response_source,
+                    ?golden_file_path,
+                    "Getting response body from file"
+                );
+                let golden_file_bytes = std::fs::read(golden_file_path)
+                    .expect("Failed to read response body from file");
+
+                let response = ResponseTemplate::new(200)
+                    .set_body_bytes(golden_file_bytes) // Remove & to pass ownership
+                    .insert_header("content-type", "application/zip");
+
+                tracing::debug!(?response, "Responding from mock server");
+
+                Mock::given(method("GET"))
+                    .and(path(api_path))
+                    .respond_with(response) // Simplified this line since we don't need the debug block
+                    .mount(&self.mock_server)
+                    .await;
+            }
+            ResponseSource::External => {
+                tracing::debug!(?response_source, "Getting response body from external API");
+            }
+        }
     }
 }
 
@@ -147,7 +178,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_context_function_id_should_be_as_expected() {
-        let ctx = test_context!().await;
+        let ctx = test_context!("json").await;
         let expected = function_id!();
         assert_eq!(
             ctx.function_id, *expected,

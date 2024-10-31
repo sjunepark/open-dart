@@ -29,11 +29,15 @@ macro_rules! digit {
 
         impl $name {
             pub fn try_new(value: &str) -> Result<Self, $crate::error::OpenDartError> {
-                if value.is_empty() && !$allow_empty {
-                    return Err($crate::error::ValidationError {
-                        value: value.to_string(),
-                        message: "Empty value is not allowed".to_string(),
-                    })?;
+                if value.is_empty() {
+                    if $allow_empty {
+                        return Ok(Self(value.to_string()));
+                    } else {
+                        return Err($crate::error::ValidationError {
+                            value: value.to_string(),
+                            message: format!("Empty value is not allowed for {}", stringify!($name)),
+                        })?;
+                    }
                 };
 
                 if value.len() == $digits && value.chars().all(|c| c.is_ascii_digit()) {
@@ -107,12 +111,12 @@ digit!(RceptNo, false, "20200117000486", 14, {
     /// - PC용 : https://dart.fss.or.kr/dsaf001/main.do?rcpNo=접수번호
 });
 
-digit!(StockCode, false, "005930", 6, {
+digit!(StockCode, true, "005930", 6, {
     /// ## 주식코드
     ///
     /// 6자리
-
 });
+
 // endregion: Implementations
 
 #[cfg(test)]
@@ -179,5 +183,19 @@ mod tests {
     fn try_new_with_invalid_char_should_fail() {
         let name = FiveDigit::try_new("1234a");
         assert!(name.is_err());
+    }
+
+    digit!(EmptyDefault, true, "012345", 6);
+
+    impl Default for EmptyDefault {
+        fn default() -> Self {
+            EmptyDefault::try_new("").expect("failed to create empty EmptyDefault")
+        }
+    }
+
+    #[test]
+    fn should_be_able_to_create_default_empty_stock_code() {
+        let stock_code = EmptyDefault::default();
+        assert_eq!(stock_code.into_inner(), "");
     }
 }

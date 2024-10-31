@@ -1,5 +1,7 @@
 ## Todos
 
+- [ ] Implement saving zip file for golden file
+
 ## Limitations
 
 ### Doesn't support XML responses
