@@ -5,6 +5,7 @@
 
 use crate::client::OpenDartApi;
 use crate::endpoints::base::{is_success, ResponseBody};
+use crate::endpoints::macros::params;
 use crate::endpoints::{OpenDartResponse, ResponseCheck};
 use crate::error::{MessageError, OpenDartError};
 use crate::statics::assert_impl_commons_without_default;
@@ -12,8 +13,7 @@ use crate::types::{
     AccMt, Adres, BizrNo, CeoNm, CorpName, CorpNameEng, EstDt, FaxNo, HmUrl, IndutyCode, IrUrl,
     JurirNo, PhnNo, StockName,
 };
-use crate::types::{CorpCls, CorpCode, CrtfcKey, StockCode};
-use derive_builder::Builder;
+use crate::types::{CorpCls, CorpCode, StockCode};
 use derive_more::{Display, From, Into};
 use serde::{Deserialize, Serialize};
 
@@ -27,38 +27,9 @@ impl OpenDartApi {
 }
 
 // region: Request Params
-
-assert_impl_commons_without_default!(Params);
-/// Documentation exists in each field's types
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-    // builder
-    Builder,
-)]
-#[builder(setter(into, strip_option))]
-#[builder(derive(Debug))]
-#[builder(build_fn(error = "OpenDartError"))]
-#[display("{self:?}")]
-pub struct Params {
-    #[builder(setter(skip))]
-    crtfc_key: CrtfcKey,
-
+params!(
     pub corp_code: CorpCode,
-}
-
+);
 // endregion: Request Params
 
 // region: Response
