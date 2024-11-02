@@ -5,15 +5,15 @@
 
 use crate::client::OpenDartApi;
 use crate::endpoints::base::{is_success, ResponseBody};
+use crate::endpoints::macros::params;
 use crate::endpoints::{OpenDartResponse, ResponseCheck};
 use crate::error::{MessageError, OpenDartError};
-use crate::statics::{assert_impl_commons, assert_impl_commons_without_default};
+use crate::statics::assert_impl_commons_without_default;
 use crate::types::{
-    BgnDe, CorpCls, CorpCode, CorpName, CrtfcKey, FlrNm, LastReprtAt, PageCount, PageNo, PblntfTy,
-    RceptDt, RceptNo, ReportNm, Sort, SortMth, StockCode, TotalCount, TotalPage, RM,
+    BgnDe, CorpCls, CorpCode, CorpName, FlrNm, LastReprtAt, PageCount, PageNo, PblntfTy, RceptDt,
+    RceptNo, ReportNm, Sort, SortMth, StockCode, TotalCount, TotalPage, RM,
 };
 use crate::types::{EndDe, PblntfDetailTy};
-use derive_builder::Builder;
 use derive_more::{Display, From, Into};
 use serde::{Deserialize, Serialize};
 
@@ -26,51 +26,30 @@ impl OpenDartApi {
     }
 }
 
-// region: Request Params
-
-assert_impl_commons!(Params);
-/// Documentation exists in each field's types
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    Default,
-    // derive_more
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-    // builder
-    Builder,
-)]
-#[builder(setter(into, strip_option), default)]
-#[builder(derive(Debug))]
-#[builder(build_fn(error = "OpenDartError"))]
-#[display("{self:?}")]
-pub struct Params {
-    #[builder(setter(skip))]
-    crtfc_key: CrtfcKey,
-
+params!(
+    #[builder(default)]
     pub corp_code: Option<CorpCode>,
+    #[builder(default)]
     pub bgn_de: Option<BgnDe>,
+    #[builder(default)]
     pub end_de: Option<EndDe>,
+    #[builder(default)]
     pub last_reprt_at: Option<LastReprtAt>,
+    #[builder(default)]
     pub pblntf_ty: Option<PblntfTy>,
+    #[builder(default)]
     pub pblntf_detail_ty: Option<PblntfDetailTy>,
+    #[builder(default)]
     pub corp_cls: Option<CorpCls>,
+    #[builder(default)]
     pub sort: Option<Sort>,
+    #[builder(default)]
     pub sort_mth: Option<SortMth>,
+    #[builder(default)]
     pub page_no: Option<PageNo>,
+    #[builder(default)]
     pub page_count: Option<PageCount>,
-}
-
-// endregion: Request Params
+);
 
 // region: Response
 
