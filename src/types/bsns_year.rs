@@ -1,35 +1,13 @@
 use crate::error::{OpenDartError, ValidationError};
+use crate::utils::derive_newtype;
 use std::num::ParseIntError;
 
-use crate::statics::assert_impl_commons_without_default;
-use derive_more::{AsRef, Display, From, Into};
-use serde::{Deserialize, Serialize};
-
-assert_impl_commons_without_default!(BsnsYear);
-/// ## 사업연도(4자리)
-/// ※ 2015년 이후 부터 정보제공
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    AsRef,
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[cfg_attr(
-    feature = "diesel_newtype",
-    derive(diesel_derive_newtype::DieselNewType)
-)]
-pub struct BsnsYear(String);
+derive_newtype! {
+    /// ## 사업연도(4자리)
+    ///
+    /// ※ 2015년 이후 부터 정보제공
+    pub struct BsnsYear(String);
+}
 
 impl BsnsYear {
     pub fn try_new(value: &str) -> Result<Self, OpenDartError> {

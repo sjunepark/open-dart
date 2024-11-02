@@ -1,33 +1,18 @@
-use crate::statics::assert_impl_commons_without_default;
-use derive_more::Display;
-use serde::{Deserialize, Serialize};
+use crate::utils::derive_enum;
 
-assert_impl_commons_without_default!(Sort);
-/// ## 정렬
-///
-/// ※ 기본값 : date
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[serde(rename_all = "lowercase")]
-pub enum Sort {
-    /// 접수일자
-    Date,
-    /// 회사명
-    Crp,
-    /// 보고서명
-    Rpt,
+derive_enum! {
+    /// ## 정렬
+    ///
+    /// ※ 기본값 : date
+    #[serde(rename_all = "lowercase")]
+    pub enum Sort {
+        /// 접수일자
+        Date,
+        /// 회사명
+        Crp,
+        /// 보고서명
+        Rpt,
+    }
 }
 
 #[cfg(test)]

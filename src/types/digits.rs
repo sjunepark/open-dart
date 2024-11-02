@@ -1,31 +1,12 @@
-macro_rules! digit {
+macro_rules! digits {
     ($name:ident, $allow_empty:expr, $mock_default:expr, $digits:expr) => {
-        digit!($name, $allow_empty, $mock_default, $digits, {});
+        digits!($name, $allow_empty, $mock_default, $digits, {});
     };
     ($name:ident, $allow_empty:expr, $mock_default:expr, $digits:expr, {$(#[$doc:meta])*}) => {
-        $(#[$doc])*
-        #[derive(
-            std::fmt::Debug,
-            Clone,
-            Eq,
-            PartialEq,
-            Ord,
-            PartialOrd,
-            Hash,
-            // derive_more
-            derive_more::AsRef,
-            derive_more::Display,
-            derive_more::From,
-            derive_more::Into,
-            // serde
-            serde::Serialize,
-            serde::Deserialize,
-        )]
-        #[cfg_attr(
-            feature = "diesel_newtype",
-            derive(diesel_derive_newtype::DieselNewType)
-        )]
-        pub struct $name(String);
+        $crate::utils::derive_newtype! {
+            $(#[$doc])*
+            pub struct $name(String);
+        }
 
         impl $name {
             pub fn try_new(value: &str) -> Result<Self, $crate::error::OpenDartError> {
@@ -77,13 +58,13 @@ macro_rules! digit {
 
 // region: Implementations
 
-digit!(BizrNo, false, "1248100998", 10, {
+digits!(BizrNo, false, "1248100998", 10, {
     /// ## 사업자등록번호
     ///
     /// 10자리
 });
 
-digit!(CorpCode, false, "00126380", 8, {
+digits!(CorpCode, false, "00126380", 8, {
     /// ## 고유번호
     ///
     /// 공시대상회사의 고유번호(8자리)
@@ -91,19 +72,19 @@ digit!(CorpCode, false, "00126380", 8, {
     /// ※ 개발가이드 > 공시정보 > 고유번호 참고
 });
 
-digit!(IndutyCode, false, "264", 3, {
+digits!(IndutyCode, false, "264", 3, {
     /// ## 업종코드
     ///
     /// 3자리
 });
 
-digit!(JurirNo, false, "1301110006246", 13, {
+digits!(JurirNo, false, "1301110006246", 13, {
     /// ## 법인등록번호
     ///
     /// 13자리
 });
 
-digit!(RceptNo, false, "20200117000486", 14, {
+digits!(RceptNo, false, "20200117000486", 14, {
     /// ### 접수번호
     /// 접수번호(14자리)
     ///
@@ -111,7 +92,7 @@ digit!(RceptNo, false, "20200117000486", 14, {
     /// - PC용 : https://dart.fss.or.kr/dsaf001/main.do?rcpNo=접수번호
 });
 
-digit!(StockCode, true, "005930", 6, {
+digits!(StockCode, true, "005930", 6, {
     /// ## 주식코드
     ///
     /// 6자리
@@ -123,7 +104,7 @@ digit!(StockCode, true, "005930", 6, {
 mod tests {
     use crate::test_utils::MockDefault;
 
-    digit!(FiveDigit, false, "54321", 5, {
+    digits!(FiveDigit, false, "54321", 5, {
         /// ## 이름
         ///
         /// - 기본값 : "Mock Name"
@@ -150,7 +131,7 @@ mod tests {
 
     #[test]
     fn text_without_doc_comment_should_not_panic() {
-        digit!(MyDigit, false, "54321", 5);
+        digits!(MyDigit, false, "54321", 5);
 
         let my_digit = MyDigit::try_new("12345").expect("failed to create MyText");
         assert_eq!(my_digit.into_inner(), "12345");
@@ -185,7 +166,7 @@ mod tests {
         assert!(name.is_err());
     }
 
-    digit!(EmptyDefault, true, "012345", 6);
+    digits!(EmptyDefault, true, "012345", 6);
 
     impl Default for EmptyDefault {
         fn default() -> Self {

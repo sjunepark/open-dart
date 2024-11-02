@@ -1,26 +1,12 @@
-use derive_more::Display;
-use serde::{Deserialize, Serialize};
+use crate::utils::derive_enum;
 
-use crate::statics::assert_impl_commons_without_default;
-
-assert_impl_commons_without_default!(YesNo);
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-pub enum YesNo {
-    Y,
-    N,
+derive_enum! {
+    pub enum YesNo {
+        /// Yes
+        Y,
+        /// No
+        N,
+    }
 }
 
 #[cfg(test)]

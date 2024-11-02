@@ -4,18 +4,15 @@
 //! 공시 유형별, 회사별, 날짜별 등 여러가지 조건으로 공시보고서 검색기능을 제공합니다.
 
 use crate::client::OpenDartApi;
-use crate::endpoints::base::{is_success, ResponseBody};
-use crate::endpoints::macros::params;
-use crate::endpoints::{OpenDartResponse, ResponseCheck};
-use crate::error::{MessageError, OpenDartError};
-use crate::statics::assert_impl_commons_without_default;
+use crate::endpoints::base::ResponseBody;
+use crate::endpoints::macros::{derive_common, json_body, params};
+use crate::endpoints::OpenDartResponse;
+use crate::error::OpenDartError;
 use crate::types::{
     BgnDe, CorpCls, CorpCode, CorpName, FlrNm, LastReprtAt, PageCount, PageNo, PblntfTy, RceptDt,
     RceptNo, ReportNm, Sort, SortMth, StockCode, TotalCount, TotalPage, RM,
 };
 use crate::types::{EndDe, PblntfDetailTy};
-use derive_more::{Display, From, Into};
-use serde::{Deserialize, Serialize};
 
 impl OpenDartApi {
     pub async fn get_list(
@@ -53,56 +50,15 @@ params!(
 
 // region: Response
 
-assert_impl_commons_without_default!(List);
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[display("{self:?}")]
-#[serde(deny_unknown_fields)]
-pub struct List {
-    status: String,
-    message: String,
-
+json_body!(List {
     page_no: Option<PageNo>,
     page_count: Option<PageCount>,
     total_count: Option<TotalCount>,
     total_page: Option<TotalPage>,
-
     list: Vec<ListCorp>,
-}
+});
 
-assert_impl_commons_without_default!(ListCorp);
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[display("{self:?}")]
-struct ListCorp {
+derive_common!(ListCorp {
     corp_code: CorpCode,
     corp_name: CorpName,
     stock_code: StockCode,
@@ -112,13 +68,7 @@ struct ListCorp {
     flr_nm: FlrNm,
     rcept_dt: RceptDt,
     rm: RM,
-}
-
-impl ResponseCheck for List {
-    fn is_success(&self) -> Result<(), MessageError> {
-        is_success(&self.status)
-    }
-}
+});
 
 // endregion: Response
 
@@ -154,8 +104,8 @@ mod tests {
             .corp_cls(corp_cls.clone())
             .sort(sort.clone())
             .sort_mth(sort_mth.clone())
-            .page_no(page_no)
-            .page_count(page_count)
+            .page_no(page_no.clone())
+            .page_count(page_count.clone())
             .build()
             .expect("ListRequestParams should build");
 
