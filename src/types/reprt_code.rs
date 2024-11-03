@@ -1,32 +1,17 @@
-use crate::statics::assert_impl_commons_without_default;
-use derive_more::Display;
-use serde::{Deserialize, Serialize};
+use crate::utils::derive_enum;
 
-assert_impl_commons_without_default!(ReprtCode);
-/// ## 보고서 코드
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-pub enum ReprtCode {
-    /// 1분기보고서
-    Q1,
-    /// 반기보고서
-    Q2,
-    /// 3분기보고서
-    Q3,
-    /// 사업보고서
-    YE,
+derive_enum! {
+    /// ## 보고서 코드
+    pub enum ReprtCode {
+        /// 1분기보고서
+        Q1,
+        /// 반기보고서
+        Q2,
+        /// 3분기보고서
+        Q3,
+        /// 사업보고서
+        YE,
+    }
 }
 
 #[cfg(test)]

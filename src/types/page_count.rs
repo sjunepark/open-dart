@@ -1,39 +1,14 @@
 use crate::error::{OpenDartError, ValidationError};
-use crate::statics::assert_impl_commons_without_default;
-use derive_more::{AsRef, Display, From, Into};
-use serde::{Deserialize, Serialize};
-use static_assertions::assert_impl_all;
+use crate::utils::derive_newtype;
 
-assert_impl_commons_without_default!(PageCount);
-assert_impl_all! {PageCount: Copy}
-/// ## 페이지 별 건수
-/// 페이지당 건수(1~100)
-///
-/// - 기본값 : 10
-/// - 최대값 : 100
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    Copy,
-    // derive_more
-    AsRef,
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[cfg_attr(
-    feature = "diesel_newtype",
-    derive(diesel_derive_newtype::DieselNewType)
-)]
-pub struct PageCount(u16);
+derive_newtype! {
+    /// ## 페이지 별 건수
+    /// 페이지당 건수(1~100)
+    ///
+    /// - 기본값 : 10
+    /// - 최대값 : 100
+    pub struct PageCount(u16);
+}
 
 impl PageCount {
     pub fn try_new(page_count: u16) -> Result<Self, OpenDartError> {

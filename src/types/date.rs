@@ -1,33 +1,12 @@
 use crate::error::OpenDartError;
-use crate::statics::assert_impl_commons_without_default;
+use crate::utils::derive_newtype;
 use chrono::NaiveDate;
-use derive_more::{AsRef, Display, From, Into};
-use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-assert_impl_commons_without_default!(Date);
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    AsRef,
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[cfg_attr(
-    feature = "diesel_newtype",
-    derive(diesel_derive_newtype::DieselNewType)
-)]
-pub struct Date(#[serde(with = "dart_date_format")] NaiveDate);
+derive_newtype! {
+    /// ## YYYYMMDD
+    pub struct Date(#[serde(with = "dart_date_format")] NaiveDate);
+}
 
 impl Date {
     pub fn new(date: NaiveDate) -> Self {

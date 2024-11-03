@@ -1,34 +1,12 @@
-use derive_more::{AsRef, Display, From, Into};
-use serde::{Deserialize, Serialize};
-
 use crate::error::{OpenDartError, ValidationError};
-use crate::statics::assert_impl_commons;
+use crate::utils::derive_newtype;
 
-assert_impl_commons!(CrtfcKey);
-/// ## API 인증키
-/// 발급받은 인증키(40자리)
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    AsRef,
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[cfg_attr(
-    feature = "diesel_newtype",
-    derive(diesel_derive_newtype::DieselNewType)
-)]
-pub struct CrtfcKey(String);
+derive_newtype! {
+    /// ## API 인증키
+    ///
+    /// 발급받은 인증키(40자리)
+    pub struct CrtfcKey(String);
+}
 
 impl CrtfcKey {
     pub fn try_new(value: &str) -> Result<Self, OpenDartError> {

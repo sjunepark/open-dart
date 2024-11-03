@@ -1,45 +1,29 @@
-use derive_more::Display;
-use serde::{Deserialize, Serialize};
+use crate::utils::derive_enum;
 
-use crate::statics::assert_impl_commons_without_default;
-
-assert_impl_commons_without_default!(PblntfTy);
-/// ## 공시유형
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-pub enum PblntfTy {
-    /// 정기공시
-    A,
-    /// 주요사항보고
-    B,
-    /// 발행공시
-    C,
-    /// 지분공시
-    D,
-    /// 기타공시
-    E,
-    /// 외부감사관련
-    F,
-    /// 펀드공시
-    G,
-    /// 자산유동화
-    H,
-    /// 거래소공시
-    I,
-    /// 공정위공시
-    J,
+derive_enum! {
+    /// ## 공시유형
+    pub enum PblntfTy {
+        /// 정기공시
+        A,
+        /// 주요사항보고
+        B,
+        /// 발행공시
+        C,
+        /// 지분공시
+        D,
+        /// 기타공시
+        E,
+        /// 외부감사관련
+        F,
+        /// 펀드공시
+        G,
+        /// 자산유동화
+        H,
+        /// 거래소공시
+        I,
+        /// 공정위공시
+        J,
+    }
 }
 
 #[cfg(test)]

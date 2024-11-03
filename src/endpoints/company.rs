@@ -4,18 +4,15 @@
 //! DART에 등록되어있는 기업의 개황정보를 제공합니다.
 
 use crate::client::OpenDartApi;
-use crate::endpoints::base::{is_success, ResponseBody};
-use crate::endpoints::macros::params;
-use crate::endpoints::{OpenDartResponse, ResponseCheck};
-use crate::error::{MessageError, OpenDartError};
-use crate::statics::assert_impl_commons_without_default;
+use crate::endpoints::base::ResponseBody;
+use crate::endpoints::macros::{json_body, params};
+use crate::endpoints::OpenDartResponse;
+use crate::error::OpenDartError;
 use crate::types::{
     AccMt, Adres, BizrNo, CeoNm, CorpName, CorpNameEng, EstDt, FaxNo, HmUrl, IndutyCode, IrUrl,
     JurirNo, PhnNo, StockName,
 };
 use crate::types::{CorpCls, CorpCode, StockCode};
-use derive_more::{Display, From, Into};
-use serde::{Deserialize, Serialize};
 
 impl OpenDartApi {
     pub async fn get_company(
@@ -26,37 +23,11 @@ impl OpenDartApi {
     }
 }
 
-// region: Request Params
 params!(
     pub corp_code: CorpCode,
 );
-// endregion: Request Params
 
-// region: Response
-
-assert_impl_commons_without_default!(Company);
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[display("{self:?}")]
-#[serde(deny_unknown_fields)]
-pub struct Company {
-    status: String,
-    message: String,
-
+json_body!(Company {
     corp_code: CorpCode,
     corp_name: CorpName,
     corp_name_eng: CorpNameEng,
@@ -74,19 +45,12 @@ pub struct Company {
     induty_code: IndutyCode,
     est_dt: EstDt,
     acc_mt: AccMt,
-}
-
-impl ResponseCheck for Company {
-    fn is_success(&self) -> Result<(), MessageError> {
-        is_success(&self.status)
-    }
-}
-
-// endregion: Response
+});
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::error::MessageError;
     use crate::test_utils::tracing_setup::subscribe_tracing_with_span;
     use crate::test_utils::{test_context, MockDefault};
     use goldrust::Content;

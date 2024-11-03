@@ -1,4 +1,5 @@
 use crate::client::OpenDartApi;
+use crate::endpoints::macros::derive_common;
 use crate::error::{OpenDartError, UnexpectedZipContentError, ValidationError};
 use crate::types::{CorpCode, CorpName, Date, StockCode};
 use bytes::Bytes;
@@ -19,30 +20,12 @@ impl OpenDartApi {
     }
 }
 
-#[derive(
-    std::fmt::Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    derive_more::AsRef,
-    derive_more::Display,
-    derive_more::From,
-    derive_more::Into,
-    // serde
-    serde::Serialize,
-    serde::Deserialize,
-)]
-#[display("{self:?}")]
-pub struct CorpInfo {
+derive_common!(CorpInfo {
     corp_code: CorpCode,
     corp_name: CorpName,
     stock_code: StockCode,
-    modify_date: Date,
-}
+    modify_date: Date
+});
 
 #[derive(Default)]
 struct CorpInfoRaw {
@@ -208,7 +191,6 @@ mod tests {
     use zip::ZipWriter;
 
     const XML_CONTENT: &str = r#"<?xml version="1.0" encoding="UTF-8"?>
-
 <result>
     <list>
         <corp_code>00126380</corp_code>

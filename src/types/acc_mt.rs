@@ -1,34 +1,12 @@
 use crate::error::ValidationError;
-use crate::statics::assert_impl_commons_without_default;
-use derive_more::{AsRef, Display, From, Into};
-use serde::{Deserialize, Serialize};
+use crate::utils::derive_newtype;
 
-assert_impl_commons_without_default!(AccMt);
-/// ## 결산월
-///
-/// MM
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    AsRef,
-    Display,
-    From,
-    Into,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[cfg_attr(
-    feature = "diesel_newtype",
-    derive(diesel_derive_newtype::DieselNewType)
-)]
-pub struct AccMt(String);
+derive_newtype! {
+    /// ## 결산월
+    ///
+    /// MM
+    pub struct AccMt(String);
+}
 
 impl AccMt {
     pub fn try_new(value: &str) -> Result<Self, crate::error::OpenDartError> {

@@ -1,32 +1,16 @@
-use crate::statics::assert_impl_commons_without_default;
-use derive_more::Display;
-use serde::{Deserialize, Serialize};
+use crate::utils::derive_enum;
 
-assert_impl_commons_without_default!(SortMth);
-/// ## 정렬방법
-///
-/// ※ 기본값 : desc
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-#[allow(non_upper_case_globals)]
-#[serde(rename_all = "lowercase")]
-pub enum SortMth {
-    /// 오름차순
-    Asc,
-    /// 내림차순
-    Desc,
+derive_enum! {
+    /// ## 정렬방법
+    ///
+    /// ※ 기본값 : desc
+    #[serde(rename_all = "lowercase")]
+    pub enum SortMth {
+        /// 오름차순
+        Asc,
+        /// 내림차순
+        Desc,
+    }
 }
 
 #[cfg(test)]

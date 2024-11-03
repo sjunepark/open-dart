@@ -1,40 +1,18 @@
-use crate::statics::assert_impl_commons_without_default;
-use derive_more::Display;
-use serde::{Deserialize, Serialize};
+use crate::utils::derive_enum;
 
-assert_impl_commons_without_default!(CorpCls);
-/// ## 법인구분
-///
-/// - Y : 유가
-/// - K : 코스닥
-/// - N : 코넥스
-/// - E : 기타
-///
-/// ※ 없으면 전체조회, 복수조건 불가
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    Display,
-    // serde
-    Serialize,
-    Deserialize,
-)]
-pub enum CorpCls {
-    /// 유가
-    Y,
-    /// 코스닥
-    K,
-    /// 코넥스
-    N,
-    /// 기타
-    E,
-}
+derive_enum!(
+    /// 법인구분
+    pub enum CorpCls {
+        /// 유가
+        Y,
+        /// 코스닥
+        K,
+        /// 코넥스
+        N,
+        /// 기타
+        E,
+    }
+);
 
 #[cfg(test)]
 impl crate::test_utils::MockDefault for CorpCls {
