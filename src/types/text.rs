@@ -2,9 +2,9 @@ macro_rules! text {
     ($name:ident, $mock_default:expr) => {
         text!($name, $mock_default, {});
     };
-    ($name:ident, $mock_default:expr, {$(#[$doc:meta])*}) => {
+    ($name:ident, $mock_default:expr, {$(#[$attr:meta])*}) => {
         $crate::utils::derive_newtype! {
-            $(#[$doc])*
+            $(#[$attr])*
             pub struct $name(String);
         }
 
@@ -37,9 +37,9 @@ macro_rules! non_empty_text {
     ($name:ident, $mock_default:expr) => {
         non_empty_text!($name, $mock_default, {});
     };
-    ($name:ident, $mock_default:expr, {$(#[$doc:meta])*}) => {
+    ($name:ident, $mock_default:expr, {$(#[$attr:meta])*}) => {
         $crate::utils::derive_newtype! {
-            $(#[$doc])*
+            $(#[$attr])*
             pub struct $name(String);
         }
 
@@ -79,10 +79,65 @@ macro_rules! non_empty_text {
     };
 }
 
+macro_rules! optional_text {
+    ($name:ident, $mock_default:expr) => {
+        optional_text!($name, $mock_default, {});
+    };
+    ($name:ident, $mock_default:expr, {$(#[$attr:meta])*}) => {
+        $crate::utils::derive_newtype! {
+            $(#[$attr])*
+            #[display("{_0:?}")]
+            pub struct $name(Option<String>);
+        }
+
+        impl $name {
+            pub fn new(value: Option<&str>) -> Self {
+                Self(value.map(|v| v.to_string()))
+            }
+
+            pub fn into_inner(self) -> Option<String> {
+                self.0
+            }
+        }
+
+        #[cfg(test)]
+        impl crate::test_utils::MockDefault for $name {
+            fn mock_default() -> Self {
+                let value = $mock_default;
+                $name::new(Some(&value))
+            }
+        }
+
+        impl From<Option<&str>> for $name {
+            fn from(value: Option<&str>) -> Self {
+                $name::new(value)
+            }
+        }
+    };
+}
+
 // region: Implementations
+
+non_empty_text!(AccountNm, "자본총계", {
+    /// ## 계정명
+    ///
+    /// 계정명칭 ex) 자본총계
+});
+
+text!(AccountDetail, "자본 [member]|지배기업 소유주지분 - 자본 [member]|지배기업 소유주지분|기타포괄손익누계액 [member]", {
+    /// ## 계정상세
+    ///
+    /// ※ 자본변동표에만 출력 ex) 계정 상세명칭 예시 - 자본 [member]|지배기업 소유주지분 - 자본 [member]|지배기업 소유주지분|기타포괄손익누계액 [member]
+});
 
 non_empty_text!(Adres, "경기도 수원시 영통구  삼성로 129 (매탄동)", {
     /// ## 주소
+});
+
+optional_text!(BfefrmtrmNm, "제 11 기말", {
+    /// ## 전전기명
+    ///
+    /// ex) 제 11 기말(※ 사업보고서의 경우에만 출력)
 });
 
 non_empty_text!(CeoNm, "한종희", {
@@ -99,12 +154,28 @@ non_empty_text!(CorpNameEng, "SAMSUNG ELECTRONICS CO,.LTD", {
     /// ## 영문정식회사명칭
 });
 
+non_empty_text!(Currency, "KRW", {
+    /// ## 통화 단위
+});
+
 non_empty_text!(FaxNo, "031-200-7538", {
     /// ## 팩스번호
 });
 
 non_empty_text!(FlrNm, "NH투자증권", {
     /// ## 공시 제출인명
+});
+
+non_empty_text!(FrmtrmNm, "제 12 기말", {
+    /// ## 전기명
+    ///
+    /// ex) 제 12 기말
+});
+
+non_empty_text!(FrmtrmQNm, "제 12 기말", {
+    /// ## 전기명(분/반기)
+    ///
+    /// ex) 제 18 기 반기
 });
 
 non_empty_text!(HmUrl, "www.samsung.com/sec", {
@@ -147,8 +218,20 @@ text!(RM, "유", {
     /// - 철 : 본 보고서는 철회(간주)되었으니 관련 철회신고서(철회간주안내)를 참고하시기 바람
 });
 
+non_empty_text!(SjNm, "재무상태표", {
+    /// ## 재무제표명
+    ///
+    /// ex) 재무상태표 또는 손익계산서 출력
+});
+
 non_empty_text!(StockName, "삼성전자", {
     /// ## 종목명(상장사) 또는 약식명칭(기타법인)
+});
+
+non_empty_text!(ThstrmNm, "제 13 기", {
+    /// ## 당기명
+    ///
+    /// ex) 제 13 기
 });
 
 // endregion: Implementations

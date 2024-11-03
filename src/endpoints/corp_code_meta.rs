@@ -22,7 +22,7 @@ impl OpenDartApi {
 
 derive_newtype! {
     /// ## 기업 코드 정보
-    #[display("{self:?}")]
+    #[display("{_0:?}")]
     pub struct CorpMetas(Vec<CorpCodeMeta>);
 }
 

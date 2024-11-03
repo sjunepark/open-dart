@@ -2,9 +2,108 @@
 //! [link](https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS003&apiId=2019020)
 //! 상장법인(유가증권, 코스닥) 및 주요 비상장법인(사업보고서 제출대상 & IFRS 적용)이 제출한 정기보고서 내에 XBRL재무제표의 모든계정과목을 제공합니다.
 
-use crate::endpoints::macros::params;
-use crate::types::CorpCode;
+use crate::client::OpenDartApi;
+use crate::endpoints::base::ResponseBody;
+use crate::endpoints::macros::{derive_common, json_body, params};
+use crate::endpoints::OpenDartResponse;
+use crate::types::{
+    AccountDetail, AccountId, AccountNm, BfefrmtrmNm, BsnsYear, CorpCode, Currency, FrmtrmNm,
+    FsDiv, RceptNo, ReprtCode, SjDiv, SjNm, ThstrmNm,
+};
+use crate::OpenDartError;
+use serde_with::serde_as;
+
+impl OpenDartApi {
+    pub async fn get_fnltt_singl_acnt_all(
+        &self,
+        args: Params,
+    ) -> Result<OpenDartResponse<ResponseBody<FnlttSinglAcntAll>>, OpenDartError> {
+        self.get(self.url("/api/fnlttSinglAcntAll.json"), args)
+            .await
+    }
+}
 
 params!(
     pub corp_code: CorpCode,
+    pub bsns_year: BsnsYear,
+    pub reprt_code: ReprtCode,
+    pub fs_div: FsDiv,
 );
+
+json_body!(FnlttSinglAcntAll {
+    list: Vec<FnlttSinglAcntAllElement>,
+});
+
+derive_common! {
+    #[serde_as]
+    FnlttSinglAcntAllElement {
+        rcept_no: RceptNo,
+        reprt_code: ReprtCode,
+        bsns_year: BsnsYear,
+        corp_code: CorpCode,
+        sj_div: SjDiv,
+        sj_nm: SjNm,
+        account_id: AccountId,
+        account_nm: AccountNm,
+        account_detail: AccountDetail,
+        thstrm_nm: ThstrmNm,
+        thstrm_amount: String,
+        #[serde_as(deserialize_as = "serde_with::DefaultOnError")]
+        thstrm_add_amount: Option<String>,
+        frmtrm_nm: FrmtrmNm,
+        frmtrm_amount: String,
+        #[serde_as(deserialize_as = "serde_with::DefaultOnError")]
+        frmtrm_q_amount: Option<String>,
+        #[serde_as(deserialize_as = "serde_with::DefaultOnError")]
+        frmtrm_add_amount: Option<String>,
+        bfefrmtrm_nm: BfefrmtrmNm,
+        bfefrmtrm_amount: String,
+        ord: String,
+        currency: Currency,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_utils::tracing_setup::subscribe_tracing_with_span;
+    use goldrust::Content;
+
+    #[tokio::test]
+    async fn get_fnltt_singl_acnt_all() {
+        subscribe_tracing_with_span!("tests");
+        let mut ctx = crate::test_utils::test_context!("json").await;
+
+        ctx.arrange_test_endpoint_json::<ResponseBody<FnlttSinglAcntAll>>(
+            "/api/fnlttSinglAcntAll.json",
+        )
+        .await;
+
+        let params = ParamsBuilder::default()
+            .corp_code(CorpCode::try_new("00126380").unwrap())
+            .bsns_year(BsnsYear::try_new("2023").unwrap())
+            .reprt_code(ReprtCode::YE)
+            .fs_div(FsDiv::CFS)
+            .build()
+            .expect("Failed to build FnlttSinglAcntAllRequestParams");
+        tracing::debug!(?params, "Request parameters");
+
+        let response = ctx
+            .api
+            .get_fnltt_singl_acnt_all(params)
+            .await
+            .expect("get_fnltt_singl_acnt_all should succeed");
+
+        assert!(
+            response.status().is_success(),
+            "Response didn't return a status code of 2xx"
+        );
+
+        ctx.goldrust
+            .save(Content::Json(
+                serde_json::to_value(response.body)
+                    .expect("Failed to convert to serde_json::Value"),
+            ))
+            .expect("Failed to save response body");
+    }
+}
