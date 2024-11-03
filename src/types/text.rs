@@ -24,6 +24,12 @@ macro_rules! text {
                 $name::new($mock_default)
             }
         }
+
+        impl From<&str> for $name {
+            fn from(value: &str) -> Self {
+                $name::new(value)
+            }
+        }
     };
 }
 
@@ -60,6 +66,14 @@ macro_rules! non_empty_text {
                 $name::try_new(&value).unwrap_or_else(|_| {
                     panic!("failed to create {} with: {}", stringify!($name), value)
                 })
+            }
+        }
+
+        impl TryFrom<&str> for $name {
+            type Error = $crate::error::OpenDartError;
+
+            fn try_from(value: &str) -> Result<Self, Self::Error> {
+                Self::try_new(value)
             }
         }
     };
