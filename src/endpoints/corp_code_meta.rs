@@ -22,7 +22,7 @@ impl OpenDartApi {
 
 derive_newtype! {
     /// ## 기업 코드 정보
-    #[display("{self:?}")]
+    #[display("{_0:?}")]
     pub struct CorpMetas(Vec<CorpCodeMeta>);
 }
 
@@ -72,7 +72,7 @@ impl TryFrom<CorpCodeMetaOptional> for CorpCodeMeta {
                 .try_into()?,
             stock_code: optional
                 .stock_code
-                .ok_or(validation_error("stock_code"))?
+                .unwrap_or_default()
                 .as_str()
                 .try_into()?,
             modify_date: optional

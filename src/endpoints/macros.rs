@@ -50,6 +50,7 @@ pub(crate) use params;
 
 macro_rules! derive_common {
     (
+        $(#[$struct_attr:meta])*
         $struct_name:ident {
             $(
                 $(#[$field_attr:meta])*
@@ -76,6 +77,7 @@ macro_rules! derive_common {
         )]
         #[display("{self:?}")]
         #[serde(deny_unknown_fields)]
+        $(#[$struct_attr])*
         pub struct $struct_name {
             $(
                 $(#[$field_attr])*

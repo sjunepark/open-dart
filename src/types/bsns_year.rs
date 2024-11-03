@@ -31,6 +31,14 @@ impl BsnsYear {
     }
 }
 
+impl TryFrom<&str> for BsnsYear {
+    type Error = OpenDartError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        BsnsYear::try_new(value)
+    }
+}
+
 #[cfg(test)]
 impl crate::test_utils::MockDefault for BsnsYear {
     fn mock_default() -> Self {
