@@ -2,77 +2,89 @@ use crate::client::OpenDartApi;
 use crate::endpoints::macros::derive_common;
 use crate::error::{OpenDartError, UnexpectedZipContentError, ValidationError};
 use crate::types::{CorpCode, CorpName, Date, StockCode};
+use crate::utils::derive_newtype;
 use bytes::Bytes;
 use quick_xml::events::Event;
 use quick_xml::Reader;
 use std::io::{BufRead, BufReader, Cursor};
-use std::str::FromStr;
 use zip::ZipArchive;
 
 impl OpenDartApi {
     #[tracing::instrument(skip(self))]
-    pub async fn get_corp_codes(&self) -> Result<CorpInfos, OpenDartError> {
+    pub async fn get_corp_codes(&self) -> Result<CorpMetas, OpenDartError> {
         let url = self.url("/api/corpCode.xml");
         let bytes = self.get_zip(url).await?;
         let cursor = Cursor::new(bytes);
         let mut zip = ZipArchive::new(cursor)?;
-        CorpInfos::from_zip(&mut zip)
+        CorpMetas::from_zip(&mut zip)
     }
 }
 
-derive_common!(CorpInfo {
+derive_newtype! {
+    /// ## 기업 코드 정보
+    #[display("{self:?}")]
+    pub struct CorpMetas(Vec<CorpCodeMeta>);
+}
+
+derive_common!(CorpCodeMeta {
     corp_code: CorpCode,
     corp_name: CorpName,
     stock_code: StockCode,
     modify_date: Date
 });
 
-#[derive(Default)]
-struct CorpInfoRaw {
-    corp_code: String,
-    corp_name: String,
-    stock_code: String,
-    modify_date: String,
+impl IntoIterator for CorpMetas {
+    type Item = CorpCodeMeta;
+    type IntoIter = std::vec::IntoIter<CorpCodeMeta>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
 }
 
-impl TryFrom<CorpInfoRaw> for CorpInfo {
+#[derive(Default)]
+struct CorpCodeMetaOptional {
+    corp_code: Option<String>,
+    corp_name: Option<String>,
+    stock_code: Option<String>,
+    modify_date: Option<String>,
+}
+
+impl TryFrom<CorpCodeMetaOptional> for CorpCodeMeta {
     type Error = OpenDartError;
 
-    fn try_from(value: CorpInfoRaw) -> Result<Self, Self::Error> {
-        Ok(CorpInfo {
-            corp_code: CorpCode::try_new(&value.corp_code)?,
-            corp_name: CorpName::try_new(&value.corp_name)?,
-            stock_code: StockCode::try_new(&value.stock_code)?,
-            modify_date: Date::from_str(&value.modify_date)?,
+    fn try_from(optional: CorpCodeMetaOptional) -> Result<Self, Self::Error> {
+        let validation_error = |field: &str| ValidationError {
+            value: "".to_string(),
+            message: format!("{} is required", field),
+        };
+
+        Ok(Self {
+            corp_code: optional
+                .corp_code
+                .ok_or(validation_error("corp_code"))?
+                .as_str()
+                .try_into()?,
+            corp_name: optional
+                .corp_name
+                .ok_or(validation_error("corp_name"))?
+                .as_str()
+                .try_into()?,
+            stock_code: optional
+                .stock_code
+                .ok_or(validation_error("stock_code"))?
+                .as_str()
+                .try_into()?,
+            modify_date: optional
+                .modify_date
+                .ok_or(validation_error("modify_date"))?
+                .as_str()
+                .try_into()?,
         })
     }
 }
 
-#[derive(
-    std::fmt::Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    derive_more::AsRef,
-    derive_more::Display,
-    derive_more::From,
-    derive_more::Into,
-    // serde
-    serde::Serialize,
-    serde::Deserialize,
-)]
-#[cfg_attr(
-    feature = "diesel_newtype",
-    derive(diesel_derive_newtype::DieselNewType)
-)]
-#[display("{self:?}")]
-pub struct CorpInfos(Vec<CorpInfo>);
-
-impl CorpInfos {
+impl CorpMetas {
     #[tracing::instrument(skip(zip))]
     fn from_zip(zip: &mut ZipArchive<Cursor<Bytes>>) -> Result<Self, OpenDartError> {
         if zip.len() != 1 {
@@ -94,7 +106,7 @@ impl CorpInfos {
         }
 
         let buf = BufReader::new(zip_file);
-        let corp_infos = CorpInfos::from_reader(buf)?;
+        let corp_infos = CorpMetas::from_reader(buf)?;
         Ok(corp_infos)
     }
 
@@ -105,7 +117,7 @@ impl CorpInfos {
 
         let mut items = Vec::new();
         let mut buf = Vec::new();
-        let mut current_item = CorpInfoRaw::default();
+        let mut current_item = CorpCodeMetaOptional::default();
         let mut current_field = String::new();
 
         loop {
@@ -116,10 +128,10 @@ impl CorpInfos {
                 Ok(Event::Empty(e)) => {
                     let field = String::from_utf8_lossy(e.name().as_ref()).to_string();
                     match field.as_str() {
-                        "corp_code" => current_item.corp_code = "".to_string(),
-                        "corp_name" => current_item.corp_name = "".to_string(),
-                        "stock_code" => current_item.stock_code = "".to_string(),
-                        "modify_date" => current_item.modify_date = "".to_string(),
+                        "corp_code" => current_item.corp_code = Some("".to_string()),
+                        "corp_name" => current_item.corp_name = Some("".to_string()),
+                        "stock_code" => current_item.stock_code = Some("".to_string()),
+                        "modify_date" => current_item.modify_date = Some("".to_string()),
                         field => {
                             Err(ValidationError {
                                 value: field.to_string(),
@@ -134,10 +146,10 @@ impl CorpInfos {
                 Ok(Event::Text(e)) => {
                     let text = e.unescape()?.to_string();
                     match current_field.as_str() {
-                        "corp_code" => current_item.corp_code = text,
-                        "corp_name" => current_item.corp_name = text,
-                        "stock_code" => current_item.stock_code = text,
-                        "modify_date" => current_item.modify_date = text,
+                        "corp_code" => current_item.corp_code = Some(text),
+                        "corp_name" => current_item.corp_name = Some(text),
+                        "stock_code" => current_item.stock_code = Some(text),
+                        "modify_date" => current_item.modify_date = Some(text),
                         field => {
                             Err(ValidationError {
                                 value: field.to_string(),
@@ -148,7 +160,7 @@ impl CorpInfos {
                 }
                 Ok(Event::End(ref e)) => {
                     if String::from_utf8_lossy(e.name().as_ref()) == "list" {
-                        let corp_info = CorpInfo::try_from(std::mem::take(&mut current_item))?;
+                        let corp_info = CorpCodeMeta::try_from(std::mem::take(&mut current_item))?;
                         items.push(corp_info);
                     }
                 }
@@ -162,20 +174,11 @@ impl CorpInfos {
             buf.clear();
         }
 
-        Ok(CorpInfos(items))
+        Ok(CorpMetas(items))
     }
 
-    pub fn iter(&self) -> std::slice::Iter<CorpInfo> {
+    pub fn iter(&self) -> std::slice::Iter<CorpCodeMeta> {
         self.0.iter()
-    }
-}
-
-impl IntoIterator for CorpInfos {
-    type Item = CorpInfo;
-    type IntoIter = std::vec::IntoIter<CorpInfo>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
     }
 }
 
@@ -187,6 +190,7 @@ mod tests {
     use goldrust::Content;
     use serde::Serialize;
     use std::io::Write;
+    use std::str::FromStr;
     use zip::write::FileOptions;
     use zip::ZipWriter;
 
@@ -226,18 +230,18 @@ mod tests {
 
         let cursor = Cursor::new(zip);
         let mut zip = ZipArchive::new(cursor).unwrap();
-        let corp_infos = CorpInfos::from_zip(&mut zip).unwrap();
+        let corp_infos = CorpMetas::from_zip(&mut zip).unwrap();
 
         assert_eq!(
             corp_infos,
-            CorpInfos(vec![
-                CorpInfo {
+            CorpMetas(vec![
+                CorpCodeMeta {
                     corp_code: CorpCode::try_new("00126380").unwrap(),
                     corp_name: CorpName::try_new("삼성전자(주)").unwrap(),
                     stock_code: StockCode::try_new("005930").unwrap(),
                     modify_date: Date::from_str("20210531").unwrap(),
                 },
-                CorpInfo {
+                CorpCodeMeta {
                     corp_code: CorpCode::try_new("00164779").unwrap(),
                     corp_name: CorpName::try_new("삼성전자서비스(주)").unwrap(),
                     stock_code: StockCode::try_new("012057").unwrap(),
@@ -254,7 +258,7 @@ mod tests {
         let cursor = Cursor::new(zip);
         let mut zip = ZipArchive::new(cursor).unwrap();
 
-        let corp_infos = CorpInfos::from_zip(&mut zip);
+        let corp_infos = CorpMetas::from_zip(&mut zip);
         assert!(corp_infos.is_err());
     }
 
@@ -276,7 +280,7 @@ mod tests {
         #[derive(Serialize)]
         #[serde(rename = "result")]
         struct Root {
-            list: Vec<CorpInfo>,
+            list: Vec<CorpCodeMeta>,
         }
         let root = Root {
             list: corp_infos_first_10.to_owned(),

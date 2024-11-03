@@ -23,6 +23,14 @@ impl FromStr for Date {
     }
 }
 
+impl TryFrom<&str> for Date {
+    type Error = OpenDartError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Date::from_str(value)
+    }
+}
+
 mod dart_date_format {
     use chrono::NaiveDate;
     use serde::{self, Deserialize, Deserializer, Serializer};
