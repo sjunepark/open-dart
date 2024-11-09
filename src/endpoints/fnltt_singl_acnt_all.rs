@@ -8,7 +8,6 @@ use crate::endpoints::macros::{derive_common, json_body, params};
 use crate::endpoints::OpenDartResponse;
 use crate::validate::fields::{bsns_year, corp_code, fs_div, reprt_code};
 use crate::OpenDartError;
-use serde_with::serde_as;
 
 impl OpenDartApi {
     pub async fn get_fnltt_singl_acnt_all(
@@ -36,7 +35,6 @@ json_body!(FnlttSinglAcntAll {
 });
 
 derive_common! {
-    #[serde_as]
     FnlttSinglAcntAllElement {
         rcept_no: String,
         reprt_code:String,
