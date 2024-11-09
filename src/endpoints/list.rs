@@ -25,7 +25,7 @@ impl OpenDartApi {
 
 params!(
     #[builder(default)]
-    pub corp_code: Option<CorpCode>,
+    pub corp_code: Option<String>,
     #[builder(default)]
     pub bgn_de: Option<BgnDe>,
     #[builder(default)]
@@ -75,14 +75,14 @@ derive_common!(ListCorp {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utils::tracing_setup::subscribe_tracing_with_span;
-    use crate::test_utils::{test_context, MockDefault};
+    use crate::test_utils::tracing::subscribe_tracing_with_span;
+    use crate::test_utils::{mock, test_context, MockDefault};
     use crate::types::YesNo;
     use goldrust::Content;
 
     #[test]
     fn params_builder_works_with_all_fields_specified() {
-        let corp_code = CorpCode::mock_default();
+        let corp_code = mock::corp_code();
         let bgn_de = BgnDe::mock_default();
         let end_de = EndDe::mock_default();
         let last_reprt_at = YesNo::mock_default();
@@ -133,7 +133,7 @@ mod tests {
 
         // region: Action
         let params = ParamsBuilder::default()
-            .corp_code(CorpCode::mock_default())
+            .corp_code(mock::corp_code())
             .bgn_de(BgnDe::mock_default())
             .build()
             .expect("Failed to build ListRequestParams");

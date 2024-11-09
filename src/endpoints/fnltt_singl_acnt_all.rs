@@ -66,7 +66,7 @@ derive_common! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utils::tracing_setup::subscribe_tracing_with_span;
+    use crate::test_utils::tracing::subscribe_tracing_with_span;
     use goldrust::Content;
 
     #[tokio::test]

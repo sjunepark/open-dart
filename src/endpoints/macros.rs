@@ -26,6 +26,8 @@ macro_rules! params {
             serde::Deserialize,
             // builder
             derive_builder::Builder,
+            // validator
+            validator::Validate,
         )]
         #[builder(setter(into, strip_option), derive(Debug))]
         #[builder(build_fn(error = "crate::OpenDartError"))]
