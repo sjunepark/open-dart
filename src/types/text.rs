@@ -46,7 +46,7 @@ macro_rules! non_empty_text {
         impl $name {
             pub fn try_new(value: &str) -> Result<Self, $crate::error::OpenDartError> {
                 if value.is_empty() {
-                    return Err($crate::error::ValidationError {
+                    return Err($crate::error::MyValidationError {
                         value: value.to_string(),
                         message: format!("Empty value is not allowed for {}", stringify!($name)),
                     })?;

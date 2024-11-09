@@ -14,7 +14,7 @@ macro_rules! digits {
                     if $allow_empty {
                         return Ok(Self(value.to_string()));
                     } else {
-                        return Err($crate::error::ValidationError {
+                        return Err($crate::error::MyValidationError {
                             value: value.to_string(),
                             message: format!("Empty value is not allowed for {}", stringify!($name)),
                         })?;
@@ -24,7 +24,7 @@ macro_rules! digits {
                 if value.len() == $digits && value.chars().all(|c| c.is_ascii_digit()) {
                     Ok(Self(value.to_string()))
                 } else {
-                    Err($crate::error::ValidationError {
+                    Err($crate::error::MyValidationError {
                         value: value.to_string(),
                         message: concat!(stringify!($name), " must be ", $digits, " digits").to_string(),
                     })?

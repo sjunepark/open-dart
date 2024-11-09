@@ -1,11 +1,11 @@
 use crate::client::OpenDartApi;
 use crate::endpoints::macros::derive_common;
-use crate::error::{OpenDartError, UnexpectedZipContentError, ValidationError};
-use crate::types::{CorpCode, CorpName, Date, StockCode};
+use crate::error::{MyValidationError, OpenDartError, UnexpectedZipContentError};
 use crate::utils::derive_newtype;
 use bytes::Bytes;
 use quick_xml::events::Event;
 use quick_xml::Reader;
+use std::borrow::Cow;
 use std::io::{BufRead, BufReader, Cursor};
 use zip::ZipArchive;
 
@@ -27,10 +27,10 @@ derive_newtype! {
 }
 
 derive_common!(CorpCodeMeta {
-    corp_code: CorpCode,
-    corp_name: CorpName,
-    stock_code: StockCode,
-    modify_date: Date
+    corp_code: String,
+    corp_name: String,
+    stock_code: String,
+    modify_date: String
 });
 
 impl IntoIterator for CorpMetas {
@@ -54,32 +54,20 @@ impl TryFrom<CorpCodeMetaOptional> for CorpCodeMeta {
     type Error = OpenDartError;
 
     fn try_from(optional: CorpCodeMetaOptional) -> Result<Self, Self::Error> {
-        let validation_error = |field: &str| ValidationError {
-            value: "".to_string(),
-            message: format!("{} is required", field),
+        let validation_error = |field: &str| {
+            let mut err = validator::ValidationError::new("empty_value");
+            err.add_param(Cow::from("field"), &field);
+            OpenDartError::from(err)
         };
 
         Ok(Self {
-            corp_code: optional
-                .corp_code
-                .ok_or(validation_error("corp_code"))?
-                .as_str()
-                .try_into()?,
-            corp_name: optional
-                .corp_name
-                .ok_or(validation_error("corp_name"))?
-                .as_str()
-                .try_into()?,
-            stock_code: optional
-                .stock_code
-                .unwrap_or_default()
-                .as_str()
-                .try_into()?,
+            corp_code: optional.corp_code.ok_or(validation_error("corp_code"))?,
+            corp_name: optional.corp_name.ok_or(validation_error("corp_name"))?,
+            // stock_code is optional
+            stock_code: optional.stock_code.unwrap_or_default(),
             modify_date: optional
                 .modify_date
-                .ok_or(validation_error("modify_date"))?
-                .as_str()
-                .try_into()?,
+                .ok_or(validation_error("modify_date"))?,
         })
     }
 }
@@ -133,7 +121,7 @@ impl CorpMetas {
                         "stock_code" => current_item.stock_code = Some("".to_string()),
                         "modify_date" => current_item.modify_date = Some("".to_string()),
                         field => {
-                            Err(ValidationError {
+                            Err(MyValidationError {
                                 value: field.to_string(),
                                 message: "Unexpected field while parsing xml.".to_string(),
                             })?;
@@ -151,7 +139,7 @@ impl CorpMetas {
                         "stock_code" => current_item.stock_code = Some(text),
                         "modify_date" => current_item.modify_date = Some(text),
                         field => {
-                            Err(ValidationError {
+                            Err(MyValidationError {
                                 value: field.to_string(),
                                 message: "Unexpected field while parsing xml.".to_string(),
                             })?;
@@ -166,7 +154,7 @@ impl CorpMetas {
                 }
                 Ok(Event::Eof) => break,
                 Err(e) => Err(e)?,
-                e => Err(ValidationError {
+                e => Err(MyValidationError {
                     value: format!("{:?}", e),
                     message: "Unexpected event while parsing xml.".to_string(),
                 })?,
@@ -190,7 +178,6 @@ mod tests {
     use goldrust::Content;
     use serde::Serialize;
     use std::io::Write;
-    use std::str::FromStr;
     use zip::write::FileOptions;
     use zip::ZipWriter;
 
@@ -236,16 +223,16 @@ mod tests {
             corp_infos,
             CorpMetas(vec![
                 CorpCodeMeta {
-                    corp_code: CorpCode::try_new("00126380").unwrap(),
-                    corp_name: CorpName::try_new("삼성전자(주)").unwrap(),
-                    stock_code: StockCode::try_new("005930").unwrap(),
-                    modify_date: Date::from_str("20210531").unwrap(),
+                    corp_code: "00126380".to_string(),
+                    corp_name: "삼성전자(주)".to_string(),
+                    stock_code: "005930".to_string(),
+                    modify_date: "20210531".to_string(),
                 },
                 CorpCodeMeta {
-                    corp_code: CorpCode::try_new("00164779").unwrap(),
-                    corp_name: CorpName::try_new("삼성전자서비스(주)").unwrap(),
-                    stock_code: StockCode::try_new("012057").unwrap(),
-                    modify_date: Date::from_str("20210531").unwrap(),
+                    corp_code: "00164779".to_string(),
+                    corp_name: "삼성전자서비스(주)".to_string(),
+                    stock_code: "012057".to_string(),
+                    modify_date: "20210531".to_string(),
                 }
             ])
         );

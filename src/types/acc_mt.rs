@@ -1,4 +1,4 @@
-use crate::error::ValidationError;
+use crate::error::MyValidationError;
 use crate::utils::derive_newtype;
 
 derive_newtype! {
@@ -10,7 +10,7 @@ derive_newtype! {
 
 impl AccMt {
     pub fn try_new(value: &str) -> Result<Self, crate::error::OpenDartError> {
-        let error = ValidationError {
+        let error = MyValidationError {
             value: value.to_string(),
             message: "acc_mt must be of format MM(00~12)".to_string(),
         };

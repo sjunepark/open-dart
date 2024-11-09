@@ -1,4 +1,4 @@
-use crate::error::{OpenDartError, ValidationError};
+use crate::error::{MyValidationError, OpenDartError};
 use crate::utils::derive_newtype;
 
 derive_newtype! {
@@ -13,7 +13,7 @@ impl CrtfcKey {
         if value.len() == 40 {
             Ok(Self(value.to_string()))
         } else {
-            Err(ValidationError {
+            Err(MyValidationError {
                 value: value.to_string(),
                 message: "crtfc_key must be 40 characters".to_string(),
             })?

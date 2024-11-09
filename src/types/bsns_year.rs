@@ -1,4 +1,4 @@
-use crate::error::{OpenDartError, ValidationError};
+use crate::error::{MyValidationError, OpenDartError};
 use crate::utils::derive_newtype;
 use std::num::ParseIntError;
 
@@ -11,15 +11,17 @@ derive_newtype! {
 
 impl BsnsYear {
     pub fn try_new(value: &str) -> Result<Self, OpenDartError> {
-        let value: u16 = value.parse().map_err(|e: ParseIntError| ValidationError {
-            value: value.to_string(),
-            message: e.to_string(),
-        })?;
+        let value: u16 = value
+            .parse()
+            .map_err(|e: ParseIntError| MyValidationError {
+                value: value.to_string(),
+                message: e.to_string(),
+            })?;
 
         if 2015 <= value {
             Ok(Self(value.to_string()))
         } else {
-            Err(ValidationError {
+            Err(MyValidationError {
                 value: value.to_string(),
                 message: "Year must be greater than or equal to 2015".to_string(),
             })?

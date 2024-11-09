@@ -1,4 +1,4 @@
-use crate::error::{OpenDartError, ValidationError};
+use crate::error::{MyValidationError, OpenDartError};
 use crate::utils::derive_newtype;
 
 derive_newtype! {
@@ -9,7 +9,7 @@ derive_newtype! {
 impl PageNo {
     pub fn try_new(page_no: u64) -> Result<Self, OpenDartError> {
         if page_no == 0 {
-            Err(ValidationError {
+            Err(MyValidationError {
                 value: page_no.to_string(),
                 message: "page_no must be greater than 0".to_string(),
             })?

@@ -1,4 +1,4 @@
-use crate::error::{OpenDartError, ValidationError};
+use crate::error::{MyValidationError, OpenDartError};
 use crate::utils::derive_newtype;
 
 derive_newtype! {
@@ -15,7 +15,7 @@ impl PageCount {
         if (1..=100).contains(&page_count) {
             Ok(Self(page_count))
         } else {
-            Err(ValidationError {
+            Err(MyValidationError {
                 value: page_count.to_string(),
                 message: "page_count must be between 1 and 100".to_string(),
             })?
