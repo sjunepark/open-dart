@@ -8,7 +8,7 @@ use crate::endpoints::base::ResponseBody;
 use crate::endpoints::macros::{json_body, params};
 use crate::endpoints::OpenDartResponse;
 use crate::error::OpenDartError;
-use crate::validate::corp_code;
+use crate::validate::fields::corp_code;
 
 impl OpenDartApi {
     pub async fn get_company(

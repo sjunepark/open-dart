@@ -1,5 +1,3 @@
-#![cfg(test)]
-
 mod context;
 mod function_id;
 pub(crate) mod mock;

@@ -6,10 +6,7 @@ use crate::client::OpenDartApi;
 use crate::endpoints::base::ResponseBody;
 use crate::endpoints::macros::{derive_common, json_body, params};
 use crate::endpoints::OpenDartResponse;
-use crate::types::{
-    AccountDetail, AccountId, AccountNm, BfefrmtrmNm, BsnsYear, CorpCode, Currency, FrmtrmNm,
-    FsDiv, RceptNo, ReprtCode, SjDiv, SjNm, ThstrmNm,
-};
+use crate::validate::fields::{bsns_year, corp_code, fs_div, reprt_code};
 use crate::OpenDartError;
 use serde_with::serde_as;
 
@@ -24,10 +21,14 @@ impl OpenDartApi {
 }
 
 params!(
-    pub corp_code: CorpCode,
-    pub bsns_year: BsnsYear,
-    pub reprt_code: ReprtCode,
-    pub fs_div: FsDiv,
+    #[validate(custom(function = "corp_code"))]
+    pub corp_code: String,
+    #[validate(custom(function = "bsns_year"))]
+    pub bsns_year: String,
+    #[validate(custom(function = "reprt_code"))]
+    pub reprt_code: String,
+    #[validate(custom(function = "fs_div"))]
+    pub fs_div: String,
 );
 
 json_body!(FnlttSinglAcntAll {
@@ -37,35 +38,34 @@ json_body!(FnlttSinglAcntAll {
 derive_common! {
     #[serde_as]
     FnlttSinglAcntAllElement {
-        rcept_no: RceptNo,
-        reprt_code: ReprtCode,
-        bsns_year: BsnsYear,
-        corp_code: CorpCode,
-        sj_div: SjDiv,
-        sj_nm: SjNm,
-        account_id: AccountId,
-        account_nm: AccountNm,
-        account_detail: AccountDetail,
-        thstrm_nm: ThstrmNm,
-        thstrm_amount: String,
-        #[serde_as(deserialize_as = "serde_with::DefaultOnError")]
-        thstrm_add_amount: Option<String>,
-        frmtrm_nm: FrmtrmNm,
-        frmtrm_amount: String,
-        #[serde_as(deserialize_as = "serde_with::DefaultOnError")]
-        frmtrm_q_amount: Option<String>,
-        #[serde_as(deserialize_as = "serde_with::DefaultOnError")]
-        frmtrm_add_amount: Option<String>,
-        bfefrmtrm_nm: BfefrmtrmNm,
-        bfefrmtrm_amount: String,
-        ord: String,
-        currency: Currency,
+        rcept_no: String,
+        reprt_code:String,
+        bsns_year:String,
+        corp_code:String,
+        sj_div:String,
+        sj_nm:String,
+        account_id:String,
+        account_nm:String,
+        account_detail:String,
+        thstrm_nm:String,
+        thstrm_amount:String,
+        // #[serde_as(deserialize_as = "serde_with::DefaultOnError")]
+        thstrm_add_amount:Option<String>,
+        frmtrm_nm:String,
+        frmtrm_amount:String,
+        frmtrm_q_amount:Option<String>,
+        frmtrm_add_amount:Option<String>,
+        bfefrmtrm_nm:String,
+        bfefrmtrm_amount:String,
+        ord:String,
+        currency:String,
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_utils::mock;
     use crate::test_utils::tracing::subscribe_tracing_with_span;
     use goldrust::Content;
 
@@ -80,10 +80,10 @@ mod tests {
         .await;
 
         let params = ParamsBuilder::default()
-            .corp_code(CorpCode::try_new("00126380").unwrap())
-            .bsns_year(BsnsYear::try_new("2023").unwrap())
-            .reprt_code(ReprtCode::YE)
-            .fs_div(FsDiv::CFS)
+            .corp_code(mock::corp_code())
+            .bsns_year(mock::bsns_year())
+            .reprt_code(mock::reprt_code())
+            .fs_div(mock::fs_div())
             .build()
             .expect("Failed to build FnlttSinglAcntAllRequestParams");
         tracing::debug!(?params, "Request parameters");

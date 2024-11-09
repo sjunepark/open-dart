@@ -2,7 +2,6 @@
 
 use open_dart::client::OpenDartApi;
 use open_dart::endpoints::fnltt_singl_acnt_all;
-use open_dart::types::{BsnsYear, CorpCode, FsDiv, ReprtCode};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -16,10 +15,10 @@ async fn main() {
     let api = OpenDartApi::default();
 
     let params = fnltt_singl_acnt_all::ParamsBuilder::default()
-        .corp_code(CorpCode::try_new("00126380").unwrap())
-        .bsns_year(BsnsYear::try_new("2023").unwrap())
-        .reprt_code(ReprtCode::YE)
-        .fs_div(FsDiv::CFS)
+        .corp_code("00126380")
+        .bsns_year("2023")
+        .reprt_code("11011")
+        .fs_div("CFS")
         .build()
         .expect("Failed to build FnlttSinglAcntAllRequestParams");
     let response = api

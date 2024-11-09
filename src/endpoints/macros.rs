@@ -8,7 +8,6 @@ macro_rules! params {
             $field_vis:vis $field_name:ident: $field_type:ty
         ),* $(,)?
     ) => {
-        /// Documentation exists in each field's types
         #[derive(
             std::fmt::Debug,
             Clone,
@@ -34,6 +33,9 @@ macro_rules! params {
         #[display("{self:?}")]
         #[serde(deny_unknown_fields)]
         pub struct Params {
+            // $(
+            //     #[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/docs/", stringify!($field_name), ".md"))]
+            // )*
             #[builder(setter(skip))]
             crtfc_key: $crate::types::CrtfcKey,
             $(
