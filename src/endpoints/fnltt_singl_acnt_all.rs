@@ -52,8 +52,8 @@ derive_common! {
         frmtrm_amount:String,
         frmtrm_q_amount:Option<String>,
         frmtrm_add_amount:Option<String>,
-        bfefrmtrm_nm:String,
-        bfefrmtrm_amount:String,
+        bfefrmtrm_nm:Option<String>,
+        bfefrmtrm_amount:Option<String>,
         ord:String,
         currency:String,
     }
