@@ -8,10 +8,6 @@ use crate::endpoints::base::ResponseBody;
 use crate::endpoints::macros::{derive_common, json_body, params};
 use crate::endpoints::OpenDartResponse;
 use crate::error::OpenDartError;
-use crate::types::{
-    CorpCls, CorpCode, CorpName, FlrNm, PageCount, PageNo, RceptDt, RceptNo, ReportNm, StockCode,
-    TotalCount, TotalPage, RM,
-};
 use crate::validate::fields::*;
 
 impl OpenDartApi {
@@ -62,23 +58,23 @@ params!(
 // region: Response
 
 json_body!(List {
-    page_no: Option<PageNo>,
-    page_count: Option<PageCount>,
-    total_count: Option<TotalCount>,
-    total_page: Option<TotalPage>,
-    list: Vec<ListCorp>,
+    page_no: Option<u64>,
+    page_count: Option<u64>,
+    total_count: Option<u64>,
+    total_page: Option<u64>,
+    list: Vec<ListElement>,
 });
 
-derive_common!(ListCorp {
-    corp_code: CorpCode,
-    corp_name: CorpName,
-    stock_code: StockCode,
-    corp_cls: CorpCls,
-    report_nm: ReportNm,
-    rcept_no: RceptNo,
-    flr_nm: FlrNm,
-    rcept_dt: RceptDt,
-    rm: RM,
+derive_common!(ListElement {
+    corp_code: String,
+    corp_name: String,
+    stock_code: String,
+    corp_cls: String,
+    report_nm: String,
+    rcept_no: String,
+    flr_nm: String,
+    rcept_dt: String,
+    rm: String,
 });
 
 // endregion: Response
