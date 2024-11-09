@@ -49,7 +49,6 @@ derive_common! {
         account_detail:String,
         thstrm_nm:String,
         thstrm_amount:String,
-        // #[serde_as(deserialize_as = "serde_with::DefaultOnError")]
         thstrm_add_amount:Option<String>,
         frmtrm_nm:String,
         frmtrm_amount:String,
