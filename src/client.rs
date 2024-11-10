@@ -1,7 +1,6 @@
 use crate::endpoints::base::ResponseBody;
 use crate::endpoints::{OpenDartResponse, ResponseCheck};
 use crate::error::{OpenDartError, ResponseError};
-use crate::types::CrtfcKey;
 use bytes::Bytes;
 use derive_builder::Builder;
 use reqwest;
@@ -95,10 +94,11 @@ impl OpenDartApi {
     {
         #[derive(Debug, Serialize)]
         struct Params {
-            crtfc_key: CrtfcKey,
+            crtfc_key: String,
         }
         let params = Params {
-            crtfc_key: CrtfcKey::default(),
+            crtfc_key: std::env::var("OPEN_DART_API_KEY")
+                .expect("OPEN_DART_API_KEY must be set as an environment variable"),
         };
         let request = self.client.get(url).query(&params).build()?;
 

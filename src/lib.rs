@@ -4,7 +4,6 @@ mod error;
 mod statics;
 #[cfg(test)]
 mod test_utils;
-pub mod types;
 mod utils;
 mod validate;
 
