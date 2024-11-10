@@ -17,20 +17,6 @@ macro_rules! optional_string {
     };
 }
 
-pub(crate) fn yyyymmdd(value: &str) -> Result<(), ValidationError> {
-    const FORMAT: &str = "%Y%m%d";
-
-    let _ = NaiveDate::parse_from_str(value, FORMAT).map_err(|_| {
-        let mut err = ValidationError::new("invalid_date");
-        err.add_param(Cow::from("value"), &value);
-        err.add_param(Cow::from("format"), &FORMAT);
-        err
-    })?;
-
-    Ok(())
-}
-optional_string!(yyyymmdd);
-
 pub(crate) fn bsns_year(value: &str) -> Result<(), ValidationError> {
     utils::is_digit(value)?;
     utils::check_string_length(value, 4, 4)?;
@@ -56,15 +42,22 @@ pub(crate) fn corp_cls(value: &str) -> Result<(), ValidationError> {
 
     Ok(())
 }
-optional_string!(corp_cls);
 
+optional_string!(corp_cls);
 pub(crate) fn corp_code(value: &str) -> Result<(), ValidationError> {
     utils::is_digit(value)?;
     utils::check_string_length(value, 8, 8)?;
 
     Ok(())
 }
+
 optional_string!(corp_code);
+
+pub(crate) fn crtfc_key(value: &str) -> Result<(), ValidationError> {
+    utils::check_string_length(value, 40, 40)?;
+
+    Ok(())
+}
 
 pub(crate) fn fs_div(value: &str) -> Result<(), ValidationError> {
     const FS_DIVS: [&str; 2] = ["CFS", "OFS"];
@@ -79,8 +72,8 @@ pub(crate) fn pblntf_ty(value: &str) -> Result<(), ValidationError> {
 
     Ok(())
 }
-optional_string!(pblntf_ty);
 
+optional_string!(pblntf_ty);
 pub(crate) fn pblntf_detail_ty(value: &str) -> Result<(), ValidationError> {
     const PBLNTF_DETAIL_TYS: [&str; 60] = [
         "A001", "A002", "A003", "A004", "A005", "B001", "B002", "B003", "C001", "C002", "C003",
@@ -94,8 +87,8 @@ pub(crate) fn pblntf_detail_ty(value: &str) -> Result<(), ValidationError> {
 
     Ok(())
 }
-optional_string!(pblntf_detail_ty);
 
+optional_string!(pblntf_detail_ty);
 pub(crate) fn reprt_code(value: &str) -> Result<(), ValidationError> {
     const REPRT_CODES: [&str; 4] = ["11013", "11012", "11014", "11011"];
     utils::contains(&REPRT_CODES, value)?;
@@ -109,20 +102,35 @@ pub(crate) fn sort(value: &str) -> Result<(), ValidationError> {
 
     Ok(())
 }
-optional_string!(sort);
 
+optional_string!(sort);
 pub(crate) fn sort_mth(value: &str) -> Result<(), ValidationError> {
     const SORT_MTHS: [&str; 2] = ["asc", "desc"];
     utils::contains(&SORT_MTHS, value)?;
 
     Ok(())
 }
-optional_string!(sort_mth);
 
+optional_string!(sort_mth);
 pub(crate) fn yes_no(value: &str) -> Result<(), ValidationError> {
     const YES_NO: [&str; 2] = ["Y", "N"];
     utils::contains(&YES_NO, value)?;
 
     Ok(())
 }
+
 optional_string!(yes_no);
+
+pub(crate) fn yyyymmdd(value: &str) -> Result<(), ValidationError> {
+    const FORMAT: &str = "%Y%m%d";
+
+    let _ = NaiveDate::parse_from_str(value, FORMAT).map_err(|_| {
+        let mut err = ValidationError::new("invalid_date");
+        err.add_param(Cow::from("value"), &value);
+        err.add_param(Cow::from("format"), &FORMAT);
+        err
+    })?;
+
+    Ok(())
+}
+optional_string!(yyyymmdd);
