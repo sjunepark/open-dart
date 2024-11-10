@@ -129,6 +129,28 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn invalid_params_should_fail_before_making_request() {
+        let params = ParamsBuilder::default()
+            .corp_code("invalid".to_string())
+            .bgn_de("invalid".to_string())
+            .end_de("invalid".to_string())
+            .last_reprt_at("invalid".to_string())
+            .pblntf_ty("invalid".to_string())
+            .pblntf_detail_ty("invalid".to_string())
+            .corp_cls("invalid".to_string())
+            .sort("invalid".to_string())
+            .sort_mth("invalid".to_string())
+            .page_no(0_u64)
+            .page_count(0_u64)
+            .build()
+            .expect("Failed to build ListRequestParams");
+
+        let api = OpenDartApi::default();
+        let response = api.get_list(params).await;
+        assert!(response.is_err());
+    }
+
+    #[tokio::test]
     #[tracing::instrument]
     async fn get_list_default() {
         subscribe_tracing_with_span!("test");

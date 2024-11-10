@@ -148,4 +148,16 @@ mod tests {
         }
         // endregion
     }
+
+    #[tokio::test]
+    async fn invalid_params_should_fail_before_making_request() {
+        let params = ParamsBuilder::default()
+            .corp_code("invalid".to_string())
+            .build()
+            .expect("Failed to build CompanyRequestParams");
+
+        let api = OpenDartApi::default();
+        let response = api.get_company(params).await;
+        assert!(response.is_err());
+    }
 }

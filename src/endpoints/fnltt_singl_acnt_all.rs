@@ -67,6 +67,21 @@ mod tests {
     use goldrust::Content;
 
     #[tokio::test]
+    async fn invalid_params_should_fail_before_making_request() {
+        let params = ParamsBuilder::default()
+            .corp_code("invalid")
+            .bsns_year("invalid")
+            .reprt_code("invalid")
+            .fs_div("invalid")
+            .build()
+            .expect("Failed to build FnlttSinglAcntAllRequestParams");
+
+        let api = OpenDartApi::default();
+        let response = api.get_fnltt_singl_acnt_all(params).await;
+        assert!(response.is_err());
+    }
+
+    #[tokio::test]
     async fn get_fnltt_singl_acnt_all() {
         subscribe_tracing_with_span!("tests");
         let mut ctx = crate::test_utils::test_context!("json").await;
