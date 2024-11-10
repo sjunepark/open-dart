@@ -33,14 +33,12 @@ macro_rules! params {
         #[display("{self:?}")]
         #[serde(deny_unknown_fields)]
         pub struct Params {
-            // todo: Add documentation in `.md` files
-            // $(
-            //     #[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/docs/", stringify!($field_name), ".md"))]
-            // )*
             #[builder(setter(skip), default = "Self::default_crtfc_key()")]
             #[validate(custom(function = "crate::validate::fields::crtfc_key"))]
+            #[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/docs/crtfc_key.md"))]
             crtfc_key: String,
             $(
+                #[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/docs/", stringify!($field_name), ".md"))]
                 $(#[$field_attr])*
                 $field_vis $field_name: $field_type
             ),*
@@ -140,18 +138,20 @@ pub(crate) use json_body;
 
 #[cfg(test)]
 mod tests {
+    use crate::test_utils::mock;
+
     #[test]
     fn params_builder_should_with_all_fields_set() {
         params!(
-            pub name: String,
-            pub age: u16,
+            pub corp_name: String,
+            pub corp_code: String,
         );
 
-        let name = "John Doe";
-        let age = 42;
+        let corp_name = mock::corp_name();
+        let corp_code = mock::corp_code();
         let params = ParamsBuilder::default()
-            .name(name)
-            .age(age)
+            .corp_name(&corp_name)
+            .corp_code(&corp_code)
             .build()
             .expect("Failed to build Params");
 
@@ -160,8 +160,8 @@ mod tests {
             Params {
                 crtfc_key: std::env::var("OPEN_DART_API_KEY")
                     .expect("OPEN_DART_API_KEY must be set as an environment variable"),
-                name: name.to_string(),
-                age,
+                corp_name,
+                corp_code,
             }
         );
     }
@@ -169,16 +169,16 @@ mod tests {
     #[test]
     fn params_builder_should_work_with_field_attributes_set() {
         params!(
-            pub name: String,
-            #[builder(setter(name = "renamed_age"))]
-            pub age: u16,
+            pub corp_name: String,
+            #[builder(setter(name = "renamed_corp_code"))]
+            pub corp_code: String,
         );
 
-        let name = "John Doe";
-        let age = 42;
+        let corp_name = mock::corp_name();
+        let corp_code = mock::corp_code();
         let params = ParamsBuilder::default()
-            .name(name)
-            .renamed_age(age)
+            .corp_name(&corp_name)
+            .renamed_corp_code(&corp_code)
             .build()
             .expect("Failed to build Params");
 
@@ -187,8 +187,8 @@ mod tests {
             Params {
                 crtfc_key: std::env::var("OPEN_DART_API_KEY")
                     .expect("OPEN_DART_API_KEY must be set as an environment variable"),
-                name: name.to_string(),
-                age,
+                corp_name,
+                corp_code,
             }
         );
     }
