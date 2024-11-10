@@ -66,20 +66,12 @@ impl OpenDartApi {
             tracing::error!("Failed to parse response body as text");
         })?;
 
-        let json_deserializer = &mut serde_json::Deserializer::from_slice(&bytes);
-        let response_body: Option<ResponseBody<B>> =
-            serde_path_to_error::deserialize(json_deserializer)
-                .inspect_err(|e| {
-                    tracing::error!(?e, body = ?text, "Failed to deserialize response body");
-                })
-                .unwrap();
-
         // The deserialization type should be an `Option`
         // because there can be no body in the case of an unsuccessful response
-        // let response_body =
-        //     serde_json::from_slice::<Option<ResponseBody<B>>>(&bytes).inspect_err(|_e| {
-        //         tracing::error!(body = ?text, "Failed to deserialize response body");
-        //     })?;
+        let response_body =
+            serde_json::from_slice::<Option<ResponseBody<B>>>(&bytes).inspect_err(|_e| {
+                tracing::error!(body = ?text, "Failed to deserialize response body");
+            })?;
 
         if let Some(body) = &response_body {
             body.is_success()?;
