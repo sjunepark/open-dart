@@ -14,6 +14,10 @@ pub(crate) fn corp_code() -> String {
     "00126380".to_string()
 }
 
+pub(crate) fn corp_name() -> String {
+    "삼성전자(주)".to_string()
+}
+
 pub(crate) fn pblntf_ty() -> String {
     "F".to_string()
 }
