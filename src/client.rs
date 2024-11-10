@@ -45,9 +45,11 @@ impl OpenDartApi {
     ) -> Result<OpenDartResponse<ResponseBody<B>>, OpenDartError>
     where
         U: Display + IntoUrl + std::fmt::Debug,
-        P: Serialize + std::fmt::Debug,
+        P: Serialize + std::fmt::Debug + validator::Validate,
         B: Serialize + ResponseCheck + DeserializeOwned + std::fmt::Debug,
     {
+        params.validate()?;
+
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
 

@@ -3,7 +3,7 @@ use derive_builder::UninitializedFieldError;
 use reqwest::StatusCode;
 use std::str::Utf8Error;
 use thiserror::Error;
-use validator::ValidationError;
+use validator::{ValidationError, ValidationErrors};
 
 #[derive(Debug, Error)]
 pub enum OpenDartError {
@@ -35,34 +35,11 @@ pub enum OpenDartError {
     Utf8(#[from] Utf8Error),
     // todo: remove
     #[error("validation error: {0}")]
-    MyValidation(#[from] MyValidationError),
-    #[error("validation error: {0}")]
-    Validator(#[from] ValidationError),
+    Validation(#[from] ValidationError),
+    #[error("validation errors: {0}")]
+    Validations(#[from] ValidationErrors),
     #[error("zip error: {0}")]
     Zip(#[from] zip::result::ZipError),
-}
-
-#[derive(
-    std::fmt::Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Hash,
-    // derive_more
-    derive_more::From,
-    derive_more::Into,
-    // serde
-    serde::Serialize,
-    serde::Deserialize,
-    // thiserror
-    Error,
-)]
-#[error("{self:?}")]
-pub struct MyValidationError {
-    pub value: String,
-    pub message: String,
 }
 
 #[derive(

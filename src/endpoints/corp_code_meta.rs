@@ -1,12 +1,13 @@
 use crate::client::OpenDartApi;
 use crate::endpoints::macros::derive_common;
-use crate::error::{MyValidationError, OpenDartError, UnexpectedZipContentError};
+use crate::error::{OpenDartError, UnexpectedZipContentError};
 use crate::utils::derive_newtype;
 use bytes::Bytes;
 use quick_xml::events::Event;
 use quick_xml::Reader;
 use std::borrow::Cow;
 use std::io::{BufRead, BufReader, Cursor};
+use validator::ValidationError;
 use zip::ZipArchive;
 
 impl OpenDartApi {
@@ -121,10 +122,9 @@ impl CorpMetas {
                         "stock_code" => current_item.stock_code = Some("".to_string()),
                         "modify_date" => current_item.modify_date = Some("".to_string()),
                         field => {
-                            Err(MyValidationError {
-                                value: field.to_string(),
-                                message: "Unexpected field while parsing xml.".to_string(),
-                            })?;
+                            let mut err = ValidationError::new("unexpected_field");
+                            err.add_param(Cow::from("field"), &field);
+                            Err(err)?;
                         }
                     }
                 }
@@ -139,10 +139,9 @@ impl CorpMetas {
                         "stock_code" => current_item.stock_code = Some(text),
                         "modify_date" => current_item.modify_date = Some(text),
                         field => {
-                            Err(MyValidationError {
-                                value: field.to_string(),
-                                message: "Unexpected field while parsing xml.".to_string(),
-                            })?;
+                            let mut err = ValidationError::new("unexpected_field");
+                            err.add_param(Cow::from("field"), &field);
+                            Err(err)?;
                         }
                     }
                 }
@@ -154,10 +153,11 @@ impl CorpMetas {
                 }
                 Ok(Event::Eof) => break,
                 Err(e) => Err(e)?,
-                e => Err(MyValidationError {
-                    value: format!("{:?}", e),
-                    message: "Unexpected event while parsing xml.".to_string(),
-                })?,
+                e => {
+                    let mut err = ValidationError::new("unexpected_event");
+                    err.add_param(Cow::from("event"), &format!("{:?}", e));
+                    Err(err)?;
+                }
             }
             buf.clear();
         }
