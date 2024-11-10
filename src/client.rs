@@ -1,7 +1,6 @@
 use crate::endpoints::base::ResponseBody;
 use crate::endpoints::{OpenDartResponse, ResponseCheck};
 use crate::error::{OpenDartError, ResponseError};
-use crate::types::CrtfcKey;
 use bytes::Bytes;
 use derive_builder::Builder;
 use reqwest;
@@ -46,9 +45,11 @@ impl OpenDartApi {
     ) -> Result<OpenDartResponse<ResponseBody<B>>, OpenDartError>
     where
         U: Display + IntoUrl + std::fmt::Debug,
-        P: Serialize + std::fmt::Debug,
+        P: Serialize + std::fmt::Debug + validator::Validate,
         B: Serialize + ResponseCheck + DeserializeOwned + std::fmt::Debug,
     {
+        params.validate()?;
+
         let request = self.client.get(url).query(&params).build()?;
         let response = self.client.execute(request).await?;
 
@@ -65,20 +66,12 @@ impl OpenDartApi {
             tracing::error!("Failed to parse response body as text");
         })?;
 
-        let json_deserializer = &mut serde_json::Deserializer::from_slice(&bytes);
-        let response_body: Option<ResponseBody<B>> =
-            serde_path_to_error::deserialize(json_deserializer)
-                .inspect_err(|e| {
-                    tracing::error!(?e, body = ?text, "Failed to deserialize response body");
-                })
-                .unwrap();
-
         // The deserialization type should be an `Option`
         // because there can be no body in the case of an unsuccessful response
-        // let response_body =
-        //     serde_json::from_slice::<Option<ResponseBody<B>>>(&bytes).inspect_err(|_e| {
-        //         tracing::error!(body = ?text, "Failed to deserialize response body");
-        //     })?;
+        let response_body =
+            serde_json::from_slice::<Option<ResponseBody<B>>>(&bytes).inspect_err(|_e| {
+                tracing::error!(body = ?text, "Failed to deserialize response body");
+            })?;
 
         if let Some(body) = &response_body {
             body.is_success()?;
@@ -95,10 +88,11 @@ impl OpenDartApi {
     {
         #[derive(Debug, Serialize)]
         struct Params {
-            crtfc_key: CrtfcKey,
+            crtfc_key: String,
         }
         let params = Params {
-            crtfc_key: CrtfcKey::default(),
+            crtfc_key: std::env::var("OPEN_DART_API_KEY")
+                .expect("OPEN_DART_API_KEY must be set as an environment variable"),
         };
         let request = self.client.get(url).query(&params).build()?;
 

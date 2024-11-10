@@ -8,11 +8,7 @@ use crate::endpoints::base::ResponseBody;
 use crate::endpoints::macros::{json_body, params};
 use crate::endpoints::OpenDartResponse;
 use crate::error::OpenDartError;
-use crate::types::{
-    AccMt, Adres, BizrNo, CeoNm, CorpName, CorpNameEng, EstDt, FaxNo, HmUrl, IndutyCode, IrUrl,
-    JurirNo, PhnNo, StockName,
-};
-use crate::types::{CorpCls, CorpCode, StockCode};
+use crate::validate::fields::corp_code;
 
 impl OpenDartApi {
     pub async fn get_company(
@@ -24,40 +20,42 @@ impl OpenDartApi {
 }
 
 params!(
-    pub corp_code: CorpCode,
+    #[validate(custom(function = "corp_code"))]
+    pub corp_code: String,
 );
 
 json_body!(Company {
-    corp_code: CorpCode,
-    corp_name: CorpName,
-    corp_name_eng: CorpNameEng,
-    stock_name: StockName,
-    stock_code: StockCode,
-    ceo_nm: CeoNm,
-    corp_cls: CorpCls,
-    jurir_no: JurirNo,
-    bizr_no: BizrNo,
-    adres: Adres,
-    hm_url: HmUrl,
-    ir_url: IrUrl,
-    phn_no: PhnNo,
-    fax_no: FaxNo,
-    induty_code: IndutyCode,
-    est_dt: EstDt,
-    acc_mt: AccMt,
+    corp_code: String,
+    corp_name: String,
+    corp_name_eng: String,
+    stock_name: String,
+    stock_code: String,
+    ceo_nm: String,
+    corp_cls: String,
+    jurir_no: String,
+    bizr_no: String,
+    adres: String,
+    hm_url: String,
+    ir_url: String,
+    phn_no: String,
+    fax_no: String,
+    induty_code: String,
+    est_dt: String,
+    acc_mt: String,
 });
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::error::MessageError;
-    use crate::test_utils::tracing_setup::subscribe_tracing_with_span;
-    use crate::test_utils::{test_context, MockDefault};
+    use crate::mock;
+    use crate::test_utils::test_context;
+    use crate::test_utils::tracing::subscribe_tracing_with_span;
     use goldrust::Content;
 
     #[test]
     fn params_builder_works_with_all_fields_specified() {
-        let corp_code = CorpCode::mock_default();
+        let corp_code = mock::corp_code();
 
         let params = ParamsBuilder::default()
             .corp_code(corp_code.clone())
@@ -78,7 +76,7 @@ mod tests {
 
         // region: Action
         let params = ParamsBuilder::default()
-            .corp_code(CorpCode::mock_default())
+            .corp_code(mock::corp_code())
             .build()
             .expect("Failed to build CompanyRequestParams");
         tracing::debug!(?params, "Request parameters");
@@ -124,7 +122,7 @@ mod tests {
 
         // region: Action
         let params = ParamsBuilder::default()
-            .corp_code(CorpCode::mock_default())
+            .corp_code(mock::corp_code())
             .build()
             .expect("Failed to build CompanyRequestParams");
         tracing::debug!(?params, "Request parameters");

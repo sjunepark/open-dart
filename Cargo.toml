@@ -10,17 +10,16 @@ diesel = { version = "2.2.4", optional = true }
 diesel-derive-newtype = { version = "2.1.2", optional = true }
 derive_builder = "0.20.2"
 derive_more = { version = "1.0.0", features = ["as_ref", "display", "from", "from_str", "into"] }
+paste = "1.0.15"
 quick-xml = { version = "0.37.0", features = ["serialize"] }
 reqwest = { version = "0.12.8", features = ["json"] }
 serde = { version = "1.0.213", features = ["derive"] }
-serde-aux = "4.5.0"
 serde_json = "1.0.132"
-serde_path_to_error = "0.1.16"
-serde_with = "3.11.0"
 static_assertions = "1.1.0"
 thiserror = "1.0.65"
 tokio = { version = "1.41.0", features = ["full"] }
 tracing = { version = "0.1.40", features = ["log"] }
+validator = { version = "0.19.0", features = ["derive"] }
 zip = "2.2.0"
 
 [dev-dependencies]

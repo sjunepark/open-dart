@@ -8,7 +8,6 @@ macro_rules! params {
             $field_vis:vis $field_name:ident: $field_type:ty
         ),* $(,)?
     ) => {
-        /// Documentation exists in each field's types
         #[derive(
             std::fmt::Debug,
             Clone,
@@ -26,18 +25,32 @@ macro_rules! params {
             serde::Deserialize,
             // builder
             derive_builder::Builder,
+            // validator
+            validator::Validate,
         )]
         #[builder(setter(into, strip_option), derive(Debug))]
         #[builder(build_fn(error = "crate::OpenDartError"))]
         #[display("{self:?}")]
         #[serde(deny_unknown_fields)]
         pub struct Params {
-            #[builder(setter(skip))]
-            crtfc_key: $crate::types::CrtfcKey,
+            // todo: Add documentation in `.md` files
+            // $(
+            //     #[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/docs/", stringify!($field_name), ".md"))]
+            // )*
+            #[builder(setter(skip), default = "Self::default_crtfc_key()")]
+            #[validate(custom(function = "crate::validate::fields::crtfc_key"))]
+            crtfc_key: String,
             $(
                 $(#[$field_attr])*
                 $field_vis $field_name: $field_type
             ),*
+        }
+
+        impl ParamsBuilder {
+            fn default_crtfc_key() -> String {
+                std::env::var("OPEN_DART_API_KEY")
+                .expect("OPEN_DART_API_KEY must be set as an environment variable")
+            }
         }
     };
 }
@@ -145,7 +158,8 @@ mod tests {
         assert_eq!(
             params,
             Params {
-                crtfc_key: Default::default(),
+                crtfc_key: std::env::var("OPEN_DART_API_KEY")
+                    .expect("OPEN_DART_API_KEY must be set as an environment variable"),
                 name: name.to_string(),
                 age,
             }
@@ -171,7 +185,8 @@ mod tests {
         assert_eq!(
             params,
             Params {
-                crtfc_key: Default::default(),
+                crtfc_key: std::env::var("OPEN_DART_API_KEY")
+                    .expect("OPEN_DART_API_KEY must be set as an environment variable"),
                 name: name.to_string(),
                 age,
             }

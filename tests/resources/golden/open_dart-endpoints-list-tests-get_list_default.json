@@ -4,6 +4,17 @@
       "corp_cls": "Y",
       "corp_code": "00126380",
       "corp_name": "삼성전자",
+      "flr_nm": "민현진",
+      "rcept_dt": "20241101",
+      "rcept_no": "20241101000042",
+      "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "rm": "",
+      "stock_code": "005930"
+    },
+    {
+      "corp_cls": "Y",
+      "corp_code": "00126380",
+      "corp_name": "삼성전자",
       "flr_nm": "삼성전자",
       "rcept_dt": "20241031",
       "rcept_no": "20241031000536",
@@ -98,23 +109,12 @@
       "report_nm": "연결재무제표기준영업(잠정)실적(공정공시)              ",
       "rm": "유",
       "stock_code": "005930"
-    },
-    {
-      "corp_cls": "Y",
-      "corp_code": "00126380",
-      "corp_name": "삼성전자",
-      "flr_nm": "김원경",
-      "rcept_dt": "20241030",
-      "rcept_no": "20241030000189",
-      "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-      "rm": "",
-      "stock_code": "005930"
     }
   ],
   "message": "정상",
   "page_count": 10,
   "page_no": 1,
   "status": "000",
-  "total_count": 252,
-  "total_page": 26
+  "total_count": 364,
+  "total_page": 37
 }

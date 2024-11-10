@@ -8,11 +8,7 @@ use crate::endpoints::base::ResponseBody;
 use crate::endpoints::macros::{derive_common, json_body, params};
 use crate::endpoints::OpenDartResponse;
 use crate::error::OpenDartError;
-use crate::types::{
-    BgnDe, CorpCls, CorpCode, CorpName, FlrNm, LastReprtAt, PageCount, PageNo, PblntfTy, RceptDt,
-    RceptNo, ReportNm, Sort, SortMth, StockCode, TotalCount, TotalPage, RM,
-};
-use crate::types::{EndDe, PblntfDetailTy};
+use crate::validate::fields::*;
 
 impl OpenDartApi {
     pub async fn get_list(
@@ -25,49 +21,60 @@ impl OpenDartApi {
 
 params!(
     #[builder(default)]
-    pub corp_code: Option<CorpCode>,
+    #[validate(custom(function = "optional_corp_code"))]
+    pub corp_code: Option<String>,
     #[builder(default)]
-    pub bgn_de: Option<BgnDe>,
+    #[validate(custom(function = "optional_yyyymmdd"))]
+    pub bgn_de: Option<String>,
     #[builder(default)]
-    pub end_de: Option<EndDe>,
+    #[validate(custom(function = "optional_yyyymmdd"))]
+    pub end_de: Option<String>,
     #[builder(default)]
-    pub last_reprt_at: Option<LastReprtAt>,
+    #[validate(custom(function = "optional_yes_no"))]
+    pub last_reprt_at: Option<String>,
     #[builder(default)]
-    pub pblntf_ty: Option<PblntfTy>,
+    #[validate(custom(function = "optional_pblntf_ty"))]
+    pub pblntf_ty: Option<String>,
     #[builder(default)]
-    pub pblntf_detail_ty: Option<PblntfDetailTy>,
+    #[validate(custom(function = "optional_pblntf_detail_ty"))]
+    pub pblntf_detail_ty: Option<String>,
     #[builder(default)]
-    pub corp_cls: Option<CorpCls>,
+    #[validate(custom(function = "optional_corp_cls"))]
+    pub corp_cls: Option<String>,
     #[builder(default)]
-    pub sort: Option<Sort>,
+    #[validate(custom(function = "optional_sort"))]
+    pub sort: Option<String>,
     #[builder(default)]
-    pub sort_mth: Option<SortMth>,
+    #[validate(custom(function = "optional_sort_mth"))]
+    pub sort_mth: Option<String>,
     #[builder(default)]
-    pub page_no: Option<PageNo>,
+    #[validate(range(min = 1))]
+    pub page_no: Option<u64>,
     #[builder(default)]
-    pub page_count: Option<PageCount>,
+    #[validate(range(min = 1))]
+    pub page_count: Option<u64>,
 );
 
 // region: Response
 
 json_body!(List {
-    page_no: Option<PageNo>,
-    page_count: Option<PageCount>,
-    total_count: Option<TotalCount>,
-    total_page: Option<TotalPage>,
-    list: Vec<ListCorp>,
+    page_no: Option<u64>,
+    page_count: Option<u64>,
+    total_count: Option<u64>,
+    total_page: Option<u64>,
+    list: Vec<ListElement>,
 });
 
-derive_common!(ListCorp {
-    corp_code: CorpCode,
-    corp_name: CorpName,
-    stock_code: StockCode,
-    corp_cls: CorpCls,
-    report_nm: ReportNm,
-    rcept_no: RceptNo,
-    flr_nm: FlrNm,
-    rcept_dt: RceptDt,
-    rm: RM,
+derive_common!(ListElement {
+    corp_code: String,
+    corp_name: String,
+    stock_code: String,
+    corp_cls: String,
+    report_nm: String,
+    rcept_no: String,
+    flr_nm: String,
+    rcept_dt: String,
+    rm: String,
 });
 
 // endregion: Response
@@ -75,24 +82,23 @@ derive_common!(ListCorp {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utils::tracing_setup::subscribe_tracing_with_span;
-    use crate::test_utils::{test_context, MockDefault};
-    use crate::types::YesNo;
+    use crate::test_utils::tracing::subscribe_tracing_with_span;
+    use crate::test_utils::{mock, test_context};
     use goldrust::Content;
 
     #[test]
     fn params_builder_works_with_all_fields_specified() {
-        let corp_code = CorpCode::mock_default();
-        let bgn_de = BgnDe::mock_default();
-        let end_de = EndDe::mock_default();
-        let last_reprt_at = YesNo::mock_default();
-        let pblntf_ty = PblntfTy::mock_default();
-        let pblntf_detail_ty = PblntfDetailTy::mock_default();
-        let corp_cls = CorpCls::mock_default();
-        let sort = Sort::mock_default();
-        let sort_mth = SortMth::mock_default();
-        let page_no = PageNo::mock_default();
-        let page_count = PageCount::mock_default();
+        let corp_code = mock::corp_code();
+        let bgn_de = mock::yyyymmdd();
+        let end_de = mock::yyyymmdd();
+        let last_reprt_at = mock::yes_no();
+        let pblntf_ty = mock::pblntf_ty();
+        let pblntf_detail_ty = mock::pbntf_detail_ty();
+        let corp_cls = mock::corp_cls();
+        let sort = mock::sort();
+        let sort_mth = mock::sort_mth();
+        let page_no = 1;
+        let page_count = 1;
 
         let params = ParamsBuilder::default()
             .corp_code(corp_code.clone())
@@ -104,8 +110,8 @@ mod tests {
             .corp_cls(corp_cls.clone())
             .sort(sort.clone())
             .sort_mth(sort_mth.clone())
-            .page_no(page_no.clone())
-            .page_count(page_count.clone())
+            .page_no(page_no)
+            .page_count(page_count)
             .build()
             .expect("ListRequestParams should build");
 
@@ -133,8 +139,8 @@ mod tests {
 
         // region: Action
         let params = ParamsBuilder::default()
-            .corp_code(CorpCode::mock_default())
-            .bgn_de(BgnDe::mock_default())
+            .corp_code(mock::corp_code())
+            .bgn_de(mock::yyyymmdd())
             .build()
             .expect("Failed to build ListRequestParams");
         tracing::debug!(?params, "Request parameters");
